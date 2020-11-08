@@ -1,0 +1,6 @@
+[submodule "vendor/ChaiScript"]
+	path = vendor/ChaiScript
+	url = https://github.com/ChaiScript/ChaiScript.git
+[submodule "vendor/immer"]
+	path = vendor/immer
+	url = https://github.com/arximboldi/immer.git
