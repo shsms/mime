@@ -7,9 +7,19 @@ std::string chai_init() {
 class buffer {
   var b;
   def buffer(x) { this.b = x; }
-  def find(text) { this.b = find_impl(this.b, "default", text); }
+  def search(text) {
+    var r = search_impl(this.b, "default", text);
+    this.b = r.meme_buffer_bool_b;
+    r.meme_buffer_bool_success;
+  }
   def set_mark() { this.b = set_mark_impl(this.b, "default"); }
   def copy() { copy_impl(this.b, "default"); }
+  def cut() {
+    var r = cut_impl(this.b, "default");
+    this.b = r.meme_buffer_text_b;
+    r.meme_buffer_text_t;
+  }
+  def flag_found() { this.b.meme_buffer_flags.meme_flag_found; }
 };
 
 def open_file(string name) {

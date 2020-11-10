@@ -48,7 +48,7 @@ buffer open_file(std::string name) {
     return b;
 }
 
-buffer find(buffer b, std::string cursor_name, std::string text) {
+buffer_bool search(buffer b, std::string cursor_name, std::string text) {
     auto  start_pos = b.cursors.at(cursor_name).point;
     auto start_iter = b.contents.begin() + start_pos;
     // TODO: validate cursor, check input size
@@ -66,13 +66,13 @@ buffer find(buffer b, std::string cursor_name, std::string text) {
 		auto c =b.cursors[cursor_name];
 		c.point += offset;
 		b.cursors = b.cursors.set(cursor_name, c);
-		return b;
+		return buffer_bool{b, true};
 	    }
 	    continue;
 	}
 	matching_char_pos = 0;
     }
-    return b;
+    return buffer_bool{b, false};
 }
 
 buffer set_mark(buffer b, std::string cursor_name) {
@@ -83,31 +83,44 @@ buffer set_mark(buffer b, std::string cursor_name) {
     return b;
 }
 
-std::string copy(buffer b, std::string cursor_name) {
+std::string get_string(text t) {
+    std::wstring wret{t.begin(), t.end()};
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    return converter.to_bytes(wret);
+}
+
+text copy(buffer b, std::string cursor_name) {
     // TODO: validate cursor
     auto c = b.cursors[cursor_name];
     if (!c.mark.has_value()) {
-	return "";
+	return text{};
     }
     auto mark = c.mark.value();
     auto point = c.point;
 
     if (mark == point) {
-	return "";
+	return text{};
     }
 
     if (mark > point) {
 	std::swap(mark, point);
     }
 	
-    auto begin_iter = b.contents.begin() + mark;
-    auto end_iter = b.contents.begin() + point;
+    // auto begin_iter = b.contents.begin() + mark;
+    // auto end_iter = b.contents.begin() + point;
+    // return text{begin_iter, end_iter};
     
-    std::wstring wret{begin_iter, end_iter};
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::string ret = converter.to_bytes(wret);
-
-    return ret;
+    return b.contents.drop(mark).take(point - mark);
 }
 
+buffer_text cut(buffer b, std::string cursor_name) {
+    auto t = copy(b, cursor_name);
+    if (t == text{}) {
+	return buffer_text{b, t};
+    }
+    auto c = b.cursors[cursor_name];
+    
+    b.contents = b.contents.erase(c.mark.value(), c.point);
+    return buffer_text{b, t};
+}
 }

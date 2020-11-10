@@ -20,12 +20,24 @@ struct buffer {
     immer::map<std::string, cursor> cursors;
 };
 
+struct buffer_text {
+    buffer b;
+    text t;
+};
+
+struct buffer_bool {
+    buffer b;
+    bool success;
+};
+
 buffer open_file(std::string name);
 
-buffer find(buffer b, std::string cursor_name, std::string text);
+buffer_bool search(buffer b, std::string cursor_name, std::string t);
 buffer set_mark(buffer b, std::string cursor_name);
-std::string copy(buffer b, std::string cursor_name);
+text copy(buffer b, std::string cursor_name);
+buffer_text cut(buffer b, std::string cursor_name);
 
+std::string get_string(text t);
 } // namespace meme
 
 #endif /* MEME_BUFFER_HH */
