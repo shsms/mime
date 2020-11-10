@@ -3,7 +3,7 @@ CXX=g++
 INCLUDES += -Ivendor/ChaiScript/include
 INCLUDES += -Ivendor/immer/
 
-CPPFLAGS = -std=c++17 ${INCLUDES} -O0
+CPPFLAGS = -std=c++17 ${INCLUDES} -g
 LDFLAGS = -ldl -lpthread
 
 TARGET_BIN = bin/tpie
@@ -15,6 +15,9 @@ build: bin ${TARGET_BIN}
 
 bin:
 	mkdir -p bin
+
+clean:
+	rm -rf build bin
 
 ${TARGET_BIN}: ${OBJS}
 	g++ ${LDFLAGS} -o $@ $^

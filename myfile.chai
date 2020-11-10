@@ -1,1 +1,5 @@
-open_file("myfile.chai");
+var b = open_file("LICENSE");
+b.find("Copy");
+b.set_mark();
+b.find("Soft");
+print(to_string(b.copy()));
