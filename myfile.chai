@@ -1,8 +1,10 @@
 var b = open_file("LICENSE");
-b.search("Copy");
+b.find("Copy");
 b.set_mark();
-b.search("Soft");
-print(get_string(b.cut()));
+b.find("Soft");
+var v = b.cut();
+b.find("Found");
+b.paste(v);
 print(get_string(b.b.meme_buffer_contents));
 
 print("\n");
