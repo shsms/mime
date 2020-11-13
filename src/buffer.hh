@@ -35,7 +35,7 @@ struct buffer_bool {
     buffer b;
     bool success;
 
-    text get_bool() { return success; }
+    bool get_bool() { return success; }
     buffer get_buffer() { return b; }
 };
 
@@ -49,7 +49,7 @@ text copy(buffer b, std::size_t cursor);
 buffer_text cut(buffer b, std::size_t cursor);
 buffer paste(buffer b, std::size_t cursor, text t);
 
-// buffer insert(buffer b, std::size_t cursor, std::string t);
+buffer insert(buffer b, std::size_t cursor, std::string t);
 // buffer new_cursor(buffer b);
 
 // // repeatable navigation

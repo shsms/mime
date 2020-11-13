@@ -43,6 +43,8 @@ int main(int argc, char* argv[]) {
     chai.add(chaiscript::fun(&meme::cut), "cut_impl");
     chai.add(chaiscript::fun(&meme::paste), "paste_impl");
 
+    chai.add(chaiscript::fun(&meme::insert), "insert_impl");
+
     chai.eval(chai_init());
 
     chai.eval_file("myfile.chai");

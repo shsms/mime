@@ -11,8 +11,8 @@ namespace meme {
 
 const static int chunk_size = 1e6;
 
-immer::box<std::wstring> read_file_chunk(std::wfstream &file, uint64_t max_chunk_size) {
-    std::wstring chunk;
+std::wstring read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
+    std::string chunk;
     chunk.resize(max_chunk_size);
 
     file.read(&chunk[0], chunk.size());
@@ -20,17 +20,18 @@ immer::box<std::wstring> read_file_chunk(std::wfstream &file, uint64_t max_chunk
         chunk.resize(file.gcount());
     }
     if (!file.eof()) {
-        std::wstring line;
+        std::string line;
         std::getline(file, line);
         if (line.length() > 0) {
             chunk += line;
         }
     }
-    return chunk;
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    return converter.from_bytes(chunk);
 }
 
 buffer open_file(std::string name) {
-    auto file = std::wfstream(name, std::ios::in | std::ios::binary);
+    auto file = std::ifstream(name, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
 	throw std::runtime_error(std::string("unable to open file '") + name + "' for reading.  Does it exist and have the right permissions?");
@@ -39,7 +40,7 @@ buffer open_file(std::string name) {
 
     while (!file.eof()) {
         auto chunk = read_file_chunk(file, chunk_size);
-        text tt{chunk->begin(), chunk->end()};
+        text tt{chunk.begin(), chunk.end()};
         vv = vv + tt;
     }
 
@@ -177,6 +178,14 @@ buffer paste(buffer b, std::size_t cursor, text t) {
     b.contents = b.contents.insert(c.point, t);
     c.point += t.size();
     b.cursors = b.cursors.set(cursor, c);
+    // TODO: update all cursors
     return b;
+}
+
+buffer insert(buffer b, std::size_t cursor, std::string t) {
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring wt = converter.from_bytes(t);
+
+    return paste(b, cursor, text{wt.begin(), wt.end()});
 }
 } // namespace meme

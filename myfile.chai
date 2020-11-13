@@ -1,11 +1,21 @@
-var b = open_file("LICENSE");
-b.find("Copy");
-b.set_mark();
-b.find("Soft");
-var v = b.cut();
-b.find("Found");
-b.paste(v);
-print(get_string(b.b.meme_buffer_contents));
+var b = open_file("/home/sahas/code/ulysses-raw/chapters/telem.html");
+b.find("<main>");
 
-print("\n");
+while(b.find("href=\"")) {
+  b.set_mark();
+  b.find("\"");
+  b.rfind("\"");
+  var url = b.copy();
+
+  b.find(">");
+  b.set_mark();
+  b.find("</a>");
+  b.rfind("</a>");
+  var text = b.copy();
+
+  print("url:" + get_string(url));
+  print("text:" + get_string(text));
+}
+
+
 

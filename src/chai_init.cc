@@ -16,21 +16,22 @@ class buffer {
   def find(text) {
     var r = find_impl(this.b, this.curr_cursor, text);
     this.b = r.meme_buffer_bool_get_buffer();
-    r.meme_buffer_bool_get_bool();
+    return r.meme_buffer_bool_get_bool();
   }
   def rfind(text) {
     var r = rfind_impl(this.b, this.curr_cursor, text);
     this.b = r.meme_buffer_bool_get_buffer();
-    r.meme_buffer_bool_get_bool();
+    return r.meme_buffer_bool_get_bool();
   }
   def set_mark() { this.b = set_mark_impl(this.b, this.curr_cursor); }
   def copy() { copy_impl(this.b, this.curr_cursor); }
   def cut() {
     var r = cut_impl(this.b, this.curr_cursor);
     this.b = r.meme_buffer_text_get_buffer();
-    r.meme_buffer_text_get_text();
+    return r.meme_buffer_text_get_text();
   }
   def paste(t) { this.b = paste_impl(this.b, this.curr_cursor, t); }
+  def insert(t) { this.b = insert_impl(this.b, this.curr_cursor, t); }
 };
 
 def open_file(string name) {

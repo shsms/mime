@@ -1,9 +1,9 @@
-CXX=clang++
+CXX=g++
 
 INCLUDES += -Ivendor/ChaiScript/include
 INCLUDES += -Ivendor/immer/
 
-CPPFLAGS = -std=c++17 ${INCLUDES} -O0
+CPPFLAGS = -std=c++17 ${INCLUDES} -ggdb3
 LDFLAGS = -ldl -lpthread
 
 TARGET_BIN = bin/tpie
