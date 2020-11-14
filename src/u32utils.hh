@@ -38,5 +38,19 @@ static inline void trim(std::u32string &s) {
     ltrim(s);
     rtrim(s);
 }
+
+char32_t tolower(char32_t a) {
+    if (a >= U'A' && a <= U'Z') {
+	return a - U'A' + U'a';
+    }
+    return a;
+}
+
+char32_t toupper(char32_t a) {
+    if (a >= U'a' && a <= U'z') {
+	return a - U'a' + U'A';
+    }
+    return a;
+}
 } // namespace meme::u32
 #endif /* MEME_U32UTILS_HH */

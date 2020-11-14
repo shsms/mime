@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
     chai.add(chaiscript::fun(&meme::find), "find_impl");
     chai.add(chaiscript::fun(&meme::find_fuzzy), "find_fuzzy_impl");
     chai.add(chaiscript::fun(&meme::rfind), "rfind_impl");
-    chai.add(chaiscript::fun(&meme::find_replace), "find_replace_impl");
+    chai.add(chaiscript::fun(&meme::replace), "replace_impl");
 
     chai.add(chaiscript::fun(&meme::copy), "copy_impl");
     chai.add(chaiscript::fun(&meme::cut), "cut_impl");

@@ -47,7 +47,7 @@ buffer_bool find(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 buffer_bool rfind(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
-buffer_bool find_replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n);
+buffer_bool replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n);
 
 text copy(buffer b, std::size_t cursor);
 buffer_text cut(buffer b, std::size_t cursor);

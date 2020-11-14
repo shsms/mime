@@ -24,52 +24,313 @@ var chapters = [
 
 var epub = open("/home/sahas/code/ulysses-annotated/4300-h/4300-h.htm")
 
-// fixes
-var telem = open(basepath + chapters[0])
-telem.find_replace("<font size=\"+2\">[1]</font>", "[ 1 ]", 1)
-telem.find_replace("<i>Thalatta! Thalatta</i>!", "<i>Thalatta! Thalatta!</i>", 1);
+for (c : chapters) {
+    var b = open(basepath + c);
+    b.find("<main>");
+    b.replace("'", "’"); // fix apostrophe to match epub
+    b.rfind("<main>");
+    b.replace(" <br />", ""); // remove br tags, those are not found in epub.
+    b.rfind("<main>");
+    b.replace("<br />", ""); // remove br tags, those are not found in epub.
+    b.rfind("<main>");
+    b.replace(" </i>", "</i>"); // fix some extra spacing in joyceproject.
+    b.rfind("<main>");
+    b.replace("em>", "i>");
+    b.rfind("<main>");
+    while(b.find("<cite ")) {
+	b.rfind("<cite ");
+	b.set_mark();
+	b.find("</cite>");
+	b.cut();
+    }
+    b.save();
+}
+
 // below are mismatches between joyceproject.com and gitenberg epub
-// among the annotated phrases from joyceproject.com. I don't want to change the text in
-// epub, so modifying downloaded joyceproject.com files below, so they
-// match with the corrosponding phrase.
-telem.find_replace("his great searching eyes", "his grey searching eyes", 1);
-telem.find_replace("Dottyville with Conolly Norman", "Dottyville with Connolly Norman", 1);
-telem.find_replace("feather fans", "featherfans", 1);
-telem.find_replace("Turko the terrible", "Turko the Terrible", 1);
-telem.find_replace("No, mother.", "No, mother!", 1);
-telem.find_replace("briskly about the hearth to and fro", "briskly to and fro about the hearth", 1);
-telem.find_replace("three quarts is a shilling and one and two is two and two",
-		   "three quarts is a shilling. That’s a shilling and one and two is two and two", 1);
-telem.find_replace("base into the sea</i></a>,", "base into the sea,</i></a>", 1);
-telem.save();
+// among the annotated phrases from joyceproject.com. I don't want to
+// change the text in epub, so modifying downloaded joyceproject.com
+// files below, so they match with their corrosponding phrases.
+def fix_telem(name) {
+    var b = open(name)
 
+    b.replace("<font size=\"+2\">[1]</font>", "[ 1 ]", 1)
+    b.replace("<i>Thalatta! Thalatta</i>!", "<i>Thalatta! Thalatta!</i>", 1);
+    b.replace("his great searching eyes", "his grey searching eyes", 1);
+    b.replace("Dottyville with Conolly Norman", "Dottyville with Connolly Norman", 1);
+    b.replace("feather fans", "featherfans", 1);
+    b.replace("No, mother.", "No, mother!", 1);
+    b.replace("briskly about the hearth to and fro", "briskly to and fro about the hearth", 1);
 
-// fix apostraphe
-for (c : chapters) {
-    var b = open(basepath + c);
-    b.find("<main>");
-    b.find_replace("'", "’");
+    b.replace("three quarts is a shilling and one and two is two and two",
+	      "three quarts is a shilling. That’s a shilling and one and two is two and two", 1);
+
+    b.replace("base into the sea</i></a>,", "base into the sea,</i></a>", 1);
+    b.replace("I am the servant of two masters", "I am a servant of two masters", 1);
+
+     b.replace("et unam sanctam catholicam</i></a><a class=\"literature note\" href=\"/notes/010115creed.html\"><i> et apostolicam
+ecclesiam</i></a>:",
+ 	      "et unam sanctam catholicam et apostolicam ecclesiam:</i></a>", 1);
+
+    b.replace("Uebermensch.</i></a>", "Übermensch.</i></a>", 1);
     b.save();
 }
-// remove br tags, those are not found in epub.
-for (c : chapters) {
-    var b = open(basepath + c);
-    b.find("<main>");
-    b.find_replace("<br />", "");
+
+def fix_nestor(name) {
+    var b = open(name);
+    b.replace("<font size=\"+2\">[2]</font>", "[ 2 ]", 1);
+    b.replace("a man in tartan filibegs: Albert Edward",
+	      "a man in tartan fillibegs: Albert Edward", 1)
+
+    b.replace("lord Hastings’ Repulse, the duke of Westminster’s
+Shotover, the duke of Beaufort’s Ceylon",
+	      "lord Hastings’ <i>Repulse</i>, the duke of Westminster’s
+<i>Shotover</i>, the duke of Beaufort’s <i>Ceylon</i>", 1);
+
+    b.replace("amid bawls of bookies on their pitches",
+	      "amid the bawls of bookies on their pitches", 1)
+    b.replace("money Fair Rebel: ten to one the field",
+	      "money <i>Fair Rebel.</i> Ten to one the field", 1)
+    b.replace("Emperor’s horses at Murzsteg", "Emperor’s horses at Mürzsteg", 1);
+    b.replace("<i>The Evening Telegraph</i></a>...", "<i>&mdash;The Evening Telegraph...</i></a>", 1)
     b.save();
 }
-// some extra spacing in joyceproject is causing mismatches.
-for (c : chapters) {
-    var b = open(basepath + c);
-    b.find("<main>");
-    b.find_replace(" </i>", "</i>");
+
+def fix_proteus(name) {
+    var b = open(name);
+    b.replace("[3]", "[ 3 ]", 1);
+    b.replace("<i>Basta</i>!", "<i>Basta!</i>", 1);
+    b.replace("Hello! Kinch here. Put me", "Hello. Kinch here. Put me", 1);
+
+    b.replace("heresiarch. In a Greek watercloset he breathed his last: euthanasia.
+With beaded mitre and with crozier, stalled upon his throne, widower of
+a widowed see, with upstiffed omophorion",
+	      "heresiarch! In a Greek watercloset he breathed his last: <i>euthanasia</i>.
+      With beaded mitre and with crozier, stalled upon his throne, widower of a
+      widowed see, with upstiffed <i>omophorion</i>", 1);
+
+    b.replace("<i>All’erta</i>!", "<i>All’erta!</i>", 1);
+    b.replace("<i>descende</i>!", "<i>descende!</i>", 1);
+    b.replace("Get down, bald poll!", "Get down, baldpoll!", 1);
+    b.replace("<i>O si, certo</i>!", "<i>O si, certo!</i>", 1);
+    b.replace("— Nother dying", "Mother dying", 1);
+    b.replace("flan breton", "flan bréton", 1);
+    b.replace("nous, Irlande,</i></a>", "nous, Irlande,</a></i>", 1);
+    b.replace("Kilkenny are</i> <i>stout", "Kilkenny are stout", 1);
+    b.replace(" ensablé</i>, Louis", " ensablé</i> Louis", 1);
+    b.replace("safe among the bulrushes", "safe mong the bulrushes", 1);
+    b.replace("he woke me up</a> last night", "he woke me</a> last night", 1);
     b.save();
 }
+
+def fix_calypso(name) {
+    var b = open(name);
+
+    b.replace("<font size=\"+2\">[4]</font>", "[ 4 ]", 1);
+    b.replace("three, four : right", "three, four: right", 1);
+    b.replace("— Mkgnao!", "&mdash;Mkgnao!", 1);
+    b.replace("— Mn.", "&mdash;Mn.", 1);
+    b.replace("Eccles lane", "Eccles’ Lane", 1);
+    b.replace("Citron still alive in Saint", "Citron still in Saint", 1);
+    b.replace("Valuation is only twenty-eight", "Valuation is only twentyeight", 1);
+    b.replace("metempsychosis", "metamspychosis", 1);
+    b.replace("XL Cafe", "XL Café", 1);
+    b.replace("Funny, I don’t", "Funny I don’t", 1);
+    b.save();
+}
+
+def fix_lotus(name) {
+    var b = open(name);
+
+    b.replace("<font size=\"+2\">[5]</font>", "[ 5 ]", 1);
+
+    b.replace("<i>Love’s
+     Old
+     Sweet
+     Song</i></a><i>
+     Comes lo-ove’s old...</i>", "<i>Love’s
+     Old
+     Sweet
+     Song
+     Comes lo-ove’s old...</i></a>", 1);
+
+    b.replace("John Conmee S.J.
+on saint Peter Claver", "John Conmee S. J. on saint Peter Claver S. J.", 1);
+    b.replace("Peter Carey. No, Peter Claver", "Peter Carey, yes. No, Peter Claver", 1);
+    b.save();
+}
+
+def fix_hades(name) {
+    var b = open(name);
+
+    b.replace("<font size=\"+2\">[6]</font>", "[ 6 ]", 1);
+    b.replace("slammed it tight till it", "slammed it twice till it", 1);
+
+    b.replace("Wallace Bros the
+bottleworks. Dodder bridge.", "Wallace Bros: the bottleworks: Dodder bridge.", 1);
+
+    b.replace("— Eight plums a penny!", "&mdash;Eight plums a penny!", 1);
+    b.replace("<i>Church Times</i></a>.", "<i>Church Times.</i></a>", 1);
+    b.save();
+}
+
+def fix_aeolus(name) {
+    var b = open(name);
+
+    b.replace("<i>Weekly Freeman</i></a><i>
+and National Press</i>",
+	      "<i>Weekly Freeman and National Press</i></a>", 1);
+    b.replace("<i>Sport’s</i> tissues", "<i>Sport</i>’s tissues", 1);
+    b.replace("</i></a><i>
+     Mouth to my mouth.</i>", " Mouth to my mouth.</i></a>", 1);
+    b.replace("threepenny bits and a sixpence", "threepenny bits and sixpences", 1);
+    b.save();
+}
+
+def fix_lestry(name) {
+    var b = open(name);
+    b.replace("L.s.d.", "£. s. d.", 1);
+    b.replace("U.P.: up", "U. p: up", 1);
+    b.replace("Express</i></a>.", "Express.</i></a>", 1);
+    b.replace("Home Rule
+sun rising up", "Homerule sun rising up", 1);
+    b.replace("— Not here.", "Not here.", 1);
+    b.replace("woman sculped Junonian", "women sculped Junonian", 1);
+    b.save();
+}
+
+def fix_scylla(name) {
+    var b = open(name);
+
+    b.replace("Mananaan,</i></a><i></i>
+<i>Mananaan MacLir...</i>", "Mananaan, Mananaan MacLir...</i></a>", 1);
+    b.replace("<i>Homestead</i></a>.", "<i>Homestead.</i></a>", 1);
+    b.save();
+}
+
+def fix_wrocks(name) {
+    var b = open(name);
+    b.replace("John Conmee S.J.", "John Conmee S. J.", 1);
+    b.replace("General Slocum explosion.", "<i>General Slocum</i> explosion.", 1);
+    b.replace("girl</i></a>.", "girl.</i></a>", 1);
+    b.save();
+}
+
+def fix_sirens(name) {
+    var b = open(name);
+    b.replace("to greaseaseabloom.", "to greaseabloom.", 1);
+    b.replace("Independent</i></a>,", "Independent,</i></a>", 1);
+    b.replace("U.
+P.: up", "U. P: up", 1);
+    b.save();
+}
+
+def fix_cyclops(name) {
+    var b = open(name);
+    b.replace("with u. p.: up on it", "with U. p: up on it", 1);
+    b.replace("a straw.</a>", "a straw</a>.", 1);
+    b.save();
+}
+
+def fix_nausicaa(name) {
+    var b = open(name);
+
+    b.replace("the featherbed mountain</a>.", "Featherbed mountain.</a>", 1);
+    b.replace("the Gold Cup race!", "the Gold Cup races!", 1);
+    b.replace("<i>Leah,</i></a>", "<i>Leah,</a></i>", 1);
+    b.save();
+}
+
+def fix_oxen(name) {
+    var b = open(name);
+
+    b.replace("all hardest of woman", "allhardest of woman", 1);
+    b.replace("sinned against the light", "sinned against my light", 1);
+    b.replace("from water of old Nile", "from waters of old Nile", 1);
+    b.replace("<i>Uebermensch</i>", "<i>Übermensch.</i>", 1);
+
+    b.save();
+}
+
+def fix_circe(name) {
+    var b = open(name);
+    b.replace("U. p.: Up.</a>", "U. p: up.</a>", 1);
+    b.replace("Leah.</i> Mrs Bandmann Palmer", "Leah</i>, Mrs Bandmann Palmer");
+    b.replace("A Titbits <i>back", "A</i> Titbits <i>back", 1);
+    b.replace("Berlin, W.13.", "Berlin, W. 13.", 1);
+    b.replace("S.J.</a>", "S. J.</a>", 1);
+    b.replace("Lorcan Sherlock, locum tenens.</a>", "Lorcan Sherlock,</i> locum tenens.</a><i>", 1);
+    b.replace("the Alleluia chorus</a>", "chorus from Handel’s Messiah</a>", 1);
+    b.replace("<i>teabrown artcolours</i>", "teabrown artcolours", 1);
+
+    b.replace("lights the Erin’s King
+<i>sails</i></i></a>", "lights the</i> Erin’s King <i>sails</a>", 1);
+
+    b.replace("<i>Pater!</i> Free!", "<i>(He cries.) Pater!</i> Free!", 1);
+    b.replace("Yet I’ve a sort a", "Yet I’ve a sort of a", 1);
+    b.replace("<i>a plasterer’s bucket", "a plasterer’s bucket", 1);
+    b.save();
+}
+
+def fix_eumaeus(name) {
+    var b = open(name);
+    b.replace("triangle, Miss Portinari, he", "triangle Miss Portinari he", 1);
+    b.replace("queen’s evidence—or king’s now—", "queen’s evidence or king’s now ", 1);
+    b.replace("indulge in any...", "indulge in any ", 1);
+
+    b.replace("you are... But in the economic, not touching religion, domain, the priest",
+	      "you are. But in the economic, not touching religion, domain the priest", 1);
+
+    b.replace("edition, extra sporting, of the <i>Telegraph</i>, tell",
+	      "edition extra sporting of the <i>Telegraph</i> tell", 1);
+    b.replace("New York disaster, thousand", "New York disaster. thousand", 1);
+    b.save();
+}
+
+def fix_ithaca(name) {
+    var b = open(name);
+    b.replace("Freeman’s Journal and
+National Press", "Freeman’s Journal</i> and <i>National Press", 1);
+
+    b.replace("circumdet.</i>
+<i>Iubilantium", "circumdet. Iubilantium", 1);
+
+    b.save();
+}
+
+def fix_penelope(name) {
+    var b = open(name);
+
+    b.replace("postcard up up", "postcard U p up", 1);
+    b.replace("coming man Griffith is", "coming man Griffiths is", 1);
+    b.replace("the hour wait 2 oclock</a> well", "the hour wait two oclock</a> well", 1);
+    b.replace("he was a patent professor", "he was a potent professor", 1);
+    b.replace("strand bathing place", "strand bathingplace", 1);
+    b.save();
+}
+
+fix_telem(basepath + chapters[0]);
+fix_nestor(basepath + chapters[1]);
+fix_proteus(basepath + chapters[2]);
+fix_calypso(basepath + chapters[3]);
+fix_lotus(basepath + chapters[4]);
+fix_hades(basepath + chapters[5]);
+fix_aeolus(basepath + chapters[6]);
+fix_lestry(basepath + chapters[7]);
+fix_scylla(basepath + chapters[8]);
+fix_wrocks(basepath + chapters[9]);
+fix_sirens(basepath + chapters[10]);
+fix_cyclops(basepath + chapters[11]);
+fix_nausicaa(basepath + chapters[12]);
+fix_oxen(basepath + chapters[13]);
+fix_circe(basepath + chapters[14]);
+fix_eumaeus(basepath + chapters[15]);
+fix_ithaca(basepath + chapters[16]);
+fix_penelope(basepath + chapters[17]);
 
 // main logic
-var total = 0
-var found = 0
-var not_found = 0
+var total = 0;
+var found = 0;
+var not_found = 0;
 for (c : chapters) {
     var b = open(basepath + c);
     b.find("<main>");
@@ -89,10 +350,7 @@ for (c : chapters) {
 	// TODO overload find to take text objects
 	if(epub.find_fuzzy(get_string(text))) {
 	    epub.insert("<a>" + get_string(url) + "</a>");
-	    // epub.insert("<a>");
-	    // epub.paste(url);
-	    // epub.insert("</a>");
-	    print("found: (" + c + ") " + get_string(text));
+	    print("text_found: (" + c + ") " + get_string(text));
 	    found += 1;
 	} else {
 	    print("text not found: (" + c + ") " + get_string(text));

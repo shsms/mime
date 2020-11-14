@@ -31,9 +31,9 @@ class buffer {
     this.b = r.meme_buffer_bool_get_buffer();
     return r.meme_buffer_bool_get_bool();
   }
-  def find_replace(from, to) { return this.find_replace(from, to, 0);  }
-  def find_replace(from, to, n) {
-    var r = find_replace_impl(this.b, this.curr_cursor, from, to, n);
+  def replace(from, to) { return this.replace(from, to, 0);  }
+  def replace(from, to, n) {
+    var r = replace_impl(this.b, this.curr_cursor, from, to, n);
     this.b = r.meme_buffer_bool_get_buffer();
     return r.meme_buffer_bool_get_bool();
   }

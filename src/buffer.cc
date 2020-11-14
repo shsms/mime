@@ -160,10 +160,11 @@ buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string text, std::size
 
     if (lim <= 0) {
         lim = std::numeric_limits<std::size_t>::max();
+    } else {
+	lim += offset;
     }
     auto it = b.contents.begin() + offset;
     while (it != b.contents.end() && offset < lim && matching_char_pos < wtext.length()) {
-        auto next_char = *it;
         if (u32::isspace(wtext[matching_char_pos]) && u32::isspace(*it)) {
             while (u32::isspace(wtext[matching_char_pos]) && matching_char_pos < wtext.length()) {
                 ++matching_char_pos;
@@ -173,7 +174,7 @@ buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string text, std::size
                 ++it;
             }
         }
-        if (wtext[matching_char_pos] != *it) {
+        if (u32::tolower(wtext[matching_char_pos]) != u32::tolower(*it)) {
             // get next steps based on strategy
             matching_char_pos = 0;
             ++offset;
@@ -194,7 +195,7 @@ buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string text, std::size
 }
 
 // TODO: maybe replace with buffer_int, same for navigation.
-buffer_bool find_replace(buffer b, std::size_t cursor, std::string from, std::string to,
+buffer_bool replace(buffer b, std::size_t cursor, std::string from, std::string to,
                          std::size_t n) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string wfrom = cvt.from_bytes(from);
