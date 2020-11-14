@@ -53,7 +53,7 @@ buffer open_file(std::string name) {
     return b;
 }
 
-buffer_bool find(buffer b, std::size_t cursor, std::string text) {
+buffer_bool find(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
     // TODO: validate cursor, check input size
 
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -62,7 +62,11 @@ buffer_bool find(buffer b, std::size_t cursor, std::string text) {
     int matching_char_pos = 0;
     auto offset = b.cursors[cursor].point;
 
-    for (auto it = b.contents.begin() + offset; it != b.contents.end(); ++it) {
+    if (lim <= 0) {
+	lim = std::numeric_limits<std::size_t>::max();
+    }
+
+    for (auto it = b.contents.begin() + offset; it != b.contents.end() && offset < lim; ++it) {
         ++offset;
         if (wtext[matching_char_pos] != *it) {
             matching_char_pos = 0;
@@ -79,7 +83,7 @@ buffer_bool find(buffer b, std::size_t cursor, std::string text) {
     return buffer_bool{b, false};
 }
 
-buffer_bool rfind(buffer b, std::size_t cursor, std::string text) {
+buffer_bool rfind(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     std::wstring wtext = converter.from_bytes(text);
 
@@ -89,9 +93,16 @@ buffer_bool rfind(buffer b, std::size_t cursor, std::string text) {
         return buffer_bool{b, false};
     }
 
+    if (lim > 0) {
+	lim = offset - lim;
+    }
+    if (lim < 0) {
+	lim = 0;
+    }
+
     int matching_char_pos = 0;
     auto iter = b.contents.begin() + offset;
-    while (offset >= 0) {
+    while (offset >= lim) {
 	if(wtext[matching_char_pos] != *iter) {
 	    if (offset == 0) break;
 	    iter -= matching_char_pos;

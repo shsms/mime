@@ -42,8 +42,8 @@ struct buffer_bool {
 buffer open_file(std::string name);
 
 buffer set_mark(buffer b, std::size_t cursor);
-buffer_bool find(buffer b, std::size_t cursor, std::string t);
-buffer_bool rfind(buffer b, std::size_t cursor, std::string t);
+buffer_bool find(buffer b, std::size_t cursor, std::string t, std::size_t lim);
+buffer_bool rfind(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
 text copy(buffer b, std::size_t cursor);
 buffer_text cut(buffer b, std::size_t cursor);

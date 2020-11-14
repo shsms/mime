@@ -13,13 +13,15 @@ class buffer {
   var b;
   var curr_cursor;
   def buffer(x) { this.b = x; this.curr_cursor = 0; }
-  def find(text) {
-    var r = find_impl(this.b, this.curr_cursor, text);
+  def find(text) { return this.find(text, 0); }
+  def find(text, int lim) {
+    var r = find_impl(this.b, this.curr_cursor, text, lim);
     this.b = r.meme_buffer_bool_get_buffer();
     return r.meme_buffer_bool_get_bool();
   }
-  def rfind(text) {
-    var r = rfind_impl(this.b, this.curr_cursor, text);
+  def rfind(text) { return this.rfind(text, 0); }
+  def rfind(text, int lim) {
+    var r = rfind_impl(this.b, this.curr_cursor, text, lim);
     this.b = r.meme_buffer_bool_get_buffer();
     return r.meme_buffer_bool_get_bool();
   }
