@@ -1,4 +1,5 @@
 #include "buffer.hh"
+#include "u32utils.hh"
 #include <codecvt>
 #include <fstream>
 #include <immer/box.hpp>
@@ -30,7 +31,7 @@ std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     return cvt.from_bytes(chunk);
 }
 
-buffer open_file(std::string name) {
+buffer open(std::string name) {
     auto file = std::ifstream(name, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
@@ -51,6 +52,29 @@ buffer open_file(std::string name) {
     b.cursors = b.cursors.push_back(cursor{});
 
     return b;
+}
+
+void save(buffer b) {
+    save_as(b, b.file_name);
+}
+
+void save_as(buffer b, std::string name) {
+    std::ofstream fs;
+    fs.open(name, std::ios::trunc | std::ios::out | std::ios::binary);
+
+    auto max_size = chunk_size/4;
+    auto pending = b.contents.size();
+    while (pending > 0) {
+	auto to_write = b.contents.take(max_size);
+	b.contents = b.contents.drop(max_size);
+	auto chunk = get_string(to_write);
+
+	fs.write(chunk.c_str(), chunk.length());
+	if (fs.bad()) {
+	    throw std::runtime_error(std::string("unable to write to output file '") + name + "'");
+	}
+	pending = b.contents.size();
+    }
 }
 
 buffer_bool find(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
@@ -119,6 +143,50 @@ buffer_bool rfind(buffer b, std::size_t cursor, std::string text, std::size_t li
 	    b.cursors = b.cursors.set(cursor, c);
 	    return buffer_bool{b, true};
 	}
+    }
+    return buffer_bool{b, false};
+}
+
+buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
+    // TODO: validate cursor, check input size
+
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    std::u32string wtext = cvt.from_bytes(text);
+
+    int matching_char_pos = 0;
+    auto offset = b.cursors[cursor].point;
+
+    if (lim <= 0) {
+	lim = std::numeric_limits<std::size_t>::max();
+    }
+    auto it = b.contents.begin() + offset;
+    while ( it != b.contents.end() && offset < lim && matching_char_pos < wtext.length()) {
+	auto next_char = *it;
+	if (isspace(wtext[matching_char_pos]) && isspace(*it)) {
+	    while(isspace(wtext[matching_char_pos]) && matching_char_pos < wtext.length()) {
+		++matching_char_pos;
+	    }
+	    while(isspace(*it) && it != b.contents.end() && offset < lim) {
+		++offset;
+		++it;
+	    }
+	}
+        if (wtext[matching_char_pos] != *it) {
+	    // get next steps based on strategy
+	    matching_char_pos = 0;
+	    ++offset;
+	    ++it;
+            continue;
+        }
+	++offset;
+	++it;
+        ++matching_char_pos;
+        if (matching_char_pos == wtext.length()) {
+            auto c = b.cursors[cursor];
+            c.point = offset;
+            b.cursors = b.cursors.set(cursor, c);
+            return buffer_bool{b, true};
+        }
     }
     return buffer_bool{b, false};
 }

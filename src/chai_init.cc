@@ -25,6 +25,12 @@ class buffer {
     this.b = r.meme_buffer_bool_get_buffer();
     return r.meme_buffer_bool_get_bool();
   }
+  def find_fuzzy(text) { return this.find_fuzzy(text, 0); }
+  def find_fuzzy(text, int lim) {
+    var r = find_fuzzy_impl(this.b, this.curr_cursor, text, lim);
+    this.b = r.meme_buffer_bool_get_buffer();
+    return r.meme_buffer_bool_get_bool();
+  }
   def set_mark() { this.b = set_mark_impl(this.b, this.curr_cursor); }
   def copy() { copy_impl(this.b, this.curr_cursor); }
   def cut() {
@@ -34,10 +40,12 @@ class buffer {
   }
   def paste(t) { this.b = paste_impl(this.b, this.curr_cursor, t); }
   def insert(t) { this.b = insert_impl(this.b, this.curr_cursor, t); }
+  def save() { save_impl(this.b); }
+  def save_as(name) { save_as_impl(this.b, name); }
 };
 
-def open_file(string name) {
-    buffer(open_file_impl(name));
+def open(string name) {
+    buffer(open_impl(name));
 }
 )";
 }

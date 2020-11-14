@@ -1,0 +1,111 @@
+// -*- mode: js -*-
+
+var basepath = "/home/sahas/code/ulysses-raw"
+var chapters = [
+    "/chapters/telem.html",
+    "/chapters/nestor.html",
+    "/chapters/proteus.html",
+    "/chapters/calypso.html",
+    "/chapters/lotus.html",
+    "/chapters/hades.html",
+    "/chapters/aeolus.html",
+    "/chapters/lestry.html",
+    "/chapters/scylla.html",
+    "/chapters/wrocks.html",
+    "/chapters/sirens.html",
+    "/chapters/cyclops.html",
+    "/chapters/nausicaa.html",
+    "/chapters/oxen.html",
+    "/chapters/circe.html",
+    "/chapters/eumaeus.html",
+    "/chapters/ithaca.html",
+    "/chapters/penelope.html"
+]
+
+var epub = open("/home/sahas/code/ulysses-annotated/4300-h/4300-h.htm")
+
+// fixes
+var telem = open(basepath + chapters[0])
+if(telem.find("<i>Thalatta! Thalatta</i>!")) {
+    telem.set_mark();
+    telem.rfind("<i>Thalatta! Thalatta</i>!")
+    telem.cut();
+    telem.insert("<i>Thalatta! Thalatta!</i>")
+    telem.save();
+}
+
+
+// fix apostraphe
+for (c : chapters) {
+    var b = open(basepath + c);
+    b.find("<main>");
+    while(b.find("'")) {
+	b.set_mark();
+	b.rfind("'");
+	b.cut();
+	b.insert("’");
+    }
+    b.save();
+}
+
+for (c : chapters) {
+    var b = open(basepath + c);
+    b.find("<main>");
+    while(b.find("<br />")) {
+	b.set_mark();
+	b.rfind("<br />");
+	b.cut();
+    }
+    b.save();
+}
+
+for (c : chapters) {
+    var b = open(basepath + c);
+    b.find("<main>");
+    while(b.find(" </a>")) {
+	b.set_mark();
+	b.rfind(" </a>");
+	b.cut();
+	b.insert("</a>");
+    }
+    b.save();
+}
+
+// main logic
+var total = 0
+var found = 0
+var not_found = 0
+for (c : chapters) {
+    var b = open(basepath + c);
+    b.find("<main>");
+
+    while(b.find("href=\"")) {
+	b.set_mark();
+	b.find("\"");
+	b.rfind("\"");
+	var url = b.copy();
+
+	b.find(">");
+	b.set_mark();
+	b.find("</a>");
+	b.rfind("</a>");
+	var text = b.copy();
+	total += 1;
+	// TODO overload find to take text objects
+	if(epub.find_fuzzy(get_string(text))) {
+	    epub.insert("<a>");
+	    epub.paste(url);
+	    epub.insert("</a>");
+	    print("found: " + get_string(text));
+	    found += 1;
+	} else {
+	    print("text not found: " + get_string(text));
+	    not_found += 1;
+	}
+    }
+}
+
+print("total:" + to_string(total))
+print("found:" + to_string(found))
+print("not_found:" + to_string(not_found))
+epub.save_as("/home/sahas/code/ulysses-annotated/4300-h/4300-h-updated.htm")

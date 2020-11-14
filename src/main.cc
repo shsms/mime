@@ -30,9 +30,12 @@ int main(int argc, char* argv[]) {
              }),
              "=");
 
-    chai.add(chaiscript::fun(&meme::open_file), "open_file_impl");
+    chai.add(chaiscript::fun(&meme::open), "open_impl");
+    chai.add(chaiscript::fun(&meme::save), "save_impl");
+    chai.add(chaiscript::fun(&meme::save_as), "save_as_impl");
     chai.add(chaiscript::fun(&meme::set_mark), "set_mark_impl");
     chai.add(chaiscript::fun(&meme::find), "find_impl");
+    chai.add(chaiscript::fun(&meme::find_fuzzy), "find_fuzzy_impl");
     chai.add(chaiscript::fun(&meme::rfind), "rfind_impl");
 
     chai.add(chaiscript::fun(&meme::copy), "copy_impl");
@@ -43,5 +46,5 @@ int main(int argc, char* argv[]) {
 
     chai.eval(chai_init());
 
-    chai.eval_file("myfile.chai");
+    chai.eval_file(argv[1]);
 }

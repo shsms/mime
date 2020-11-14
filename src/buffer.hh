@@ -39,18 +39,22 @@ struct buffer_bool {
     buffer get_buffer() { return b; }
 };
 
-buffer open_file(std::string name);
-
+buffer open(std::string name);
+void save(buffer b);
+void save_as(buffer b, std::string name);
 buffer set_mark(buffer b, std::size_t cursor);
 buffer_bool find(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 buffer_bool rfind(buffer b, std::size_t cursor, std::string t, std::size_t lim);
+buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
 text copy(buffer b, std::size_t cursor);
 buffer_text cut(buffer b, std::size_t cursor);
 buffer paste(buffer b, std::size_t cursor, text t);
 
 buffer insert(buffer b, std::size_t cursor, std::string t);
+
 // buffer new_cursor(buffer b);
+// std::size_t get_cursor_pos(buffer b);
 
 // // repeatable navigation
 // buffer forward(buffer b, std::size_t cursor, std::size_t n = 0);
