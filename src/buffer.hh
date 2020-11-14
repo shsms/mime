@@ -13,7 +13,7 @@ struct cursor {
     std::size_t point{};
 };
 
-using text = immer::flex_vector<wchar_t>;
+using text = immer::flex_vector<char32_t>;
 
 std::string get_string(text t);
 

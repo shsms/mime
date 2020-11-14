@@ -11,7 +11,7 @@ namespace meme {
 
 const static int chunk_size = 1e6;
 
-std::wstring read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
+std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     std::string chunk;
     chunk.resize(max_chunk_size);
 
@@ -26,8 +26,8 @@ std::wstring read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
             chunk += line;
         }
     }
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    return converter.from_bytes(chunk);
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    return cvt.from_bytes(chunk);
 }
 
 buffer open_file(std::string name) {
@@ -56,8 +56,8 @@ buffer open_file(std::string name) {
 buffer_bool find(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
     // TODO: validate cursor, check input size
 
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wtext = converter.from_bytes(text);
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    std::u32string wtext = cvt.from_bytes(text);
 
     int matching_char_pos = 0;
     auto offset = b.cursors[cursor].point;
@@ -84,8 +84,8 @@ buffer_bool find(buffer b, std::size_t cursor, std::string text, std::size_t lim
 }
 
 buffer_bool rfind(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wtext = converter.from_bytes(text);
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    std::u32string wtext = cvt.from_bytes(text);
 
     // TODO: add debug log for 0 input size
     std::size_t offset = b.cursors[cursor].point - text.length();
@@ -132,9 +132,9 @@ buffer set_mark(buffer b, std::size_t cursor) {
 }
 
 std::string get_string(text t) {
-    std::wstring wret{t.begin(), t.end()};
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    return converter.to_bytes(wret);
+    std::u32string wret{t.begin(), t.end()};
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    return cvt.to_bytes(wret);
 }
 
 text copy(buffer b, std::size_t cursor) {
@@ -194,8 +194,8 @@ buffer paste(buffer b, std::size_t cursor, text t) {
 }
 
 buffer insert(buffer b, std::size_t cursor, std::string t) {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wt = converter.from_bytes(t);
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    std::u32string wt = cvt.from_bytes(t);
 
     return paste(b, cursor, text{wt.begin(), wt.end()});
 }

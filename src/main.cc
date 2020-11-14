@@ -30,10 +30,6 @@ int main(int argc, char* argv[]) {
              }),
              "=");
 
-    // auto lib = std::make_shared<chaiscript::Module>();
-    // chaiscript::bootstrap::standard_library::string_type<std::wstring>("wstring", *lib);
-    // chai.add(lib);
-
     chai.add(chaiscript::fun(&meme::open_file), "open_file_impl");
     chai.add(chaiscript::fun(&meme::set_mark), "set_mark_impl");
     chai.add(chaiscript::fun(&meme::find), "find_impl");
