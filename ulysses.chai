@@ -26,48 +26,43 @@ var epub = open("/home/sahas/code/ulysses-annotated/4300-h/4300-h.htm")
 
 // fixes
 var telem = open(basepath + chapters[0])
-if(telem.find("<i>Thalatta! Thalatta</i>!")) {
-    telem.set_mark();
-    telem.rfind("<i>Thalatta! Thalatta</i>!")
-    telem.cut();
-    telem.insert("<i>Thalatta! Thalatta!</i>")
-    telem.save();
-}
+telem.find_replace("<font size=\"+2\">[1]</font>", "[ 1 ]", 1)
+telem.find_replace("<i>Thalatta! Thalatta</i>!", "<i>Thalatta! Thalatta!</i>", 1);
+// below are mismatches between joyceproject.com and gitenberg epub
+// among the annotated phrases from joyceproject.com. I don't want to change the text in
+// epub, so modifying downloaded joyceproject.com files below, so they
+// match with the corrosponding phrase.
+telem.find_replace("his great searching eyes", "his grey searching eyes", 1);
+telem.find_replace("Dottyville with Conolly Norman", "Dottyville with Connolly Norman", 1);
+telem.find_replace("feather fans", "featherfans", 1);
+telem.find_replace("Turko the terrible", "Turko the Terrible", 1);
+telem.find_replace("No, mother.", "No, mother!", 1);
+telem.find_replace("briskly about the hearth to and fro", "briskly to and fro about the hearth", 1);
+telem.find_replace("three quarts is a shilling and one and two is two and two",
+		   "three quarts is a shilling. That’s a shilling and one and two is two and two", 1);
+telem.find_replace("base into the sea</i></a>,", "base into the sea,</i></a>", 1);
+telem.save();
 
 
 // fix apostraphe
 for (c : chapters) {
     var b = open(basepath + c);
     b.find("<main>");
-    while(b.find("'")) {
-	b.set_mark();
-	b.rfind("'");
-	b.cut();
-	b.insert("’");
-    }
+    b.find_replace("'", "’");
     b.save();
 }
-
+// remove br tags, those are not found in epub.
 for (c : chapters) {
     var b = open(basepath + c);
     b.find("<main>");
-    while(b.find("<br />")) {
-	b.set_mark();
-	b.rfind("<br />");
-	b.cut();
-    }
+    b.find_replace("<br />", "");
     b.save();
 }
-
+// some extra spacing in joyceproject is causing mismatches.
 for (c : chapters) {
     var b = open(basepath + c);
     b.find("<main>");
-    while(b.find(" </a>")) {
-	b.set_mark();
-	b.rfind(" </a>");
-	b.cut();
-	b.insert("</a>");
-    }
+    b.find_replace(" </i>", "</i>");
     b.save();
 }
 
@@ -93,13 +88,14 @@ for (c : chapters) {
 	total += 1;
 	// TODO overload find to take text objects
 	if(epub.find_fuzzy(get_string(text))) {
-	    epub.insert("<a>");
-	    epub.paste(url);
-	    epub.insert("</a>");
-	    print("found: " + get_string(text));
+	    epub.insert("<a>" + get_string(url) + "</a>");
+	    // epub.insert("<a>");
+	    // epub.paste(url);
+	    // epub.insert("</a>");
+	    print("found: (" + c + ") " + get_string(text));
 	    found += 1;
 	} else {
-	    print("text not found: " + get_string(text));
+	    print("text not found: (" + c + ") " + get_string(text));
 	    not_found += 1;
 	}
     }

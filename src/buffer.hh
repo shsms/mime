@@ -47,6 +47,8 @@ buffer_bool find(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 buffer_bool rfind(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
+buffer_bool find_replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n);
+
 text copy(buffer b, std::size_t cursor);
 buffer_text cut(buffer b, std::size_t cursor);
 buffer paste(buffer b, std::size_t cursor, text t);
@@ -57,14 +59,14 @@ buffer insert(buffer b, std::size_t cursor, std::string t);
 // std::size_t get_cursor_pos(buffer b);
 
 // // repeatable navigation
-// buffer forward(buffer b, std::size_t cursor, std::size_t n = 0);
-// buffer backward(buffer b, std::size_t cursor, std::size_t n = 0);
-// buffer forward_word(buffer b, std::size_t cursor, std::size_t n = 0);
-// buffer backward_word(buffer b, std::size_t cursor, std::size_t n = 0);
-// buffer forward_subword(buffer b, std::size_t cursor, std::size_t n = 0);
-// buffer backward_subword(buffer b, std::size_t cursor, std::size_t n = 0);
-// buffer next_line(buffer b, std::size_t cursor, std::size_t n = 0);
-// buffer prev_line(buffer b, std::size_t cursor, std::size_t n = 0);
+// buffer forward(buffer b, std::size_t cursor, std::size_t n);
+buffer backward(buffer b, std::size_t cursor, std::size_t n);
+// buffer forward_word(buffer b, std::size_t cursor, std::size_t n);
+// buffer backward_word(buffer b, std::size_t cursor, std::size_t n);
+// buffer forward_subword(buffer b, std::size_t cursor, std::size_t n);
+// buffer backward_subword(buffer b, std::size_t cursor, std::size_t n);
+// buffer next_line(buffer b, std::size_t cursor, std::size_t n);
+// buffer prev_line(buffer b, std::size_t cursor, std::size_t n);
 
 // // non-repeatable navigation
 // buffer start_of_buffer(buffer b, std::size_t cursor);

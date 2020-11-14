@@ -35,7 +35,8 @@ buffer open(std::string name) {
     auto file = std::ifstream(name, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
-	throw std::runtime_error(std::string("unable to open file '") + name + "' for reading.  Does it exist and have the right permissions?");
+        throw std::runtime_error(std::string("unable to open file '") + name +
+                                 "' for reading.  Does it exist and have the right permissions?");
     }
     auto vv = text{};
 
@@ -54,26 +55,24 @@ buffer open(std::string name) {
     return b;
 }
 
-void save(buffer b) {
-    save_as(b, b.file_name);
-}
+void save(buffer b) { save_as(b, b.file_name); }
 
 void save_as(buffer b, std::string name) {
     std::ofstream fs;
     fs.open(name, std::ios::trunc | std::ios::out | std::ios::binary);
 
-    auto max_size = chunk_size/4;
+    auto max_size = chunk_size / 4;
     auto pending = b.contents.size();
     while (pending > 0) {
-	auto to_write = b.contents.take(max_size);
-	b.contents = b.contents.drop(max_size);
-	auto chunk = get_string(to_write);
+        auto to_write = b.contents.take(max_size);
+        b.contents = b.contents.drop(max_size);
+        auto chunk = get_string(to_write);
 
-	fs.write(chunk.c_str(), chunk.length());
-	if (fs.bad()) {
-	    throw std::runtime_error(std::string("unable to write to output file '") + name + "'");
-	}
-	pending = b.contents.size();
+        fs.write(chunk.c_str(), chunk.length());
+        if (fs.bad()) {
+            throw std::runtime_error(std::string("unable to write to output file '") + name + "'");
+        }
+        pending = b.contents.size();
     }
 }
 
@@ -87,7 +86,7 @@ buffer_bool find(buffer b, std::size_t cursor, std::string text, std::size_t lim
     auto offset = b.cursors[cursor].point;
 
     if (lim <= 0) {
-	lim = std::numeric_limits<std::size_t>::max();
+        lim = std::numeric_limits<std::size_t>::max();
     }
 
     for (auto it = b.contents.begin() + offset; it != b.contents.end() && offset < lim; ++it) {
@@ -118,31 +117,32 @@ buffer_bool rfind(buffer b, std::size_t cursor, std::string text, std::size_t li
     }
 
     if (lim > 0) {
-	lim = offset - lim;
+        lim = offset - lim;
     }
     if (lim < 0) {
-	lim = 0;
+        lim = 0;
     }
 
     int matching_char_pos = 0;
     auto iter = b.contents.begin() + offset;
     while (offset >= lim) {
-	if(wtext[matching_char_pos] != *iter) {
-	    if (offset == 0) break;
-	    iter -= matching_char_pos;
-	    --iter;
-	    --offset;
-	    matching_char_pos = 0;
-	    continue;
-	}
-	++matching_char_pos;
-	++iter;
-	if (matching_char_pos == wtext.length()) {
-	    auto c = b.cursors[cursor];
-	    c.point = offset;
-	    b.cursors = b.cursors.set(cursor, c);
-	    return buffer_bool{b, true};
-	}
+        if (wtext[matching_char_pos] != *iter) {
+            if (offset == 0)
+                break;
+            iter -= matching_char_pos;
+            --iter;
+            --offset;
+            matching_char_pos = 0;
+            continue;
+        }
+        ++matching_char_pos;
+        ++iter;
+        if (matching_char_pos == wtext.length()) {
+            auto c = b.cursors[cursor];
+            c.point = offset;
+            b.cursors = b.cursors.set(cursor, c);
+            return buffer_bool{b, true};
+        }
     }
     return buffer_bool{b, false};
 }
@@ -153,33 +153,35 @@ buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string text, std::size
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string wtext = cvt.from_bytes(text);
 
+    u32::trim(wtext);
+
     int matching_char_pos = 0;
     auto offset = b.cursors[cursor].point;
 
     if (lim <= 0) {
-	lim = std::numeric_limits<std::size_t>::max();
+        lim = std::numeric_limits<std::size_t>::max();
     }
     auto it = b.contents.begin() + offset;
-    while ( it != b.contents.end() && offset < lim && matching_char_pos < wtext.length()) {
-	auto next_char = *it;
-	if (isspace(wtext[matching_char_pos]) && isspace(*it)) {
-	    while(isspace(wtext[matching_char_pos]) && matching_char_pos < wtext.length()) {
-		++matching_char_pos;
-	    }
-	    while(isspace(*it) && it != b.contents.end() && offset < lim) {
-		++offset;
-		++it;
-	    }
-	}
+    while (it != b.contents.end() && offset < lim && matching_char_pos < wtext.length()) {
+        auto next_char = *it;
+        if (u32::isspace(wtext[matching_char_pos]) && u32::isspace(*it)) {
+            while (u32::isspace(wtext[matching_char_pos]) && matching_char_pos < wtext.length()) {
+                ++matching_char_pos;
+            }
+            while (u32::isspace(*it) && it != b.contents.end() && offset < lim) {
+                ++offset;
+                ++it;
+            }
+        }
         if (wtext[matching_char_pos] != *it) {
-	    // get next steps based on strategy
-	    matching_char_pos = 0;
-	    ++offset;
-	    ++it;
+            // get next steps based on strategy
+            matching_char_pos = 0;
+            ++offset;
+            ++it;
             continue;
         }
-	++offset;
-	++it;
+        ++offset;
+        ++it;
         ++matching_char_pos;
         if (matching_char_pos == wtext.length()) {
             auto c = b.cursors[cursor];
@@ -189,6 +191,36 @@ buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string text, std::size
         }
     }
     return buffer_bool{b, false};
+}
+
+// TODO: maybe replace with buffer_int, same for navigation.
+buffer_bool find_replace(buffer b, std::size_t cursor, std::string from, std::string to,
+                         std::size_t n) {
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    std::u32string wfrom = cvt.from_bytes(from);
+    std::u32string wto = cvt.from_bytes(to);
+    text text_to{wto.begin(), wto.end()};
+
+    if (n <= 0) {
+        n = std::numeric_limits<std::size_t>::max();
+    }
+
+    // TODO: add overload that takes text{} for all find methods
+    for (std::size_t ii = 0; ii < n; ++ii) {
+        auto found = find(b, cursor, from, 0);
+        if (!found.get_bool()) {
+            if (ii > 0) {
+                found.success = true;
+            }
+            return found;
+        }
+        auto c = found.b.cursors[cursor];
+        b.contents = found.b.contents.erase(c.point - wfrom.length(), c.point);
+        b.contents = b.contents.insert(c.point - wfrom.length(), text_to);
+        c.point = c.point - wfrom.length() + wto.length();
+        b.cursors = b.cursors.set(cursor, c);
+    }
+    return buffer_bool{b, true};
 }
 
 buffer set_mark(buffer b, std::size_t cursor) {
@@ -248,7 +280,7 @@ buffer_text cut(buffer b, std::size_t cursor) {
     c.point = mark;
     b.cursors = b.cursors.set(cursor, c);
     // TODO: update all cursors
-    
+
     return buffer_text{b, t};
 }
 
@@ -267,4 +299,16 @@ buffer insert(buffer b, std::size_t cursor, std::string t) {
 
     return paste(b, cursor, text{wt.begin(), wt.end()});
 }
+
+buffer backward(buffer b, std::size_t cursor, std::size_t n) {
+    // TODO: validate cursors
+    auto c = b.cursors[cursor];
+    c.point -= n;
+    if (c.point < 0) {
+        c.point = 0;
+    }
+    b.cursors = b.cursors.set(cursor, c);
+    return b;
+}
+
 } // namespace meme
