@@ -47,7 +47,7 @@ struct buffer_int {
     int get_int() { return n; }
 };
 
-buffer open(std::string name);
+buffer_bool open(std::string name);
 void save(buffer b);
 void save_as(buffer b, std::string name);
 buffer set_mark(buffer b, std::size_t cursor);

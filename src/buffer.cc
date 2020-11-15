@@ -31,12 +31,13 @@ std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     return cvt.from_bytes(chunk);
 }
 
-buffer open(std::string name) {
+buffer_bool open(std::string name) {
     auto file = std::ifstream(name, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
-        throw std::runtime_error(std::string("unable to open file '") + name +
-                                 "' for reading.  Does it exist and have the right permissions?");
+	std::cerr << "unable to open file '" << name <<
+                                 "' for reading.  Does it exist and have the right permissions?";
+	return buffer_bool{buffer{}, false};
     }
     auto vv = text{};
 
@@ -52,7 +53,7 @@ buffer open(std::string name) {
     };
     b.cursors = b.cursors.push_back(cursor{});
 
-    return b;
+    return buffer_bool{b, true};
 }
 
 void save(buffer b) { save_as(b, b.file_name); }

@@ -22,8 +22,6 @@ var chapters = [
     "/chapters/penelope.html"
 ]
 
-var epub = open("/home/sahas/code/ulysses-annotated/4300-h/4300-h.htm")
-
 for (c : chapters) {
     var b = open(basepath + c);
     b.find("<main>");
@@ -327,6 +325,33 @@ fix_eumaeus(basepath + chapters[15]);
 fix_ithaca(basepath + chapters[16]);
 fix_penelope(basepath + chapters[17]);
 
+def insert_footnote(filename, id, epub) {
+    var note_b = open(filename);
+    if(!note_b.is_open() || !note_b.find("<main>")) {
+	return false;
+    }
+    note_b.set_mark();
+    note_b.find("</section>");
+    var note = note_b.copy();
+    epub.insert("<aside epub:type=\"footnote\" id=\"" + id + "\">");
+    epub.paste(note);
+    epub.insert("</aside>
+");
+    return true;
+}
+
+var epub = open("/home/sahas/code/ulysses-annotated/4300-h/4300-h.htm")
+var main_cur = epub.new_cursor();
+var notes_cur = epub.new_cursor();
+epub.use_cursor(main_cur);
+// add epub namespace so epub tags are recognized.
+epub.find("1999/xhtml\"");
+epub.insert(" xmlns:epub=\"http://www.idpf.org/2007/ops\"");
+// move notes_cur to end of novel text. notes will be inserted there.
+epub.use_cursor(notes_cur);
+epub.find("End of the Project Gutenberg EBook of Ulysses, by James Joyce");
+epub.rfind("<pre");
+
 // main logic
 var total = 0;
 var found = 0;
@@ -348,10 +373,16 @@ for (c : chapters) {
 	var text = b.copy();
 	total += 1;
 	// TODO overload find to take text objects
+	epub.use_cursor(main_cur);
 	if(epub.find_fuzzy(get_string(text))) {
-	    epub.insert("<a>" + get_string(url) + "</a>");
-	    print("text_found: (" + c + ") " + get_string(text));
+	    var f_str = to_string(found);
 	    found += 1;
+
+	    epub.use_cursor(main_cur);
+	    epub.insert("<a epub:type=\"noteref\" href=\"#jpnote" +f_str+ "\">"+f_str+"</a></p>");
+	    //print("text_found: (" + c + ") " + get_string(text));
+	    epub.use_cursor(notes_cur);
+	    insert_footnote(basepath + "/" + get_string(url), "jpnote" + f_str, epub);
 	} else {
 	    print("text not found: (" + c + ") " + get_string(text));
 	    not_found += 1;
