@@ -39,6 +39,14 @@ struct buffer_bool {
     buffer get_buffer() { return b; }
 };
 
+struct buffer_int {
+    buffer b;
+    int n;
+
+    buffer get_buffer() { return b; }
+    int get_int() { return n; }
+};
+
 buffer open(std::string name);
 void save(buffer b);
 void save_as(buffer b, std::string name);
@@ -47,6 +55,7 @@ buffer_bool find(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 buffer_bool rfind(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
+// TODO: switch to buffer_int
 buffer_bool replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n);
 
 text copy(buffer b, std::size_t cursor);
@@ -55,8 +64,9 @@ buffer paste(buffer b, std::size_t cursor, text t);
 
 buffer insert(buffer b, std::size_t cursor, std::string t);
 
-// buffer new_cursor(buffer b);
-// std::size_t get_cursor_pos(buffer b);
+buffer_int new_cursor(buffer b);
+std::size_t get_cursor_pos(buffer b, std::size_t cursor);
+// std::size_t goto_pos(buffer b, std::size_t cursor, std::size_t pos);
 
 // // repeatable navigation
 // buffer forward(buffer b, std::size_t cursor, std::size_t n);

@@ -4,14 +4,10 @@
 
 std::string chai_init() {
     return R"(
-class text {
-  var t;
-  def text(x) { this.t = x; }
-};
-
 class buffer {
   var b;
   var curr_cursor;
+  var max_cursor;
   def buffer(x) { this.b = x; this.curr_cursor = 0; }
   def find(text) { return this.find(text, 0); }
   def find(text, int lim) {
@@ -48,6 +44,21 @@ class buffer {
   def insert(t) { this.b = insert_impl(this.b, this.curr_cursor, t); }
   def save() { save_impl(this.b); }
   def save_as(name) { save_as_impl(this.b, name); }
+  def new_cursor() {
+    var r = new_cursor_impl(this.b);
+    this.b = r.meme_buffer_int_get_buffer();
+    this.max_cursor = r.meme_buffer_int_get_int();
+    return this.max_cursor;
+  }
+  def use_cursor(int c) {
+    if (c > this.max_cursor) {
+       print("error: attempt to use cursor" + to_string(c) + " > " + to_string(this.max_cursor));
+       return false;
+    }
+    this.curr_cursor = c;
+    return true;
+  }
+  def get_cursor_pos() { return get_cursor_pos_impl(this.b, this.curr_cursor); }
 };
 
 def open(string name) {

@@ -77,10 +77,11 @@ void save_as(buffer b, std::string name) {
 }
 
 buffer_bool find(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
-    // TODO: validate cursor, check input size
-
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string wtext = cvt.from_bytes(text);
+    if (wtext.length() == 0) {
+	return buffer_bool{b, false};
+    }
 
     int matching_char_pos = 0;
     auto offset = b.cursors[cursor].point;
@@ -109,8 +110,10 @@ buffer_bool find(buffer b, std::size_t cursor, std::string text, std::size_t lim
 buffer_bool rfind(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string wtext = cvt.from_bytes(text);
+    if (wtext.length() == 0) {
+	return buffer_bool{b, false};
+    }
 
-    // TODO: add debug log for 0 input size
     std::size_t offset = b.cursors[cursor].point - text.length();
     if (offset < 0) {
         return buffer_bool{b, false};
@@ -148,12 +151,12 @@ buffer_bool rfind(buffer b, std::size_t cursor, std::string text, std::size_t li
 }
 
 buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string text, std::size_t lim) {
-    // TODO: validate cursor, check input size
-
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string wtext = cvt.from_bytes(text);
-
     u32::trim(wtext);
+    if (wtext.length() == 0) {
+	return buffer_bool{b, false};
+    }
 
     int matching_char_pos = 0;
     auto offset = b.cursors[cursor].point;
@@ -199,6 +202,10 @@ buffer_bool replace(buffer b, std::size_t cursor, std::string from, std::string 
                          std::size_t n) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string wfrom = cvt.from_bytes(from);
+    if (wfrom.length() == 0) {
+	return buffer_bool{b, false};
+    }
+
     std::u32string wto = cvt.from_bytes(to);
     text text_to{wto.begin(), wto.end()};
 
@@ -216,16 +223,32 @@ buffer_bool replace(buffer b, std::size_t cursor, std::string from, std::string 
             return found;
         }
         auto c = found.b.cursors[cursor];
-        b.contents = found.b.contents.erase(c.point - wfrom.length(), c.point);
-        b.contents = b.contents.insert(c.point - wfrom.length(), text_to);
-        c.point = c.point - wfrom.length() + wto.length();
-        b.cursors = b.cursors.set(cursor, c);
+	auto mark = c.point - wfrom.length();
+	auto point = c.point;
+        b.contents = found.b.contents.erase(mark, point);
+        b.contents = b.contents.insert(mark, text_to);
+	
+	// update all cursors
+	for (std::size_t cid = 0; cid < b.cursors.size(); ++cid) {
+	    auto csr = b.cursors[cid];
+	    // csr.mark.reset();
+	    // if (c.mark.has_value() && *c.mark >= point) {
+	    // 	c.mark = *c.mark - wfrom.length() + wto.length();
+	    // } else if (c.mark.has_value() && *c.mark > mark) {
+	    // 	c.mark = mark;
+	    // }
+	    if (csr.point >= point) {
+		csr.point = csr.point - wfrom.length() + wto.length();
+	    } else if (csr.point > mark) {
+		csr.point = mark;
+	    }
+	    b.cursors = b.cursors.set(cid, csr);
+	}
     }
     return buffer_bool{b, true};
 }
 
 buffer set_mark(buffer b, std::size_t cursor) {
-    // TODO: validate cursor
     auto c = b.cursors[cursor];
     c.mark = c.point;
     b.cursors = b.cursors.set(cursor, c);
@@ -239,26 +262,20 @@ std::string get_string(text t) {
 }
 
 text copy(buffer b, std::size_t cursor) {
-    // TODO: validate cursor
     auto c = b.cursors[cursor];
     if (!c.mark.has_value()) {
         return text{};
     }
+    
     auto mark = c.mark.value();
     auto point = c.point;
-
     if (mark == point) {
         return text{};
     }
-
     if (mark > point) {
         std::swap(mark, point);
     }
-
-    // auto begin_iter = b.contents.begin() + mark;
-    // auto end_iter = b.contents.begin() + point;
-    // return text{begin_iter, end_iter};
-
+    
     return b.contents.drop(mark).take(point - mark);
 }
 
@@ -277,20 +294,35 @@ buffer_text cut(buffer b, std::size_t cursor) {
     }
     b.contents = b.contents.erase(mark, point);
 
-    c.mark = mark;
-    c.point = mark;
-    b.cursors = b.cursors.set(cursor, c);
-    // TODO: update all cursors
+    // update all cursors
+    for (std::size_t cid = 0; cid < b.cursors.size(); ++cid) {
+	auto csr = b.cursors[cid];
+	// csr.mark.reset();
+	if (csr.point >= point) {
+	    csr.point = csr.point - (point - mark);
+	} else if (csr.point > mark) {
+	    csr.point = mark;
+	}
+	b.cursors = b.cursors.set(cid, csr);
+    }
 
     return buffer_text{b, t};
 }
 
 buffer paste(buffer b, std::size_t cursor, text t) {
     auto c = b.cursors[cursor];
+    auto point = c.point;
+    
     b.contents = b.contents.insert(c.point, t);
-    c.point += t.size();
-    b.cursors = b.cursors.set(cursor, c);
-    // TODO: update all cursors
+    // update all cursors
+    for (std::size_t cid = 0; cid < b.cursors.size(); ++cid) {
+	auto csr = b.cursors[cid];
+	// csr.mark.reset();
+	if(csr.point >= point) {
+	    csr.point += t.size();
+	}
+	b.cursors = b.cursors.set(cid, csr);
+    }
     return b;
 }
 
@@ -301,8 +333,17 @@ buffer insert(buffer b, std::size_t cursor, std::string t) {
     return paste(b, cursor, text{wt.begin(), wt.end()});
 }
 
+buffer_int new_cursor(buffer b) {
+    int sz = b.cursors.size();
+    b.cursors = b.cursors.push_back(cursor{});
+    return buffer_int{b, sz};
+}
+
+std::size_t get_cursor_pos(buffer b, std::size_t cursor) {
+    return b.cursors[cursor].point;
+}
+
 buffer backward(buffer b, std::size_t cursor, std::size_t n) {
-    // TODO: validate cursors
     auto c = b.cursors[cursor];
     c.point -= n;
     if (c.point < 0) {

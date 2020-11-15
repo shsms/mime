@@ -18,6 +18,8 @@ int main(int argc, char* argv[]) {
     chai.add(chaiscript::fun(&meme::buffer_text::get_text), "meme_buffer_text_get_text");
     chai.add(chaiscript::fun(&meme::buffer_bool::get_buffer), "meme_buffer_bool_get_buffer");
     chai.add(chaiscript::fun(&meme::buffer_bool::get_bool), "meme_buffer_bool_get_bool");
+    chai.add(chaiscript::fun(&meme::buffer_int::get_buffer), "meme_buffer_int_get_buffer");
+    chai.add(chaiscript::fun(&meme::buffer_int::get_int), "meme_buffer_int_get_int");
 
     chai.add(chaiscript::fun(&meme::get_string), "get_string");
 
@@ -44,6 +46,8 @@ int main(int argc, char* argv[]) {
     chai.add(chaiscript::fun(&meme::paste), "paste_impl");
 
     chai.add(chaiscript::fun(&meme::insert), "insert_impl");
+    chai.add(chaiscript::fun(&meme::new_cursor), "new_cursor_impl");
+    chai.add(chaiscript::fun(&meme::get_cursor_pos), "get_cursor_pos_impl");
 
     chai.add(chaiscript::fun(&meme::backward), "backward_impl");
 
