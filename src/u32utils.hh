@@ -1,12 +1,12 @@
-#ifndef MEME_U32UTILS_HH
-#define MEME_U32UTILS_HH
+#ifndef MIME_U32UTILS_HH
+#define MIME_U32UTILS_HH
 
 #include <algorithm>
 #include <cctype>
 #include <locale>
 #include <string>
 
-namespace meme::u32 {
+namespace mime::u32 {
 bool isspace(char32_t c) {
     switch (c) {
     case U' ':
@@ -52,5 +52,5 @@ char32_t toupper(char32_t a) {
     }
     return a;
 }
-} // namespace meme::u32
-#endif /* MEME_U32UTILS_HH */
+} // namespace mime::u32
+#endif /* MIME_U32UTILS_HH */

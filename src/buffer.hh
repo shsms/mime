@@ -1,12 +1,12 @@
-#ifndef MEME_BUFFER_HH
-#define MEME_BUFFER_HH
+#ifndef MIME_BUFFER_HH
+#define MIME_BUFFER_HH
 
 #include <immer/box.hpp>
 #include <immer/vector.hpp>
 #include <immer/flex_vector.hpp>
 #include <immer/map.hpp>
 
-namespace meme {
+namespace mime {
 
 struct cursor {
     std::optional<std::size_t> mark{};
@@ -85,6 +85,6 @@ buffer backward(buffer b, std::size_t cursor, std::size_t n);
 // buffer end_of_line(buffer b, std::size_t cursor);
 
 
-} // namespace meme
+} // namespace mime
 
-#endif /* MEME_BUFFER_HH */
+#endif /* MIME_BUFFER_HH */

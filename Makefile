@@ -6,7 +6,7 @@ INCLUDES += -Ivendor/immer/
 CPPFLAGS = -std=c++17 ${INCLUDES} -O3
 LDFLAGS = -ldl -lpthread
 
-TARGET_BIN = bin/tpie
+TARGET_BIN = bin/mime
 
 SRCS = $(shell cd src && find * -type f -not -name '*_test.cc' -name '*.cc')
 OBJS = $(addprefix build/.objs/,$(subst .cc,.o,$(SRCS)))

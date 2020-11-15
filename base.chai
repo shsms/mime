@@ -6,7 +6,7 @@ var v = b.cut();
 b.find("Found");
 b.insert("\"ation\"")
 b.paste(v);
-print(get_string(b.b.meme_buffer_contents));
+print(get_string(b.b.mime_buffer_contents));
 
 print("\n");
 

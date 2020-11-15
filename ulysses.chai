@@ -347,6 +347,8 @@ epub.use_cursor(main_cur);
 // add epub namespace so epub tags are recognized.
 epub.find("1999/xhtml\"");
 epub.insert(" xmlns:epub=\"http://www.idpf.org/2007/ops\"");
+// go just after toc.
+epub.find("<a name=\"link2HCH0001\" id=\"link2HCH0001\">");
 // move notes_cur to end of novel text. notes will be inserted there.
 epub.use_cursor(notes_cur);
 epub.find("End of the Project Gutenberg EBook of Ulysses, by James Joyce");
@@ -379,7 +381,7 @@ for (c : chapters) {
 	    found += 1;
 
 	    epub.use_cursor(main_cur);
-	    epub.insert("<a epub:type=\"noteref\" href=\"#jpnote" +f_str+ "\">"+f_str+"</a></p>");
+	    epub.insert("<sup><a epub:type=\"noteref\" href=\"#jpnote" +f_str+ "\">"+f_str+"</a></sup>");
 	    //print("text_found: (" + c + ") " + get_string(text));
 	    epub.use_cursor(notes_cur);
 	    insert_footnote(basepath + "/" + get_string(url), "jpnote" + f_str, epub);

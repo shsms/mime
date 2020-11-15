@@ -8,7 +8,7 @@
 #include <locale>
 #include <string>
 
-namespace meme {
+namespace mime {
 
 const static int chunk_size = 1e6;
 
@@ -354,4 +354,4 @@ buffer backward(buffer b, std::size_t cursor, std::size_t n) {
     return b;
 }
 
-} // namespace meme
+} // namespace mime
