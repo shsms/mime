@@ -339,14 +339,15 @@ def insert_footnote(filename, id, epub) {
     note_b.rfind("<main>");
     note_b.replace("</a>", "");
     note_b.rfind("<main>");
+    note_b.replace("<section class=\"brief\"><h2>In Brief</h2>", "");
+    note_b.rfind("<main>");
     note_b.set_mark();
     note_b.find("</section>");
+    note_b.rfind("</section>");
     var note = note_b.copy();
-    epub.insert("<aside epub:type=\"footnote\" id=\"" + id + "\">");
+    epub.insert("<aside role=\"doc-footnote\" epub:type=\"footnote\" id=\"jpnote" + id + "\">");
     epub.paste(note);
-    epub.rfind("</section>");
-    epub.insert("<br/>Read more on <a href=\"http://m.joyceproject.com/"+filename+"\">joyceproject.com</a>");
-    epub.insert("</aside>\n");
+    epub.insert("<br/>Read more on <a href=\"http://m.joyceproject.com/"+filename+"\">joyceproject.com</a><br/>Back to <a href=\"#jpref" + id +"\" role=\"doc-backlink\" title=\"Go to note reference\">text</a>.</aside>\n");
     return true;
 }
 
@@ -382,21 +383,24 @@ for (c : chapters) {
 	b.set_mark();
 	b.find("</a>");
 	b.rfind("</a>");
-	var text = b.copy();
+	var text = get_string(b.copy());
 	total += 1;
 	// TODO overload find to take text objects
 	epub.use_cursor(main_cur);
-	if(epub.find_fuzzy(get_string(text))) {
+	if (text == "the canal was frozen") {
+	    epub.rfind("<p>");
+	}
+	if(epub.find_fuzzy(text)) {
 	    var f_str = to_string(found);
 	    found += 1;
 
 	    epub.use_cursor(main_cur);
-	    epub.insert("<sup><a epub:type=\"noteref\" href=\"#jpnote" +f_str+ "\">"+f_str+"</a></sup>");
+	    epub.insert("<sup><a id=\"jpref"+f_str+"\" role=\"doc-noteref\" epub:type=\"noteref\" href=\"#jpnote" +f_str+ "\">"+f_str+"</a></sup>");
 	    //print("text_found: (" + c + ") " + get_string(text));
 	    epub.use_cursor(notes_cur);
-	    insert_footnote(get_string(url), "jpnote" + f_str, epub);
+	    insert_footnote(get_string(url), f_str, epub);
 	} else {
-	    print("text not found: (" + c + ") " + get_string(text));
+	    print("text not found: (" + c + ") " + text);
 	    not_found += 1;
 	}
     }
