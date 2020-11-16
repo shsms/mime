@@ -29,3 +29,6 @@ build/.objs/%.o: src/%.cc
 	@mkdir -p $(shell dirname $@)
 	$(CXX) $(CPPFLAGS) -MMD -c -o $@ $<
 
+
+init:
+	git submodule update --init --recursive vendor/*

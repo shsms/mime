@@ -1,6 +1,6 @@
 // -*- mode: js -*-
 
-var basepath = "/home/sahas/code/ulysses-raw"
+global basepath = "../ulysses-raw"
 var chapters = [
     "/chapters/telem.html",
     "/chapters/nestor.html",
@@ -326,21 +326,31 @@ fix_ithaca(basepath + chapters[16]);
 fix_penelope(basepath + chapters[17]);
 
 def insert_footnote(filename, id, epub) {
-    var note_b = open(filename);
+    var note_b = open(basepath + "/" + filename);
     if(!note_b.is_open() || !note_b.find("<main>")) {
 	return false;
     }
+    while(note_b.find("<a ")) {
+	note_b.rfind("<a ");
+	note_b.set_mark();
+	note_b.find(">");
+	note_b.cut();
+    }
+    note_b.rfind("<main>");
+    note_b.replace("</a>", "");
+    note_b.rfind("<main>");
     note_b.set_mark();
     note_b.find("</section>");
     var note = note_b.copy();
     epub.insert("<aside epub:type=\"footnote\" id=\"" + id + "\">");
     epub.paste(note);
-    epub.insert("</aside>
-");
+    epub.rfind("</section>");
+    epub.insert("<br/>Read more on <a href=\"http://m.joyceproject.com/"+filename+"\">joyceproject.com</a>");
+    epub.insert("</aside>\n");
     return true;
 }
 
-var epub = open("/home/sahas/code/ulysses-annotated/4300-h/4300-h.htm")
+var epub = open("../ulysses-annotated/4300-h/4300-h.htm")
 var main_cur = epub.new_cursor();
 var notes_cur = epub.new_cursor();
 epub.use_cursor(main_cur);
@@ -384,7 +394,7 @@ for (c : chapters) {
 	    epub.insert("<sup><a epub:type=\"noteref\" href=\"#jpnote" +f_str+ "\">"+f_str+"</a></sup>");
 	    //print("text_found: (" + c + ") " + get_string(text));
 	    epub.use_cursor(notes_cur);
-	    insert_footnote(basepath + "/" + get_string(url), "jpnote" + f_str, epub);
+	    insert_footnote(get_string(url), "jpnote" + f_str, epub);
 	} else {
 	    print("text not found: (" + c + ") " + get_string(text));
 	    not_found += 1;
@@ -395,4 +405,4 @@ for (c : chapters) {
 print("total:" + to_string(total))
 print("found:" + to_string(found))
 print("not_found:" + to_string(not_found))
-epub.save_as("/home/sahas/code/ulysses-annotated/4300-h/4300-h-updated.htm")
+epub.save_as("../ulysses-annotated/4300-h/4300-h-updated.htm")
