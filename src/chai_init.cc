@@ -8,9 +8,9 @@ class buffer {
   var b;
   var curr_cursor;
   var max_cursor;
-  var flag_is_open;
-  def buffer(x, o) { this.b = x; this.flag_is_open = o; this.curr_cursor = 0; }
-  def is_open() { return this.flag_is_open; }
+  var flag_is_new;
+  def buffer(x, o) { this.b = x; this.flag_is_new = o; this.curr_cursor = 0; }
+  def is_new() { return this.flag_is_new; }
   def find(text) { return this.find(text, 0); }
   def find(text, int lim) {
     var r = find_impl(this.b, this.curr_cursor, text, lim);
@@ -60,7 +60,14 @@ class buffer {
     this.curr_cursor = c;
     return true;
   }
-  def get_cursor_pos() { return get_cursor_pos_impl(this.b, this.curr_cursor); }
+  def get_pos() { return get_pos_impl(this.b, this.curr_cursor); }
+  def goto_pos(pos) {
+    var r = goto_pos_impl(this.b, this.curr_cursor, pos);
+    this.b = r.mime_buffer_bool_get_buffer();
+    return r.mime_buffer_bool_get_bool();
+  }
+
+  def backward(n) { this.b = backward_impl(this.b, this.curr_cursor, n); }
 };
 
 def open(string name) {

@@ -47,7 +47,8 @@ int main(int argc, char* argv[]) {
 
     chai.add(chaiscript::fun(&mime::insert), "insert_impl");
     chai.add(chaiscript::fun(&mime::new_cursor), "new_cursor_impl");
-    chai.add(chaiscript::fun(&mime::get_cursor_pos), "get_cursor_pos_impl");
+    chai.add(chaiscript::fun(&mime::get_pos), "get_pos_impl");
+    chai.add(chaiscript::fun(&mime::goto_pos), "goto_pos_impl");
 
     chai.add(chaiscript::fun(&mime::backward), "backward_impl");
 

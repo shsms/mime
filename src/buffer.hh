@@ -65,8 +65,8 @@ buffer paste(buffer b, std::size_t cursor, text t);
 buffer insert(buffer b, std::size_t cursor, std::string t);
 
 buffer_int new_cursor(buffer b);
-std::size_t get_cursor_pos(buffer b, std::size_t cursor);
-// std::size_t goto_pos(buffer b, std::size_t cursor, std::size_t pos);
+std::size_t get_pos(buffer b, std::size_t cursor);
+buffer_bool goto_pos(buffer b, std::size_t cursor, std::size_t pos);
 
 // // repeatable navigation
 // buffer forward(buffer b, std::size_t cursor, std::size_t n);

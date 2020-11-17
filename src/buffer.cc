@@ -35,9 +35,7 @@ buffer_bool open(std::string name) {
     auto file = std::ifstream(name, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
-	std::cerr << "unable to open file '" << name <<
-                                 "' for reading.  Does it exist and have the right permissions?";
-	return buffer_bool{buffer{}, false};
+	return buffer_bool{buffer{.file_name=name}, true}; // new file = true
     }
     auto vv = text{};
 
@@ -53,7 +51,7 @@ buffer_bool open(std::string name) {
     };
     b.cursors = b.cursors.push_back(cursor{});
 
-    return buffer_bool{b, true};
+    return buffer_bool{b, false};
 }
 
 void save(buffer b) { save_as(b, b.file_name); }
@@ -340,8 +338,18 @@ buffer_int new_cursor(buffer b) {
     return buffer_int{b, sz};
 }
 
-std::size_t get_cursor_pos(buffer b, std::size_t cursor) {
+std::size_t get_pos(buffer b, std::size_t cursor) {
     return b.cursors[cursor].point;
+}
+
+buffer_bool goto_pos(buffer b, std::size_t cursor, std::size_t pos) {
+    if (pos < 0 || pos >= b.contents.size()) {
+	return buffer_bool{b, false};
+    }
+    auto c = b.cursors[cursor];
+    c.point = pos;
+    b.cursors = b.cursors.set(cursor, c);
+    return buffer_bool{b, true};
 }
 
 buffer backward(buffer b, std::size_t cursor, std::size_t n) {
