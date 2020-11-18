@@ -4,3 +4,6 @@
 [submodule "vendor/immer"]
 	path = vendor/immer
 	url = https://github.com/arximboldi/immer.git
+[submodule "vendor/googletest"]
+	path = vendor/googletest
+	url = https://github.com/google/googletest

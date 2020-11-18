@@ -32,8 +32,8 @@ class buffer {
   def replace(from, to) { return this.replace(from, to, 0);  }
   def replace(from, to, n) {
     var r = replace_impl(this.b, this.curr_cursor, from, to, n);
-    this.b = r.mime_buffer_bool_get_buffer();
-    return r.mime_buffer_bool_get_bool();
+    this.b = r.mime_buffer_int_get_buffer();
+    return r.mime_buffer_int_get_int();
   }
   def set_mark() { this.b = set_mark_impl(this.b, this.curr_cursor); }
   def copy() { copy_impl(this.b, this.curr_cursor); }
@@ -42,8 +42,9 @@ class buffer {
     this.b = r.mime_buffer_text_get_buffer();
     return r.mime_buffer_text_get_text();
   }
+  def erase_region() { this.b = erase_region_impl(this.b, this.curr_cursor); }
   def paste(t) { this.b = paste_impl(this.b, this.curr_cursor, t); }
-  def insert(t) { this.b = insert_impl(this.b, this.curr_cursor, t); }
+  def clear() { this.b = clear_impl(this.b); }
   def save() { save_impl(this.b); }
   def save_as(name) { save_as_impl(this.b, name); }
   def new_cursor() {
@@ -67,12 +68,26 @@ class buffer {
     return r.mime_buffer_bool_get_bool();
   }
 
+  def forward() { this.forward(1); }
+  def backward() { this.backward(1); }
+  def next_line() { this.next_line(1); }
+  def prev_line() { this.prev_line(1); }
+  def forward(n) { this.b = forward_impl(this.b, this.curr_cursor, n); }
   def backward(n) { this.b = backward_impl(this.b, this.curr_cursor, n); }
+  def next_line(n) { this.b = next_line_impl(this.b, this.curr_cursor, n); }
+  def prev_line(n) { this.b = prev_line_impl(this.b, this.curr_cursor, n); }
+  def start_of_buffer() { this.b = start_of_buffer_impl(this.b, this.curr_cursor); }
+  def end_of_buffer() { this.b = end_of_buffer_impl(this.b, this.curr_cursor); }
+  def start_of_line() { this.b = start_of_line_impl(this.b, this.curr_cursor); }
+  def end_of_line() { this.b = end_of_line_impl(this.b, this.curr_cursor); }
 };
 
+def open() {
+  return open("");
+}
 def open(string name) {
-    var r = open_impl(name);
-    return buffer(r.mime_buffer_bool_get_buffer(), r.mime_buffer_bool_get_bool());
+  var r = open_impl(name);
+  return buffer(r.mime_buffer_bool_get_buffer(), r.mime_buffer_bool_get_bool());
 }
 )";
 }
