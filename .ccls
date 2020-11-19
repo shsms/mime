@@ -2,3 +2,5 @@ clang
 %cpp -std=c++17
 -Ivendor/ChaiScript/include
 -Ivendor/immer/
+-Ivendor/googletest/googletest/include
+-Ivendor/spdlog/include

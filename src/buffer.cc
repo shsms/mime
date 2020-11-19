@@ -7,6 +7,7 @@
 #include <iterator>
 #include <locale>
 #include <string>
+#include <spdlog/spdlog.h>
 
 namespace mime {
 
@@ -20,25 +21,24 @@ std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     if (file.gcount() < max_chunk_size) {
         chunk.resize(file.gcount());
     }
-    if (!file.eof()) {
-        std::string line;
-        std::getline(file, line);
-        if (line.length() > 0) {
-            chunk += line;
-        }
-    }
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     return cvt.from_bytes(chunk);
 }
 
 buffer_bool open(std::string name) {
-    if (name.length() == 0) {
-        return buffer_bool{buffer{}, true}; // new anonymous buffer
+    if (name.empty()) {
+	SPDLOG_INFO("Received empty filename. Creating a new buffer.");
+	buffer b{};
+	b.cursors = b.cursors.push_back(cursor{});	
+        return buffer_bool{b, true}; // new anonymous buffer
     }
     auto file = std::ifstream(name, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
-        return buffer_bool{buffer{.file_name = name}, true}; // new file = true
+	SPDLOG_INFO("File '{0}' doesn't exist. Creating a new buffer with that name instead.", name);
+	buffer b{.file_name = name};
+	b.cursors = b.cursors.push_back(cursor{});	
+        return buffer_bool{b, true}; // new file = true
     }
     auto vv = text{};
 
@@ -397,37 +397,46 @@ buffer backward(buffer b, std::size_t cursor, std::size_t n) {
     return b;
 }
 
-buffer next_line(buffer b, std::size_t cursor, std::size_t n) {
+buffer_bool next_line(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
     auto it = b.contents.begin() + c.point;
+    auto success = true;
     for (auto ii = 0; ii < n; ii++) {
         while (it != b.contents.end() && *it != U'\n') {
             ++it;
         }
+	if (*it != U'\n') {
+	    success = false;
+	    break;
+	}
         if (it != b.contents.end()) {
             ++it;
         }
     }
     c.point = it - b.contents.begin();
     b.cursors = b.cursors.set(cursor, c);
-    return b;
+    return buffer_bool{b, success};
 }
 
-buffer prev_line(buffer b, std::size_t cursor, std::size_t n) {
+buffer_bool prev_line(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
     auto it = b.contents.begin() + c.point;
-
+    auto success = true;
     for (auto ii = 0; ii < n; ii++) {
         while (it != b.contents.begin() && *it != U'\n') {
             --it;
         }
+	if (*it != U'\n') {
+	    success = false;
+	    break;
+	}
         while (it != b.contents.begin() && *(it - 1) != U'\n') {
             --it;
         }
     }
     c.point = it - b.contents.begin();
     b.cursors = b.cursors.set(cursor, c);
-    return b;
+    return buffer_bool{b, success};
 }
 
 buffer start_of_buffer(buffer b, std::size_t cursor) {
