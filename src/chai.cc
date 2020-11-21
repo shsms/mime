@@ -1,7 +1,7 @@
 #include <string>
 
-#include "chai_init.hh"
 #include "buffer.hh"
+#include "chai.hh"
 #include <chaiscript/chaiscript.hpp>
 
 void add_methods(chaiscript::ChaiScript &chai) {
@@ -190,13 +190,13 @@ class buffer {
   def backward(n) { this.b = backward_impl(this.b, this.curr_cursor, n); }
   def next_line(n) {
     var r = next_line_impl(this.b, this.curr_cursor, n);
-    this.b = r.mime_buffer_bool_get_buffer();
-    return r.mime_buffer_bool_get_bool();    
+    this.b = r.mime_buffer_int_get_buffer();
+    return r.mime_buffer_int_get_int();    
   }
   def prev_line(n) {
     var r = prev_line_impl(this.b, this.curr_cursor, n);
-    this.b = r.mime_buffer_bool_get_buffer();
-    return r.mime_buffer_bool_get_bool();
+    this.b = r.mime_buffer_int_get_buffer();
+    return r.mime_buffer_int_get_int();
   }
   def start_of_buffer() { this.b = start_of_buffer_impl(this.b, this.curr_cursor); }
   def end_of_buffer() { this.b = end_of_buffer_impl(this.b, this.curr_cursor); }

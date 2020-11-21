@@ -6,8 +6,8 @@
 #include <iostream>
 #include <iterator>
 #include <locale>
-#include <string>
 #include <spdlog/spdlog.h>
+#include <string>
 
 namespace mime {
 
@@ -27,17 +27,18 @@ std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
 
 buffer_bool open(std::string name) {
     if (name.empty()) {
-	SPDLOG_INFO("Received empty filename. Creating a new buffer.");
-	buffer b{};
-	b.cursors = b.cursors.push_back(cursor{});	
+        SPDLOG_INFO("Received empty filename. Creating a new buffer.");
+        buffer b{};
+        b.cursors = b.cursors.push_back(cursor{});
         return buffer_bool{b, true}; // new anonymous buffer
     }
     auto file = std::ifstream(name, std::ios::in | std::ios::binary);
 
     if (!file.is_open()) {
-	SPDLOG_INFO("File '{0}' doesn't exist. Creating a new buffer with that name instead.", name);
-	buffer b{.file_name = name};
-	b.cursors = b.cursors.push_back(cursor{});	
+        SPDLOG_INFO("File '{0}' doesn't exist. Creating a new buffer with that name instead.",
+                    name);
+        buffer b{.file_name = name};
+        b.cursors = b.cursors.push_back(cursor{});
         return buffer_bool{b, true}; // new file = true
     }
     auto vv = text{};
@@ -216,7 +217,6 @@ template <> buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string t, 
     return find_fuzzy(b, cursor, ustr, lim);
 }
 
-// TODO: maybe replace with buffer_int, same for navigation.
 buffer_int replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string wfrom = cvt.from_bytes(from);
@@ -238,10 +238,11 @@ buffer_int replace(buffer b, std::size_t cursor, std::string from, std::string t
         if (!found.get_bool()) {
             return buffer_int{found.b, ii};
         }
-        auto c = found.b.cursors[cursor];
+        b = found.b;
+        auto c = b.cursors[cursor];
         auto mark = c.point - wfrom.size();
         auto point = c.point;
-        b.contents = found.b.contents.erase(mark, point);
+        b.contents = b.contents.erase(mark, point);
         b.contents = b.contents.insert(mark, text_to);
 
         // update all cursors
@@ -326,6 +327,9 @@ buffer paste(buffer b, std::size_t cursor, std::string t) {
 buffer erase_region(buffer b, std::size_t cursor) {
     auto c = b.cursors[cursor];
 
+    if (!c.mark.has_value()) {
+        return b;
+    }
     auto mark = c.mark.value();
     auto point = c.point;
 
@@ -368,7 +372,7 @@ buffer_int new_cursor(buffer b) {
 std::size_t get_pos(buffer b, std::size_t cursor) { return b.cursors[cursor].point; }
 
 buffer_bool goto_pos(buffer b, std::size_t cursor, std::size_t pos) {
-    if (pos < 0 || pos >= b.contents.size()) {
+    if (pos < 0 || pos > b.contents.size()) {
         return buffer_bool{b, false};
     }
     auto c = b.cursors[cursor];
@@ -389,54 +393,53 @@ buffer forward(buffer b, std::size_t cursor, std::size_t n) {
 
 buffer backward(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
-    c.point -= n;
-    if (c.point < 0) {
+    if (c.point > n) {
+        c.point -= n;
+    } else {
         c.point = 0;
     }
     b.cursors = b.cursors.set(cursor, c);
     return b;
 }
 
-buffer_bool next_line(buffer b, std::size_t cursor, std::size_t n) {
+buffer_int next_line(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
     auto it = b.contents.begin() + c.point;
-    auto success = true;
-    for (auto ii = 0; ii < n; ii++) {
+    int ii;
+    for (ii = 0; ii < n; ii++) {
         while (it != b.contents.end() && *it != U'\n') {
             ++it;
         }
-	if (*it != U'\n') {
-	    success = false;
-	    break;
-	}
+        if (*it != U'\n') {
+            break;
+        }
         if (it != b.contents.end()) {
             ++it;
         }
     }
     c.point = it - b.contents.begin();
     b.cursors = b.cursors.set(cursor, c);
-    return buffer_bool{b, success};
+    return buffer_int{b, ii};
 }
 
-buffer_bool prev_line(buffer b, std::size_t cursor, std::size_t n) {
+buffer_int prev_line(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
     auto it = b.contents.begin() + c.point;
-    auto success = true;
-    for (auto ii = 0; ii < n; ii++) {
+    int ii;
+    for (ii = 0; ii < n; ii++) {
         while (it != b.contents.begin() && *it != U'\n') {
             --it;
         }
-	if (*it != U'\n') {
-	    success = false;
-	    break;
-	}
+        if (*it != U'\n') {
+            break;
+        }
         while (it != b.contents.begin() && *(it - 1) != U'\n') {
             --it;
         }
     }
     c.point = it - b.contents.begin();
     b.cursors = b.cursors.set(cursor, c);
-    return buffer_bool{b, success};
+    return buffer_int{b, ii};
 }
 
 buffer start_of_buffer(buffer b, std::size_t cursor) {

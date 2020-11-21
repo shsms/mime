@@ -75,8 +75,8 @@ buffer_bool goto_pos(buffer b, std::size_t cursor, std::size_t pos);
 // // repeatable navigation
 buffer forward(buffer b, std::size_t cursor, std::size_t n);
 buffer backward(buffer b, std::size_t cursor, std::size_t n);
-buffer_bool next_line(buffer b, std::size_t cursor, std::size_t n);
-buffer_bool prev_line(buffer b, std::size_t cursor, std::size_t n);
+buffer_int next_line(buffer b, std::size_t cursor, std::size_t n);
+buffer_int prev_line(buffer b, std::size_t cursor, std::size_t n);
 // buffer forward_word(buffer b, std::size_t cursor, std::size_t n);
 // buffer backward_word(buffer b, std::size_t cursor, std::size_t n);
 

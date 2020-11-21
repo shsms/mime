@@ -53,7 +53,7 @@ build/spdlog:
 	mkdir -p $@
 
 $(SPDLOG_LIB): build/spdlog
-	cd build/spdlog && cmake ../../vendor/spdlog && make
+	cd build/spdlog && cmake ../../vendor/spdlog && make -j
 
 
 ## unit test targets
@@ -82,4 +82,4 @@ build/googletest:
 	mkdir -p $@
 
 $(GTEST_LIB): build/googletest
-	cd build/googletest && cmake ../../vendor/googletest && make
+	cd build/googletest && cmake ../../vendor/googletest && make -j
