@@ -1,0 +1,164 @@
+* mime
+
+Mime is a text processing tool inspired by Emacs,  written in C++.
+
+Mime provides an editor-like abstraction for manipulating text files,
+but in a scripting environment,  without an editor.  This enables very
+sophisticated transformations that are easy to do through tools
+like Emacs Keyboard Macros,  but hard to do in code.
+
+Here's an example mime script ([[examples/gofunc.mime][examples/gofunc.mime]]):
+
+#+begin_src
+var b = open("main.go");
+var doc_c = b.new_cursor();
+var nav_c = b.new_cursor();
+
+b.use_cursor(nav_c);
+
+while(b.find("func ")) {
+    b.set_mark();
+    b.find("(");
+    b.backward();
+
+    var fname = b.copy();
+
+    b.use_cursor(doc_c);
+    b.paste("// FuncAlert: " + fname + "\n");
+
+    b.use_cursor(nav_c);
+}
+b.use_cursor(doc_c);
+b.paste("\n");
+
+b.save_as("mimeout.go");
+#+end_src
+
+If there is a file "main.go" in the same directory with the below
+contents,
+
+#+begin_src go
+package main
+
+import "fmt"
+
+func main() {
+	fmt.Print(hello(), world())
+}
+
+func world() string {
+	return "world!"
+}
+
+func hello() string {
+	return "Hello "
+}
+#+end_src
+
+Then running the above mime script with:
+
+#+begin_src shell
+mime gofunc.mime
+#+end_src
+
+would generate a new file "mimeout.go" with below contents:
+
+#+begin_src go
+// FuncAlert: main
+// FuncAlert: world
+// FuncAlert: hello
+
+package main
+
+import "fmt"
+
+func main() {
+        fmt.Print(hello(), world())
+}
+
+func world() string {
+        return "world!"
+}
+
+func hello() string {
+        return "Hello "
+}
+#+end_src
+
+If it is not already obvious, here's what the script does:
+
+   1. open file "main.go"
+   2. create two cursors - one for adding documentation at the top,
+      and one for navigating the file.
+   3. switch to the navigation cursor.
+   4. find and goto next occurance of the string "func ".  If found:
+      1. set mark (emacs parlance for "start selecting")
+      2. find next occurance of "(" (assuming we are operating on a
+         valid go program,  we don't check if "(" was found, we assume
+         it is there.)
+      3. go back one character,  we don't want to copy the "("
+      4. copy the text between mark (where we started selecting in
+         4.1), and (current cursor) point, and store in a var called
+         "fname".
+      5. switch to the documentation cursor, which is still at the top
+      6. paste the function name in "fname" with a comment prefix and
+         a newline at the end.
+      7. switch to navigation cursor
+      8. goto step 4.
+   5. switch to doc cursor to insert a final newline to introduce a
+      gap between inserted text and original program.
+   6. save file under a new name.
+
+** Dependencies
+For providing its functionalities, Mime depends on these amazing
+ libraries:
+
+1. [[https://github.com/ChaiScript/ChaiScript][ChaiScript]] for the scripting language.
+2. [[https://github.com/arximboldi/immer][Immer]] for data representation. Immer is particularly unique in the
+   kind of abstractions it offers over traditional datastructures,
+   there's nothing else like it in C++ as far as I know.
+3. [[https://github.com/gabime/spdlog][spdlog]] for logs.
+4. [[https://github.com/google/googletest][googletest]] for unit tests.
+
+(You don't have to install them separately, they are added as
+submodules to this repository,  so just following the build steps
+below is enough.)
+
+** Build instructions
+(Only Linux at the moment, I've tested on Manjaro)
+
+- Initialize submodules with:
+
+#+begin_src shell
+make init
+#+end_src
+
+- Build using:
+
+#+begin_src shell
+make build
+#+end_src
+
+- Run unit tests with:
+
+#+begin_src shell
+make test
+#+end_src
+
+- Install to [[https://www.freedesktop.org/software/systemd/man/file-hierarchy.html#~/.local/bin/][local bin]] directory. (depends on systemd to get
+  installation path)
+#+begin_src bash
+make install
+#+end_src
+
+** Project status
+Mime is already usable,  there are unit tests for all core
+function,  but the project is still very new,  and I'm in the process
+of adding additional features and documentation for all features.
+
+Until then, to get the list of functions that you can call in your
+scripts, checkout the [[https://github.com/shsms/mime/blob/main/src/chai.cc#L119][chai_init]] function.  All the functions there are
+working and have tests.
+
+For details on other features provided by the scripting language,
+checkout chaiscript docs [[https://codedocs.xyz/ChaiScript/ChaiScript/LangGettingStarted.html][here]].

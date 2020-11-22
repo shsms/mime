@@ -55,10 +55,7 @@ buffer set_mark(buffer b, std::size_t cursor);
 template <typename T> buffer_bool find(buffer b, std::size_t cursor, T t, std::size_t lim);
 template <typename T> buffer_bool rfind(buffer b, std::size_t cursor, T t, std::size_t lim);
 template <typename T> buffer_bool find_fuzzy(buffer b, std::size_t cursor, T t, std::size_t lim);
-// buffer_bool find_beg(buffer b, std::size_t cursor, std::string t, std::size_t lim);
-// buffer_bool rfind_end(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
-// TODO: switch to buffer_int
 buffer_int replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n);
 
 text copy(buffer b, std::size_t cursor);
@@ -77,8 +74,6 @@ buffer forward(buffer b, std::size_t cursor, std::size_t n);
 buffer backward(buffer b, std::size_t cursor, std::size_t n);
 buffer_int next_line(buffer b, std::size_t cursor, std::size_t n);
 buffer_int prev_line(buffer b, std::size_t cursor, std::size_t n);
-// buffer forward_word(buffer b, std::size_t cursor, std::size_t n);
-// buffer backward_word(buffer b, std::size_t cursor, std::size_t n);
 
 // // non-repeatable navigation
 buffer start_of_buffer(buffer b, std::size_t cursor);
@@ -86,6 +81,15 @@ buffer end_of_buffer(buffer b, std::size_t cursor);
 buffer start_of_line(buffer b, std::size_t cursor);
 buffer end_of_line(buffer b, std::size_t cursor);
 
+// buffer forward_word(buffer b, std::size_t cursor, std::size_t n);
+// buffer backward_word(buffer b, std::size_t cursor, std::size_t n);
+// buffer_bool find_beg(buffer b, std::size_t cursor, std::string t, std::size_t lim);
+// buffer_bool rfind_end(buffer b, std::size_t cursor, std::string t, std::size_t lim);
+// buffer_bool start_of_block(buffer b, std::size_t cursor); // nearest open paran without matching close.
+// buffer_bool end_of_block(buffer b, std::size_t cursor);
+// buffer_bool narrow_to_region(buffer b, std::size_t cursor);  // all operations happen only within the narrowed view
+// buffer_bool narrow_to_block(buffer b, std::size_t cursor);
+// buffer_bool widen(buffer b, std::size_t cursor)
 } // namespace mime
 
 #endif /* MIME_BUFFER_HH */

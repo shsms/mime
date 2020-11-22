@@ -16,6 +16,8 @@ OBJS = $(addprefix build/.objs/,$(subst .cc,.o,$(SRCS)))
 ABS_SRCS = $(addprefix src/,$(SRCS))
 ABS_HEADERS = $(shell find src -type f -name '*.hh')
 
+INSTALL_PATH = $(shell systemd-path user-binaries)
+
 DEP = $(OBJS:%.o=%.d)
 -include $(DEP)
 
@@ -46,6 +48,9 @@ ${TARGET_BIN}: ${OBJS} $(LIBS)
 build/.objs/%.o: src/%.cc
 	@mkdir -p $(shell dirname $@)
 	$(CXX) $(CPPFLAGS) -MMD -c -o $@ $<
+
+install: build
+	@test "${INSTALL_PATH}" == "" && echo -e "\nunable to get 'user-binaries' path from 'systemd-path' command\n" || install $(TARGET_BIN) ${INSTALL_PATH}/
 
 ## spdlog
 
