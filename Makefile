@@ -1,4 +1,4 @@
-CXX=g++
+CXX ?= g++
 
 INCLUDES += -Ivendor/ChaiScript/include
 INCLUDES += -Ivendor/immer
@@ -7,8 +7,8 @@ INCLUDES += -Ivendor/spdlog/include
 SPDLOG_LIB = build/spdlog/libspdlog.a
 LIBS = $(SPDLOG_LIB)
 
-CPPFLAGS = -std=c++17 ${INCLUDES} -O3
-LDFLAGS = -ldl -lpthread
+CPPFLAGS = -std=c++17 ${INCLUDES} -O3 -DCHAISCRIPT_NO_THREADS
+LDFLAGS = -Wl,--no-as-needed -ldl
 
 TARGET_BIN = bin/mime
 SRCS = $(shell cd src && find * -type f -not -name '*_test.cc' -name '*.cc')
@@ -22,9 +22,6 @@ DEP = $(OBJS:%.o=%.d)
 -include $(DEP)
 
 build: bin ${TARGET_BIN}
-
-run: build
-	${TARGET_BIN} ulysses.chai
 
 init:
 	git submodule update --init --recursive vendor/*
@@ -67,8 +64,8 @@ GTEST_LIB = build/googletest/lib/libgtest.a
 TEST_SRCS = $(shell cd src && find * -type f -not -name 'main.cc' -name '*.cc')
 TEST_OBJS = $(addprefix build/test/.objs/,$(subst .cc,.o,$(TEST_SRCS)))
 
-TEST_CPPFLAGS = -std=c++17 ${INCLUDES} -Ivendor/googletest/googletest/include -O0 -g --coverage
-TEST_LDFLAGS = $(LDFLAGS) --coverage
+TEST_CPPFLAGS = -std=c++17 ${INCLUDES} -Ivendor/googletest/googletest/include -O0 -g --coverage -DCHAISCRIPT_NO_THREADS
+TEST_LDFLAGS = $(LDFLAGS) -pthread --coverage
 
 testCover: test
 	gcovr -r . -f src -e '.+_test\.cc$$' --html --html-details -o build/coverage.html

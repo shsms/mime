@@ -1,0 +1,23 @@
+language: cpp
+dist: bionic
+
+matrix:
+  include:
+  - os: linux
+    addons:
+      apt:
+        sources:
+        - ubuntu-toolchain-r-test
+        packages:
+        - g++-10
+    env:
+    - MATRIX_EVAL="CC=gcc-10 && CXX=g++-10"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+
+script:
+  make && make test
+
+after_success:
+  bash <(curl -s https://codecov.io/bash)
