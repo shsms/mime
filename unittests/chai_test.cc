@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "chai.hh"
+#include "../src/chai.hh"
 
 TEST(Chai, Buffer) {
     chaiscript::ChaiScript chai;

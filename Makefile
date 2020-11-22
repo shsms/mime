@@ -11,7 +11,7 @@ CPPFLAGS = -std=c++17 ${INCLUDES} -O3 -DCHAISCRIPT_NO_THREADS
 LDFLAGS = -Wl,--no-as-needed -ldl
 
 TARGET_BIN = bin/mime
-SRCS = $(shell cd src && find * -type f -not -name '*_test.cc' -name '*.cc')
+SRCS = $(shell ls src/*.cc)
 OBJS = $(addprefix build/.objs/,$(subst .cc,.o,$(SRCS)))
 ABS_SRCS = $(addprefix src/,$(SRCS))
 ABS_HEADERS = $(shell find src -type f -name '*.hh')
@@ -42,7 +42,7 @@ tidy: format
 ${TARGET_BIN}: ${OBJS} $(LIBS)
 	$(CXX) ${LDFLAGS} -o $@ $^
 
-build/.objs/%.o: src/%.cc
+build/.objs/%.o: %.cc
 	@mkdir -p $(shell dirname $@)
 	$(CXX) $(CPPFLAGS) -MMD -c -o $@ $<
 
@@ -61,7 +61,7 @@ $(SPDLOG_LIB): build/spdlog
 ## unit test targets
 TEST_BIN = bin/test
 GTEST_LIB = build/googletest/lib/libgtest.a
-TEST_SRCS = $(shell cd src && find * -type f -not -name 'main.cc' -name '*.cc')
+TEST_SRCS = $(shell ls src/*.cc unittests/*.cc | grep -v main.cc)
 TEST_OBJS = $(addprefix build/test/.objs/,$(subst .cc,.o,$(TEST_SRCS)))
 
 TEST_CPPFLAGS = -std=c++17 ${INCLUDES} -Ivendor/googletest/googletest/include -O0 -g --coverage -DCHAISCRIPT_NO_THREADS
@@ -76,7 +76,7 @@ test: bin $(TEST_BIN)
 $(TEST_BIN):  $(TEST_OBJS) $(LIBS) $(GTEST_LIB)
 	$(CXX) $(TEST_LDFLAGS) -o $@ $^
 
-build/test/.objs/%.o: src/%.cc
+build/test/.objs/%.o: %.cc
 	@mkdir -p $(shell dirname $@)
 	$(CXX) $(TEST_CPPFLAGS) -MMD -c -o $@ $<
 

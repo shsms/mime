@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "buffer.hh"
+#include "../src/buffer.hh"
 #include <filesystem>
 #include <string>
 

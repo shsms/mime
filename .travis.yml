@@ -20,6 +20,4 @@ script:
   make && make test
 
 after_success:
-  - rm  "build/test/.objs/*_test.g*"
-  - bash <(curl -s https://codecov.io/bash) -x gcov-10
-
+  - bash <(curl -s https://codecov.io/bash) -x gcov-10 -g './build/test/.objs/unittests/*'

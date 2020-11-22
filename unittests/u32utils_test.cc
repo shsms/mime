@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "u32utils.hh"
-#include "buffer.hh"
+#include "../src/u32utils.hh"
+#include "../src/buffer.hh"
 #include <string>
 
 using namespace std::literals;
