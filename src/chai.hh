@@ -1,10 +1,9 @@
 #ifndef MIME_CHAI_INIT_HH
 #define MIME_CHAI_INIT_HH
 
-#include <chaiscript/chaiscript.hpp>
 #include <string>
 
-void add_methods(chaiscript::ChaiScript &chai);
-std::string chai_init();
+void run(std::string filename);
+void run_str(std::string script);
 
 #endif /* MIME_CHAI_INIT_HH */

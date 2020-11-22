@@ -213,3 +213,17 @@ def open(string name) {
 }
 )";
 }
+
+void run(std::string filename) {
+    chaiscript::ChaiScript chai;
+    add_methods(chai);
+    chai.eval(chai_init());
+    chai.eval_file(filename);
+}
+
+void run_str(std::string script) {
+    chaiscript::ChaiScript chai;
+    add_methods(chai);
+    chai.eval(chai_init());
+    chai.eval(script);
+}

@@ -15,8 +15,5 @@ int main(int argc, char *argv[]) {
     spdlog::set_default_logger(spdlog::stderr_color_mt("stderr"));
     spdlog::set_pattern("[%^%l%$ %@/%!] %v");
 
-    chaiscript::ChaiScript chai;
-    add_methods(chai);
-    chai.eval(chai_init());
-    chai.eval_file(argv[1]);
+    run(argv[1]);
 }
