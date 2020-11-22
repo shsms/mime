@@ -20,4 +20,5 @@ script:
   make && make test
 
 after_success:
-  bash <(curl -s https://codecov.io/bash) -x gcov-10
+  bash <(curl -s https://codecov.io/bash) -x gcov-10 -f "!*_test.cc"
+
