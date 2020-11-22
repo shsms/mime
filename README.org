@@ -1,5 +1,7 @@
 * mime
 
+[[https://travis-ci.com/shsms/mime][https://travis-ci.com/shsms/mime.svg?branch=main]] [[https://codecov.io/gh/shsms/mime][https://codecov.io/gh/shsms/mime/branch/main/graph/badge.svg?token=ASAIA6P309]]
+
 Mime is a text processing tool inspired by Emacs,  written in C++.
 
 Mime provides an editor-like abstraction for manipulating text files,
