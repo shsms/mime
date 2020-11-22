@@ -1,0 +1,23 @@
+// -*- js -*-
+
+def assert(x, msg)
+{
+  if (!x)
+  {
+    print("ERROR: assert failed: " + msg);
+    assert_failure(); // indirect throw
+  }
+}
+
+var b = open();
+assert(b.is_new() == true, "is_new");
+b.paste("hello this is some text");
+b.set_mark();
+b.rfind("some");
+var t = b.copy();
+
+assert(t + "." == "some text.", "concat text+string");
+assert(".some text" == "." + t, "concat string+text");
+assert(t + ".some text" == t + "." + t, "concat text+text");
+assert((t == ".") == false, "eq compare should fail");
+assert(("." == t) == false, "eq compare should fail");

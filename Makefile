@@ -9,17 +9,17 @@ LIBS = $(SPDLOG_LIB)
 
 CPPFLAGS = -std=c++17 ${INCLUDES} -O3 -DCHAISCRIPT_NO_THREADS
 LDFLAGS = -Wl,--no-as-needed -ldl
-
 TARGET_BIN = bin/mime
 SRCS = $(shell ls src/*.cc)
 OBJS = $(addprefix build/.objs/,$(subst .cc,.o,$(SRCS)))
-ABS_SRCS = $(addprefix src/,$(SRCS))
-ABS_HEADERS = $(shell find src -type f -name '*.hh')
 
 INSTALL_PATH = $(shell systemd-path user-binaries)
 
 DEP = $(OBJS:%.o=%.d)
 -include $(DEP)
+
+ALL_SRCS=$(shell find src unittests -type f -name '*.cc')
+ALL_HEADERS=$(shell find src unittests -type f -name '*.hh')
 
 build: bin ${TARGET_BIN}
 
@@ -33,7 +33,7 @@ clean:
 	rm -rf build bin
 
 format:
-	clang-format -i $(ABS_SRCS) $(ABS_HEADERS)
+	clang-format -i $(ALL_SRCS) $(ALL_HEADERS)
 
 tidy: format
 	clang-tidy --checks=readability-*,performance-*,cppcoreguidelines-*,bugprone-*,misc-* $(ABS_HEADERS) $(ABS_SRCS) -- $(CPPFLAGS)
@@ -57,7 +57,6 @@ build/spdlog:
 $(SPDLOG_LIB): build/spdlog
 	cd build/spdlog && cmake ../../vendor/spdlog && make -j
 
-
 ## unit test targets
 TEST_BIN = bin/test
 GTEST_LIB = build/googletest/lib/libgtest.a
@@ -68,7 +67,7 @@ TEST_CPPFLAGS = -std=c++17 ${INCLUDES} -Ivendor/googletest/googletest/include -O
 TEST_LDFLAGS = $(LDFLAGS) -pthread --coverage
 
 testCover: test
-	gcovr -r . -f src -e '.+_test\.cc$$' --html --html-details -o build/coverage.html
+	gcovr -r . -f src --html --html-details -o build/coverage.html
 
 test: bin $(TEST_BIN)
 	$(TEST_BIN)

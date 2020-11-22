@@ -60,4 +60,4 @@ char32_t toupper(char32_t a) {
     }
     return a;
 }
-}
+} // namespace mime::u32

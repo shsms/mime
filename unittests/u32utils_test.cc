@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-#include "../src/u32utils.hh"
 #include "../src/buffer.hh"
+#include "../src/u32utils.hh"
+#include <gtest/gtest.h>
 #include <string>
 
 using namespace std::literals;
@@ -66,4 +66,3 @@ TEST(u32utils, lower) {
     EXPECT_EQ(mime::u32::tolower(U'w'), U'w');
     EXPECT_EQ(mime::u32::tolower(U'W'), U'w');
 }
-

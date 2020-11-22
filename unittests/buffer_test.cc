@@ -1,20 +1,20 @@
-#include <gtest/gtest.h>
 #include "../src/buffer.hh"
 #include <filesystem>
+#include <gtest/gtest.h>
 #include <string>
 
 using namespace std::literals;
 
 class BufferTest : public ::testing::Test {
- protected:
-  void SetUp() override {
-      ascii_bool = mime::open("testdata/open.csv");
-      ascii = ascii_bool.b;
-      unicode_bool = mime::open("testdata/unicode.csv");
-      unicode = ascii_bool.b;
-  }
+  protected:
+    void SetUp() override {
+        ascii_bool = mime::open("testdata/open.csv");
+        ascii = ascii_bool.b;
+        unicode_bool = mime::open("testdata/unicode.csv");
+        unicode = ascii_bool.b;
+    }
 
-  // void TearDown() override {}
+    // void TearDown() override {}
 
     mime::buffer_bool ascii_bool;
     mime::buffer_bool unicode_bool;
@@ -48,7 +48,7 @@ TEST_F(BufferTest, ReplaceFound) {
     EXPECT_EQ(r.n, 1);
     EXPECT_STREQ(mime::to_string(r.b.contents).c_str(), "a,c,b\n1,2,3\n4,5,6\n");
     EXPECT_EQ(r.b.cursors[0].point, 5);
-    
+
     r = mime::replace(ascii, 0, "b,c", "c,b", 2);
     EXPECT_EQ(r.n, 1);
     r = mime::replace(r.b, 0, ",", "#", 2);
@@ -59,14 +59,14 @@ TEST_F(BufferTest, ReplaceFound) {
 TEST_F(BufferTest, ReplaceMultiCursor) {
     auto r = mime::new_cursor(ascii);
     EXPECT_EQ(r.n, 1);
-    
+
     r = mime::replace(r.b, 0, "b,c", "B,c", 0);
     r = mime::replace(r.b, 1, ",B", ",longfield", 0);
     EXPECT_EQ(r.n, 1);
     EXPECT_STREQ(mime::to_string(r.b.contents).c_str(), "a,longfield,c\n1,2,3\n4,5,6\n");
     EXPECT_EQ(r.b.cursors[0].point, 13);
     EXPECT_EQ(r.b.cursors[1].point, 11);
-    
+
     r = mime::new_cursor(r.b);
     EXPECT_EQ(r.n, 2);
     r = mime::new_cursor(r.b);
@@ -77,8 +77,8 @@ TEST_F(BufferTest, ReplaceMultiCursor) {
     // move cursor between word "longfield" that is going away.
     // in this case, cursor 3 should go back to pos 1 where
     // from field starts.
-    r.b.cursors = r.b.cursors.set(3, mime::cursor{.point=5}); 
-    
+    r.b.cursors = r.b.cursors.set(3, mime::cursor{.point = 5});
+
     r = mime::replace(r.b, 2, ",longfield", ",www", 0);
     EXPECT_EQ(r.n, 1);
     EXPECT_STREQ(mime::to_string(r.b.contents).c_str(), "a,www,c\n1,2,3\n4,5,6\n");
@@ -86,7 +86,7 @@ TEST_F(BufferTest, ReplaceMultiCursor) {
     EXPECT_EQ(r.b.cursors[1].point, 5);
     EXPECT_EQ(r.b.cursors[2].point, 5);
     EXPECT_EQ(r.b.cursors[3].point, 1);
-    EXPECT_EQ(r.b.cursors[4].point, 0);   
+    EXPECT_EQ(r.b.cursors[4].point, 0);
 }
 
 TEST_F(BufferTest, SetMark) {
@@ -95,8 +95,8 @@ TEST_F(BufferTest, SetMark) {
     EXPECT_EQ(ascii.cursors[0].mark.has_value(), true);
     EXPECT_EQ(ascii.cursors[0].mark.value(), 0);
 
-    ascii.cursors = ascii.cursors.set(0, mime::cursor{.point=3});
-    
+    ascii.cursors = ascii.cursors.set(0, mime::cursor{.point = 3});
+
     EXPECT_EQ(ascii.cursors[0].mark.has_value(), false);
     ascii = mime::set_mark(ascii, 0);
     EXPECT_EQ(ascii.cursors[0].mark.has_value(), true);
@@ -109,7 +109,7 @@ TEST_F(BufferTest, CopyEmpty) {
     auto t = mime::copy(r.b, 0);
     EXPECT_EQ(t.size(), 0);
     EXPECT_STREQ(mime::to_string(t).c_str(), "");
-    
+
     auto b = mime::set_mark(ascii, 0);
     t = mime::copy(b, 0);
     EXPECT_EQ(t.size(), 0);
@@ -201,7 +201,7 @@ TEST_F(BufferTest, Cut) {
     auto t = mime::cut(b, 0);
     EXPECT_EQ(t.t.size(), 0);
     EXPECT_EQ(t.b.contents.size(), 18);
-    
+
     auto r = mime::find(b, 0, "c"s, 0);
     t = mime::cut(r.b, 0);
     EXPECT_EQ(t.t.size(), 5);
@@ -218,7 +218,7 @@ TEST_F(BufferTest, Paste) {
 
     b = mime::paste(r.b, 0, "\n");
     b = mime::paste(b, 0, t);
-    EXPECT_STREQ(mime::to_string(b.contents).c_str(), "a,b,c\na,b,c\n1,2,3\n4,5,6\n");    
+    EXPECT_STREQ(mime::to_string(b.contents).c_str(), "a,b,c\na,b,c\n1,2,3\n4,5,6\n");
 }
 
 TEST_F(BufferTest, Clear) {
@@ -241,14 +241,14 @@ TEST_F(BufferTest, GetPos) {
 TEST_F(BufferTest, GotoPos) {
     auto r = mime::goto_pos(ascii, 0, -1);
     EXPECT_EQ(r.success, false);
-    
+
     r = mime::goto_pos(r.b, 0, 20);
     EXPECT_EQ(r.success, false);
-    
+
     r = mime::goto_pos(r.b, 0, 10);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 10);
-    
+
     r = mime::goto_pos(r.b, 0, 5);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 5);
@@ -262,13 +262,12 @@ TEST_F(BufferTest, GotoPos) {
     r = mime::find(b, 0, "hel"s, 0);
     EXPECT_EQ(r.b.cursors[0].point, 21);
     EXPECT_EQ(r.success, true);
-    
 }
 
 TEST_F(BufferTest, Forward) {
     auto b = mime::forward(ascii, 0, 1);
     EXPECT_EQ(b.cursors[0].point, 1);
-    
+
     b = mime::forward(b, 0, 1);
     EXPECT_EQ(b.cursors[0].point, 2);
 
@@ -282,7 +281,7 @@ TEST_F(BufferTest, Forward) {
 TEST_F(BufferTest, Backward) {
     auto b = mime::forward(ascii, 0, 18);
     EXPECT_EQ(b.cursors[0].point, 18);
-    
+
     b = mime::backward(b, 0, 1);
     EXPECT_EQ(b.cursors[0].point, 17);
     b = mime::backward(b, 0, 5);
@@ -290,7 +289,7 @@ TEST_F(BufferTest, Backward) {
 
     b = mime::backward(b, 0, 12);
     EXPECT_EQ(b.cursors[0].point, 0);
-    
+
     b = mime::backward(b, 0, 20);
     EXPECT_EQ(b.cursors[0].point, 0);
 }
@@ -299,11 +298,11 @@ TEST_F(BufferTest, NextLine) {
     auto i = mime::next_line(ascii, 0, 1);
     EXPECT_EQ(i.b.cursors[0].point, 6);
     EXPECT_EQ(i.n, 1);
-    
+
     i = mime::next_line(i.b, 0, 1);
     EXPECT_EQ(i.b.cursors[0].point, 12);
     EXPECT_EQ(i.n, 1);
-    
+
     i = mime::next_line(i.b, 0, 2);
     EXPECT_EQ(i.b.cursors[0].point, 18);
     EXPECT_EQ(i.n, 1);
@@ -314,11 +313,11 @@ TEST_F(BufferTest, PrevLine) {
     auto i = mime::prev_line(r.b, 0, 1);
     EXPECT_EQ(i.b.cursors[0].point, 12);
     EXPECT_EQ(i.n, 1);
-    
+
     i = mime::prev_line(i.b, 0, 1);
     EXPECT_EQ(i.b.cursors[0].point, 6);
     EXPECT_EQ(i.n, 1);
-    
+
     i = mime::prev_line(i.b, 0, 2);
     EXPECT_EQ(i.b.cursors[0].point, 0);
     EXPECT_EQ(i.n, 1);
@@ -327,7 +326,7 @@ TEST_F(BufferTest, PrevLine) {
 TEST_F(BufferTest, StartOfBuffer) {
     auto r = mime::goto_pos(ascii, 0, 12);
     EXPECT_EQ(r.b.cursors[0].point, 12);
-    
+
     auto b = mime::start_of_buffer(r.b, 0);
     EXPECT_EQ(b.cursors[0].point, 0);
 }
@@ -335,7 +334,7 @@ TEST_F(BufferTest, StartOfBuffer) {
 TEST_F(BufferTest, EndOfBuffer) {
     auto r = mime::goto_pos(ascii, 0, 12);
     EXPECT_EQ(r.b.cursors[0].point, 12);
-    
+
     auto b = mime::end_of_buffer(r.b, 0);
     EXPECT_EQ(b.cursors[0].point, 18);
 }
@@ -343,7 +342,7 @@ TEST_F(BufferTest, EndOfBuffer) {
 TEST_F(BufferTest, StartOfLine) {
     auto r = mime::goto_pos(ascii, 0, 15);
     EXPECT_EQ(r.b.cursors[0].point, 15);
-    
+
     auto b = mime::start_of_line(r.b, 0);
     EXPECT_EQ(b.cursors[0].point, 12);
 }
@@ -351,17 +350,15 @@ TEST_F(BufferTest, StartOfLine) {
 TEST_F(BufferTest, EndOfLine) {
     auto r = mime::goto_pos(ascii, 0, 12);
     EXPECT_EQ(r.b.cursors[0].point, 12);
-    
+
     auto b = mime::end_of_line(r.b, 0);
     EXPECT_EQ(b.cursors[0].point, 17);
 }
 
-
-
 // TODO:  convert below tests to fixture based ones.
 TEST(BufferOpen, UnnamedFile) {
     auto r = mime::open("");
-    EXPECT_EQ(r.get_bool(), true);  // signifying a new file.
+    EXPECT_EQ(r.get_bool(), true); // signifying a new file.
     EXPECT_EQ(r.get_buffer().contents.size(), 0);
 }
 
@@ -402,7 +399,7 @@ TEST(BufferFind, Present) {
     r = mime::find(r.b, 0, "c\n1"s, 0);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 7);
-    
+
     r = mime::find(r.b, 0, "6\n"s, 0);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 18);
@@ -410,27 +407,26 @@ TEST(BufferFind, Present) {
 
 TEST(BufferFind, Limited) {
     auto r = mime::open("testdata/open.csv");
-    
+
     r = mime::find(r.b, 0, "5,6"s, 10);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);
-    
+
     r = mime::find(r.b, 0, "5,6"s, 20);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 17);
-    
 }
 
 TEST(BufferFind, Missing) {
     auto r = mime::open("testdata/open.csv");
-    
+
     r = mime::find(r.b, 0, "zz"s, 0);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);
 
     r = mime::find(r.b, 0, "b"s, 0);
     EXPECT_EQ(r.b.cursors[0].point, 3);
-    
+
     r = mime::find(r.b, 0, "zzz"s, 30);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 3);
@@ -445,7 +441,7 @@ TEST(BufferFind, Missing) {
 
     r = mime::find(r.b, 0, "6\n"s, 0);
     EXPECT_EQ(r.success, false);
-    EXPECT_EQ(r.b.cursors[0].point, 18);   
+    EXPECT_EQ(r.b.cursors[0].point, 18);
 }
 
 TEST(BufferFind, EmptyFile) {
@@ -465,7 +461,7 @@ TEST(BufferRfind, Present) {
     r = mime::rfind(r.b, 0, "3"s, 0);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 10);
-    
+
     r = mime::rfind(r.b, 0, "a,b"s, 0);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 0);
@@ -496,11 +492,11 @@ TEST(BufferRfind, Missing) {
 
     r = mime::find(r.b, 0, "6\n"s, 0);
     EXPECT_EQ(r.b.cursors[0].point, 18);
-    
+
     r = mime::rfind(r.b, 0, ""s, 0);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 18);
-    
+
     r = mime::rfind(r.b, 0, "d"s, 0);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 18);
@@ -541,7 +537,7 @@ TEST(BufferFindFuzzy, Missing) {
     r = mime::find_fuzzy(r.b, 0, "a,B,d 1,2"s, 0);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);
-    
+
     r = mime::find_fuzzy(r.b, 0, ""s, 0);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);

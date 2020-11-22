@@ -3,7 +3,7 @@
 
 #include <string>
 
+namespace mime {
 void run(std::string filename);
-void run_str(std::string script);
-
+} // namespace mime
 #endif /* MIME_CHAI_INIT_HH */

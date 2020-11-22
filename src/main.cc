@@ -15,5 +15,5 @@ int main(int argc, char *argv[]) {
     spdlog::set_default_logger(spdlog::stderr_color_mt("stderr"));
     spdlog::set_pattern("[%^%l%$ %@/%!] %v");
 
-    run(argv[1]);
+    mime::run(argv[1]);
 }
