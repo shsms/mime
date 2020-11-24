@@ -105,7 +105,7 @@ TEST_F(BufferTest, SetMark) {
 
 TEST_F(BufferTest, CopyEmpty) {
     EXPECT_EQ(ascii.cursors[0].mark.has_value(), false);
-    auto r = mime::find(ascii, 0, "c"s, 0);
+    auto r = mime::find(ascii, 0, "c"s);
     auto t = mime::copy(r.b, 0);
     EXPECT_EQ(t.size(), 0);
     EXPECT_STREQ(mime::to_string(t).c_str(), "");
@@ -118,7 +118,7 @@ TEST_F(BufferTest, CopyEmpty) {
 
 TEST_F(BufferTest, CopyForward) {
     auto b = mime::set_mark(ascii, 0);
-    auto r = mime::find(b, 0, "c"s, 0);
+    auto r = mime::find(b, 0, "c"s);
     auto t = mime::copy(r.b, 0);
     EXPECT_EQ(t.size(), 5);
     EXPECT_STREQ(mime::to_string(t).c_str(), "a,b,c");
@@ -132,9 +132,9 @@ TEST_F(BufferTest, CopyForward) {
 }
 
 TEST_F(BufferTest, CopyReverse) {
-    auto r = mime::find(ascii, 0, "3"s, 0);
+    auto r = mime::find(ascii, 0, "3"s);
     auto b = mime::set_mark(r.b, 0);
-    r = mime::rfind(b, 0, "2"s, 0);
+    r = mime::rfind(b, 0, "2"s);
     auto t = mime::copy(r.b, 0);
     EXPECT_EQ(t.size(), 3);
     EXPECT_STREQ(mime::to_string(t).c_str(), "2,3");
@@ -154,7 +154,7 @@ TEST_F(BufferTest, EraseRegionForward) {
     b = mime::erase_region(i.b, 0);
     EXPECT_STREQ(mime::to_string(b.contents).c_str(), "1,2,3\n4,5,6\n");
 
-    auto r = mime::find(b, 0, "3"s, 0);
+    auto r = mime::find(b, 0, "3"s);
     b = mime::set_mark(r.b, 0);
     i = mime::next_line(b, 0, 2);
     b = mime::erase_region(i.b, 0);
@@ -183,7 +183,7 @@ TEST_F(BufferTest, EraseRegionMultiCursor) {
     EXPECT_EQ(i.b.cursors[2].point, 6);
     EXPECT_EQ(i.b.cursors[3].point, 0);
 
-    auto r = mime::find(i.b, 3, ","s, 0);
+    auto r = mime::find(i.b, 3, ","s);
     EXPECT_EQ(r.b.cursors[3].point, 2);
     b = mime::set_mark(r.b, 3);
     b = mime::end_of_line(b, 3);
@@ -202,7 +202,7 @@ TEST_F(BufferTest, Cut) {
     EXPECT_EQ(t.t.size(), 0);
     EXPECT_EQ(t.b.contents.size(), 18);
 
-    auto r = mime::find(b, 0, "c"s, 0);
+    auto r = mime::find(b, 0, "c"s);
     t = mime::cut(r.b, 0);
     EXPECT_EQ(t.t.size(), 5);
     EXPECT_STREQ(mime::to_string(t.t).c_str(), "a,b,c");
@@ -211,9 +211,10 @@ TEST_F(BufferTest, Cut) {
     EXPECT_STREQ(mime::to_string(t.b.contents).c_str(), "\n1,2,3\n4,5,6\n");
 }
 
+// TODO: add a MultiCursor test for Paste
 TEST_F(BufferTest, Paste) {
     auto b = mime::set_mark(ascii, 0);
-    auto r = mime::find(b, 0, "c"s, 0);
+    auto r = mime::find(b, 0, "c"s);
     auto t = mime::copy(r.b, 0);
 
     b = mime::paste(r.b, 0, "\n");
@@ -222,7 +223,7 @@ TEST_F(BufferTest, Paste) {
 }
 
 TEST_F(BufferTest, Clear) {
-    auto r = mime::find(ascii, 0, ","s, 0);
+    auto r = mime::find(ascii, 0, ","s);
     EXPECT_EQ(r.b.cursors[0].point, 2);
 
     auto b = mime::clear(r.b);
@@ -233,7 +234,7 @@ TEST_F(BufferTest, Clear) {
 TEST_F(BufferTest, GetPos) {
     EXPECT_EQ(ascii.cursors[0].point, 0);
     EXPECT_EQ(mime::get_pos(ascii, 0), 0);
-    auto r = mime::find(ascii, 0, ","s, 0);
+    auto r = mime::find(ascii, 0, ","s);
     EXPECT_EQ(r.b.cursors[0].point, 2);
     EXPECT_EQ(mime::get_pos(r.b, 0), 2);
 }
@@ -259,7 +260,7 @@ TEST_F(BufferTest, GotoPos) {
 
     auto b = mime::paste(r.b, 0, "hello");
     b = mime::start_of_buffer(b, 0);
-    r = mime::find(b, 0, "hel"s, 0);
+    r = mime::find(b, 0, "hel"s);
     EXPECT_EQ(r.b.cursors[0].point, 21);
     EXPECT_EQ(r.success, true);
 }
@@ -388,58 +389,46 @@ TEST(BufferSave, NewFile) {
 TEST(BufferFind, Present) {
     auto r = mime::open("testdata/open.csv");
 
-    r = mime::find(r.b, 0, "a"s, 0);
+    r = mime::find(r.b, 0, "a"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 1);
 
-    r = mime::find(r.b, 0, "b"s, 0);
+    r = mime::find(r.b, 0, "b"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 3);
 
-    r = mime::find(r.b, 0, "c\n1"s, 0);
+    r = mime::find(r.b, 0, "c\n1"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 7);
 
-    r = mime::find(r.b, 0, "6\n"s, 0);
+    r = mime::find(r.b, 0, "6\n"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 18);
-}
-
-TEST(BufferFind, Limited) {
-    auto r = mime::open("testdata/open.csv");
-
-    r = mime::find(r.b, 0, "5,6"s, 10);
-    EXPECT_EQ(r.success, false);
-    EXPECT_EQ(r.b.cursors[0].point, 0);
-
-    r = mime::find(r.b, 0, "5,6"s, 20);
-    EXPECT_EQ(r.success, true);
-    EXPECT_EQ(r.b.cursors[0].point, 17);
 }
 
 TEST(BufferFind, Missing) {
     auto r = mime::open("testdata/open.csv");
 
-    r = mime::find(r.b, 0, "zz"s, 0);
+    r = mime::find(r.b, 0, "zz"s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);
 
-    r = mime::find(r.b, 0, "b"s, 0);
+    r = mime::find(r.b, 0, "b"s);
     EXPECT_EQ(r.b.cursors[0].point, 3);
 
-    r = mime::find(r.b, 0, "zzz"s, 30);
+    r = mime::find(r.b, 0, "zzz"s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 3);
 
-    r = mime::find(r.b, 0, ""s, 0);
+    r = mime::find(r.b, 0, ""s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 3);
 
-    r = mime::find(r.b, 0, "6\n"s, 0);
+    r = mime::find(r.b, 0, "6\n"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 18);
 
-    r = mime::find(r.b, 0, "6\n"s, 0);
+    r = mime::find(r.b, 0, "6\n"s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 18);
 }
@@ -447,7 +436,7 @@ TEST(BufferFind, Missing) {
 TEST(BufferFind, EmptyFile) {
     auto r = mime::open("");
     EXPECT_EQ(r.b.cursors[0].point, 0);
-    r = mime::find(r.b, 0, "zz"s, 0);
+    r = mime::find(r.b, 0, "zz"s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);
 }
@@ -455,29 +444,14 @@ TEST(BufferFind, EmptyFile) {
 TEST(BufferRfind, Present) {
     auto r = mime::open("testdata/open.csv");
 
-    r = mime::find(r.b, 0, "6\n"s, 0);
+    r = mime::find(r.b, 0, "6\n"s);
     EXPECT_EQ(r.b.cursors[0].point, 18);
 
-    r = mime::rfind(r.b, 0, "3"s, 0);
+    r = mime::rfind(r.b, 0, "3"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 10);
 
-    r = mime::rfind(r.b, 0, "a,b"s, 0);
-    EXPECT_EQ(r.success, true);
-    EXPECT_EQ(r.b.cursors[0].point, 0);
-}
-
-TEST(BufferRfind, Limited) {
-    auto r = mime::open("testdata/open.csv");
-
-    r = mime::find(r.b, 0, "6\n"s, 0);
-    EXPECT_EQ(r.b.cursors[0].point, 18);
-
-    r = mime::rfind(r.b, 0, "a,b"s, 10);
-    EXPECT_EQ(r.success, false);
-    EXPECT_EQ(r.b.cursors[0].point, 18);
-
-    r = mime::rfind(r.b, 0, "a,b"s, 0);
+    r = mime::rfind(r.b, 0, "a,b"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 0);
 }
@@ -490,18 +464,18 @@ TEST(BufferRfind, Missing) {
     // EXPECT_EQ(r.success, false);
     // EXPECT_EQ(r.b.cursors[0].point, 18);
 
-    r = mime::find(r.b, 0, "6\n"s, 0);
+    r = mime::find(r.b, 0, "6\n"s);
     EXPECT_EQ(r.b.cursors[0].point, 18);
 
-    r = mime::rfind(r.b, 0, ""s, 0);
+    r = mime::rfind(r.b, 0, ""s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 18);
 
-    r = mime::rfind(r.b, 0, "d"s, 0);
+    r = mime::rfind(r.b, 0, "d"s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 18);
 
-    r = mime::rfind(r.b, 0, "a,b,d"s, 0);
+    r = mime::rfind(r.b, 0, "a,b,d"s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 18);
 }
@@ -509,11 +483,11 @@ TEST(BufferRfind, Missing) {
 TEST(BufferFindFuzzy, Present) {
     auto r = mime::open("testdata/open.csv");
 
-    r = mime::find_fuzzy(r.b, 0, "a,B,C 1,2"s, 0);
+    r = mime::find_fuzzy(r.b, 0, "a,B,C 1,2"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 9);
 
-    r = mime::find_fuzzy(r.b, 0, "3\n\n\t4"s, 0);
+    r = mime::find_fuzzy(r.b, 0, "3\n\n\t4"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 13);
 
@@ -523,22 +497,14 @@ TEST(BufferFindFuzzy, Present) {
     // EXPECT_EQ(r.b.cursors[0].point, 13);
 }
 
-TEST(BufferFindFuzzy, Limited) {
-    auto r = mime::open("testdata/open.csv");
-
-    r = mime::find_fuzzy(r.b, 0, "a,B,C 1,2"s, 5);
-    EXPECT_EQ(r.success, false);
-    EXPECT_EQ(r.b.cursors[0].point, 0);
-}
-
 TEST(BufferFindFuzzy, Missing) {
     auto r = mime::open("testdata/open.csv");
 
-    r = mime::find_fuzzy(r.b, 0, "a,B,d 1,2"s, 0);
+    r = mime::find_fuzzy(r.b, 0, "a,B,d 1,2"s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);
 
-    r = mime::find_fuzzy(r.b, 0, ""s, 0);
+    r = mime::find_fuzzy(r.b, 0, ""s);
     EXPECT_EQ(r.success, false);
     EXPECT_EQ(r.b.cursors[0].point, 0);
 }
@@ -546,7 +512,7 @@ TEST(BufferFindFuzzy, Missing) {
 TEST(BufferFindFuzzy, Unicode) {
     auto r = mime::open("testdata/unicode.csv");
 
-    r = mime::find_fuzzy(r.b, 0, "நாமன் உன்"s, 0);
+    r = mime::find_fuzzy(r.b, 0, "நாமன் உன்"s);
     EXPECT_EQ(r.success, true);
     EXPECT_EQ(r.b.cursors[0].point, 38);
 }

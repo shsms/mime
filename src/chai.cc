@@ -23,26 +23,19 @@ void add_methods(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(&save), "save_impl");
     chai.add(chaiscript::fun(&save_as), "save_as_impl");
     chai.add(chaiscript::fun(&set_mark), "set_mark_impl");
-    chai.add(
-        chaiscript::fun(
-            static_cast<buffer_bool (*)(buffer, std::size_t, std::string, std::size_t)>(&find)),
-        "find_impl");
-    chai.add(chaiscript::fun(
-                 static_cast<buffer_bool (*)(buffer, std::size_t, text, std::size_t)>(&find)),
+    chai.add(chaiscript::fun(static_cast<buffer_bool (*)(buffer, std::size_t, std::string)>(&find)),
+             "find_impl");
+    chai.add(chaiscript::fun(static_cast<buffer_bool (*)(buffer, std::size_t, text)>(&find)),
              "find_impl");
     chai.add(
-        chaiscript::fun(
-            static_cast<buffer_bool (*)(buffer, std::size_t, std::string, std::size_t)>(&rfind)),
+        chaiscript::fun(static_cast<buffer_bool (*)(buffer, std::size_t, std::string)>(&rfind)),
         "rfind_impl");
-    chai.add(chaiscript::fun(
-                 static_cast<buffer_bool (*)(buffer, std::size_t, text, std::size_t)>(&rfind)),
+    chai.add(chaiscript::fun(static_cast<buffer_bool (*)(buffer, std::size_t, text)>(&rfind)),
              "rfind_impl");
-    chai.add(
-        chaiscript::fun(static_cast<buffer_bool (*)(buffer, std::size_t, std::string, std::size_t)>(
-            &find_fuzzy)),
-        "find_fuzzy_impl");
     chai.add(chaiscript::fun(
-                 static_cast<buffer_bool (*)(buffer, std::size_t, text, std::size_t)>(&find_fuzzy)),
+                 static_cast<buffer_bool (*)(buffer, std::size_t, std::string)>(&find_fuzzy)),
+             "find_fuzzy_impl");
+    chai.add(chaiscript::fun(static_cast<buffer_bool (*)(buffer, std::size_t, text)>(&find_fuzzy)),
              "find_fuzzy_impl");
     chai.add(chaiscript::fun(&replace), "replace_impl");
 
@@ -67,6 +60,9 @@ void add_methods(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(&end_of_buffer), "end_of_buffer_impl");
     chai.add(chaiscript::fun(&start_of_line), "start_of_line_impl");
     chai.add(chaiscript::fun(&end_of_line), "end_of_line_impl");
+
+    chai.add(chaiscript::fun(&narrow_to_region), "narrow_to_region_impl");
+    chai.add(chaiscript::fun(&widen), "widen_impl");
 
     chai.add(chaiscript::fun([](buffer &lhs, const buffer &rhs) -> buffer & { return lhs = rhs; }),
              "=");
@@ -116,23 +112,25 @@ class buffer {
   var curr_cursor;
   var max_cursor;
   var flag_is_new;
-  def buffer(x, o) { this.b = x; this.flag_is_new = o; this.curr_cursor = 0; }
+  def buffer(x, o) {
+    this.set_explicit(true);
+    this.b = x;
+    this.flag_is_new = o;
+    this.curr_cursor = 0;
+  }
   def is_new() { return this.flag_is_new; }
-  def find(text) { return this.find(text, 0); }
-  def find(text, int lim) {
-    var r = find_impl(this.b, this.curr_cursor, text, lim);
+  def find(text) {
+    var r = find_impl(this.b, this.curr_cursor, text);
     this.b = r.mime_buffer_bool_get_buffer();
     return r.mime_buffer_bool_get_bool();
   }
-  def rfind(text) { return this.rfind(text, 0); }
-  def rfind(text, int lim) {
-    var r = rfind_impl(this.b, this.curr_cursor, text, lim);
+  def rfind(text) {
+    var r = rfind_impl(this.b, this.curr_cursor, text);
     this.b = r.mime_buffer_bool_get_buffer();
     return r.mime_buffer_bool_get_bool();
   }
-  def find_fuzzy(text) { return this.find_fuzzy(text, 0); }
-  def find_fuzzy(text, int lim) {
-    var r = find_fuzzy_impl(this.b, this.curr_cursor, text, lim);
+  def find_fuzzy(text) {
+    var r = find_fuzzy_impl(this.b, this.curr_cursor, text);
     this.b = r.mime_buffer_bool_get_buffer();
     return r.mime_buffer_bool_get_bool();
   }
@@ -195,6 +193,13 @@ class buffer {
   def end_of_buffer() { this.b = end_of_buffer_impl(this.b, this.curr_cursor); }
   def start_of_line() { this.b = start_of_line_impl(this.b, this.curr_cursor); }
   def end_of_line() { this.b = end_of_line_impl(this.b, this.curr_cursor); }
+
+  def narrow_to_region() {
+    var r = narrow_to_region_impl(this.b, this.curr_cursor);
+    this.b = r.mime_buffer_bool_get_buffer();
+    return r.mime_buffer_bool_get_bool();
+  }
+  def widen() { this.b = widen_impl(this.b, this.curr_cursor); }
 };
 
 def open() {

@@ -8,9 +8,15 @@
 
 namespace mime {
 
+struct bounds {
+    std::size_t lower{};
+    std::size_t upper{};
+};
+
 struct cursor {
     std::optional<std::size_t> mark{};
     std::size_t point{};
+    std::optional<bounds> view{};
 };
 
 using text = immer::flex_vector<char32_t>;
@@ -52,9 +58,9 @@ void save(buffer b);
 void save_as(buffer b, std::string name);
 buffer set_mark(buffer b, std::size_t cursor);
 
-template <typename T> buffer_bool find(buffer b, std::size_t cursor, T t, std::size_t lim);
-template <typename T> buffer_bool rfind(buffer b, std::size_t cursor, T t, std::size_t lim);
-template <typename T> buffer_bool find_fuzzy(buffer b, std::size_t cursor, T t, std::size_t lim);
+template <typename T> buffer_bool find(buffer b, std::size_t cursor, T t);
+template <typename T> buffer_bool rfind(buffer b, std::size_t cursor, T t);
+template <typename T> buffer_bool find_fuzzy(buffer b, std::size_t cursor, T t);
 
 buffer_int replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n);
 
@@ -85,11 +91,11 @@ buffer end_of_line(buffer b, std::size_t cursor);
 // buffer backward_word(buffer b, std::size_t cursor, std::size_t n);
 // buffer_bool find_beg(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 // buffer_bool rfind_end(buffer b, std::size_t cursor, std::string t, std::size_t lim);
-// buffer_bool start_of_block(buffer b, std::size_t cursor); // nearest open paran without matching close.
+// buffer_bool start_of_block(buffer b, std::size_t cursor);
 // buffer_bool end_of_block(buffer b, std::size_t cursor);
-// buffer_bool narrow_to_region(buffer b, std::size_t cursor);  // all operations happen only within the narrowed view
+buffer widen(buffer b, std::size_t cursor);
+buffer_bool narrow_to_region(buffer b, std::size_t cursor);
 // buffer_bool narrow_to_block(buffer b, std::size_t cursor);
-// buffer_bool widen(buffer b, std::size_t cursor)
 } // namespace mime
 
 #endif /* MIME_BUFFER_HH */

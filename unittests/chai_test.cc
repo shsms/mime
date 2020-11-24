@@ -4,6 +4,4 @@
 
 using namespace std::string_literals;
 
-TEST(Chai, Buffer) {
-    mime::run("testdata/test.mime");
-}
+TEST(Chai, Buffer) { mime::run("testdata/test.mime"); }

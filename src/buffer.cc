@@ -25,6 +25,39 @@ std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     return cvt.from_bytes(chunk);
 }
 
+buffer update_all_cursors(buffer b, std::size_t mark, std::size_t point, std::size_t forward) {
+    auto back = point - mark;
+    for (std::size_t cid = 0; cid < b.cursors.size(); ++cid) {
+        auto csr = b.cursors[cid];
+        csr.mark.reset();
+        if (csr.point >= point) {
+            csr.point = csr.point - back + forward;
+        } else if (csr.point > mark && back > 0) {
+            csr.point = mark;
+        }
+
+        if (csr.view.has_value()) {
+            if (csr.view->lower >= point) {
+                csr.view->lower = csr.view->lower - back + forward;
+                csr.view->upper = csr.view->upper - back + forward;
+            } else if (csr.view->lower >= mark && csr.view->upper >= point) {
+                csr.view->lower = mark;
+                csr.view->upper = csr.view->upper - back + forward;
+            } else if (csr.view->lower < mark && csr.view->upper >= point) {
+                csr.view->upper = csr.view->upper - back + forward;
+            } else if (csr.view->lower >= mark && csr.view->upper > mark) {
+                csr.view->lower = mark;
+                csr.view->upper = mark;
+            } else if (csr.view->lower < mark && csr.view->upper > mark) {
+                csr.view->upper = mark;
+            }
+        }
+
+        b.cursors = b.cursors.set(cid, csr);
+    }
+    return b;
+}
+
 buffer_bool open(std::string name) {
     if (name.empty()) {
         SPDLOG_INFO("Received empty filename. Creating a new buffer.");
@@ -79,16 +112,18 @@ void save_as(buffer b, std::string name) {
     }
 }
 
-template <typename T> buffer_bool find(buffer b, std::size_t cursor, T t, std::size_t lim) {
+template <typename T> buffer_bool find(buffer b, std::size_t cursor, T t) {
     if (t.empty()) {
         return buffer_bool{b, false};
     }
 
     auto match_iter = t.begin();
-    auto offset = b.cursors[cursor].point;
+    auto c = b.cursors[cursor];
+    auto offset = c.point;
 
-    if (lim <= 0) {
-        lim = std::numeric_limits<std::size_t>::max();
+    auto lim = b.contents.size();
+    if (c.view.has_value()) { // narrowed view
+        lim = c.view->upper;
     }
 
     for (auto it = b.contents.begin() + offset; it != b.contents.end() && offset < lim; ++it) {
@@ -108,29 +143,28 @@ template <typename T> buffer_bool find(buffer b, std::size_t cursor, T t, std::s
     return buffer_bool{b, false};
 }
 // we only need these two instanciations and one specialization below.
-template buffer_bool find(buffer b, std::size_t cursor, text t, std::size_t lim);
-template buffer_bool find(buffer b, std::size_t cursor, std::u32string t, std::size_t lim);
-template <> buffer_bool find(buffer b, std::size_t cursor, std::string t, std::size_t lim) {
+template buffer_bool find(buffer b, std::size_t cursor, text t);
+template buffer_bool find(buffer b, std::size_t cursor, std::u32string t);
+template <> buffer_bool find(buffer b, std::size_t cursor, std::string t) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string ustr = cvt.from_bytes(t);
-    return find(b, cursor, ustr, lim);
+    return find(b, cursor, ustr);
 }
 
-template <typename T> buffer_bool rfind(buffer b, std::size_t cursor, T t, std::size_t lim) {
+template <typename T> buffer_bool rfind(buffer b, std::size_t cursor, T t) {
     if (t.empty()) {
         return buffer_bool{b, false};
     }
 
-    std::size_t offset = b.cursors[cursor].point - t.size();
+    auto c = b.cursors[cursor];
+    std::size_t offset = c.point - t.size();
     if (offset < 0) {
         return buffer_bool{b, false};
     }
 
-    if (lim > 0) {
-        lim = offset - lim;
-    }
-    if (lim < 0) {
-        lim = 0;
+    std::size_t lim{};
+    if (c.view.has_value()) { // narrowed view
+        lim = c.view->lower;
     }
 
     auto match_iter = t.begin();
@@ -158,28 +192,29 @@ template <typename T> buffer_bool rfind(buffer b, std::size_t cursor, T t, std::
     return buffer_bool{b, false};
 }
 
-template buffer_bool rfind(buffer b, std::size_t cursor, text t, std::size_t lim);
-template buffer_bool rfind(buffer b, std::size_t cursor, std::u32string t, std::size_t lim);
-template <> buffer_bool rfind(buffer b, std::size_t cursor, std::string t, std::size_t lim) {
+template buffer_bool rfind(buffer b, std::size_t cursor, text t);
+template buffer_bool rfind(buffer b, std::size_t cursor, std::u32string t);
+template <> buffer_bool rfind(buffer b, std::size_t cursor, std::string t) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string ustr = cvt.from_bytes(t);
-    return rfind(b, cursor, ustr, lim);
+    return rfind(b, cursor, ustr);
 }
 
-template <typename T> buffer_bool find_fuzzy(buffer b, std::size_t cursor, T t, std::size_t lim) {
+template <typename T> buffer_bool find_fuzzy(buffer b, std::size_t cursor, T t) {
     u32::trim(t);
     if (t.empty()) {
         return buffer_bool{b, false};
     }
 
     auto match_iter = t.begin();
-    auto offset = b.cursors[cursor].point;
+    auto c = b.cursors[cursor];
+    auto offset = c.point;
 
-    if (lim <= 0) {
-        lim = std::numeric_limits<std::size_t>::max();
-    } else {
-        lim += offset;
+    auto lim = b.contents.size();
+    if (c.view.has_value()) { // narrowed view
+        lim = c.view->upper;
     }
+
     auto it = b.contents.begin() + offset;
     while (match_iter != t.end() && it != b.contents.end() && offset < lim) {
         if (u32::isspace(*match_iter) && u32::isspace(*it)) {
@@ -209,12 +244,12 @@ template <typename T> buffer_bool find_fuzzy(buffer b, std::size_t cursor, T t, 
     }
     return buffer_bool{b, false};
 }
-template buffer_bool find_fuzzy(buffer b, std::size_t cursor, text t, std::size_t lim);
-template buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::u32string t, std::size_t lim);
-template <> buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string t, std::size_t lim) {
+template buffer_bool find_fuzzy(buffer b, std::size_t cursor, text t);
+template buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::u32string t);
+template <> buffer_bool find_fuzzy(buffer b, std::size_t cursor, std::string t) {
     std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
     std::u32string ustr = cvt.from_bytes(t);
-    return find_fuzzy(b, cursor, ustr, lim);
+    return find_fuzzy(b, cursor, ustr);
 }
 
 buffer_int replace(buffer b, std::size_t cursor, std::string from, std::string to, std::size_t n) {
@@ -234,7 +269,7 @@ buffer_int replace(buffer b, std::size_t cursor, std::string from, std::string t
     // TODO: add overload that takes text{} for all find methods
     int ii;
     for (ii = 0; ii < n; ++ii) {
-        auto found = find(b, cursor, wfrom, 0);
+        auto found = find(b, cursor, wfrom);
         if (!found.get_bool()) {
             return buffer_int{found.b, ii};
         }
@@ -244,18 +279,7 @@ buffer_int replace(buffer b, std::size_t cursor, std::string from, std::string t
         auto point = c.point;
         b.contents = b.contents.erase(mark, point);
         b.contents = b.contents.insert(mark, text_to);
-
-        // update all cursors
-        for (std::size_t cid = 0; cid < b.cursors.size(); ++cid) {
-            auto csr = b.cursors[cid];
-            csr.mark.reset();
-            if (csr.point >= point) {
-                csr.point = csr.point - wfrom.size() + wto.size();
-            } else if (csr.point > mark) {
-                csr.point = mark;
-            }
-            b.cursors = b.cursors.set(cid, csr);
-        }
+        b = update_all_cursors(b, mark, point, wto.size());
     }
     return buffer_int{b, ii};
 }
@@ -279,7 +303,7 @@ text copy(buffer b, std::size_t cursor) {
         return text{};
     }
 
-    auto mark = c.mark.value();
+    auto mark = *c.mark;
     auto point = c.point;
     if (mark == point) {
         return text{};
@@ -305,15 +329,7 @@ buffer paste(buffer b, std::size_t cursor, text t) {
     auto point = c.point;
 
     b.contents = b.contents.insert(c.point, t);
-    // update all cursors
-    for (std::size_t cid = 0; cid < b.cursors.size(); ++cid) {
-        auto csr = b.cursors[cid];
-        csr.mark.reset();
-        if (csr.point >= point) {
-            csr.point += t.size();
-        }
-        b.cursors = b.cursors.set(cid, csr);
-    }
+    b = update_all_cursors(b, point, point, t.size());
     return b;
 }
 
@@ -330,25 +346,14 @@ buffer erase_region(buffer b, std::size_t cursor) {
     if (!c.mark.has_value()) {
         return b;
     }
-    auto mark = c.mark.value();
+    auto mark = *c.mark;
     auto point = c.point;
 
     if (mark > point) {
         std::swap(mark, point);
     }
     b.contents = b.contents.erase(mark, point);
-
-    // update all cursors
-    for (std::size_t cid = 0; cid < b.cursors.size(); ++cid) {
-        auto csr = b.cursors[cid];
-        csr.mark.reset();
-        if (csr.point >= point) {
-            csr.point = csr.point - (point - mark);
-        } else if (csr.point > mark) {
-            csr.point = mark;
-        }
-        b.cursors = b.cursors.set(cid, csr);
-    }
+    b = update_all_cursors(b, mark, point, 0);
     return b;
 }
 
@@ -358,6 +363,7 @@ buffer clear(buffer b) {
         auto csr = b.cursors[cid];
         csr.mark.reset();
         csr.point = 0;
+        csr.view.reset();
         b.cursors = b.cursors.set(cid, csr);
     }
     return b;
@@ -372,10 +378,18 @@ buffer_int new_cursor(buffer b) {
 std::size_t get_pos(buffer b, std::size_t cursor) { return b.cursors[cursor].point; }
 
 buffer_bool goto_pos(buffer b, std::size_t cursor, std::size_t pos) {
-    if (pos < 0 || pos > b.contents.size()) {
+    auto c = b.cursors[cursor];
+    std::size_t start = 0, end = b.contents.size();
+    if (c.view.has_value()) { // narrowed view
+        start = c.view->lower;
+        end = c.view->upper;
+    }
+
+    if (pos < start || pos > end) {
+        SPDLOG_ERROR("Attempt to 'goto_pos({0})', which is outside the {1}: {2}", pos,
+                     c.view.has_value() ? "narrowed view" : "buffer", b.file_name.get());
         return buffer_bool{b, false};
     }
-    auto c = b.cursors[cursor];
     c.point = pos;
     b.cursors = b.cursors.set(cursor, c);
     return buffer_bool{b, true};
@@ -383,9 +397,13 @@ buffer_bool goto_pos(buffer b, std::size_t cursor, std::size_t pos) {
 
 buffer forward(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
+    auto lim = b.contents.size();
+    if (c.view.has_value()) { // narrowed view
+        lim = c.view->upper;
+    }
     c.point += n;
-    if (c.point > b.contents.size()) {
-        c.point = b.contents.size();
+    if (c.point > lim) {
+        c.point = lim;
     }
     b.cursors = b.cursors.set(cursor, c);
     return b;
@@ -393,10 +411,14 @@ buffer forward(buffer b, std::size_t cursor, std::size_t n) {
 
 buffer backward(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
-    if (c.point > n) {
+    std::size_t lim{};
+    if (c.view.has_value()) { // narrowed view
+        lim = c.view->lower;
+    }
+    if (c.point > n + lim) {
         c.point -= n;
     } else {
-        c.point = 0;
+        c.point = lim;
     }
     b.cursors = b.cursors.set(cursor, c);
     return b;
@@ -405,15 +427,21 @@ buffer backward(buffer b, std::size_t cursor, std::size_t n) {
 buffer_int next_line(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
     auto it = b.contents.begin() + c.point;
+    auto end = b.contents.end();
+    if (c.view.has_value()) {
+        end = b.contents.begin() + c.view->upper;
+    }
+
     int ii;
     for (ii = 0; ii < n; ii++) {
-        while (it != b.contents.end() && *it != U'\n') {
+        while (it != end && *it != U'\n') {
             ++it;
         }
         if (*it != U'\n') {
             break;
         }
-        if (it != b.contents.end()) {
+        // go 1 char past the new line.
+        if (it != end) {
             ++it;
         }
     }
@@ -425,15 +453,19 @@ buffer_int next_line(buffer b, std::size_t cursor, std::size_t n) {
 buffer_int prev_line(buffer b, std::size_t cursor, std::size_t n) {
     auto c = b.cursors[cursor];
     auto it = b.contents.begin() + c.point;
+    auto begin = b.contents.begin();
+    if (c.view.has_value()) {
+        begin = begin + c.view->lower;
+    }
     int ii;
     for (ii = 0; ii < n; ii++) {
-        while (it != b.contents.begin() && *it != U'\n') {
+        while (it != begin && *it != U'\n') {
             --it;
         }
         if (*it != U'\n') {
             break;
         }
-        while (it != b.contents.begin() && *(it - 1) != U'\n') {
+        while (it != begin && *(it - 1) != U'\n') {
             --it;
         }
     }
@@ -445,6 +477,9 @@ buffer_int prev_line(buffer b, std::size_t cursor, std::size_t n) {
 buffer start_of_buffer(buffer b, std::size_t cursor) {
     auto c = b.cursors[cursor];
     c.point = 0;
+    if (c.view.has_value()) { // narrowed view
+        c.point = c.view->lower;
+    }
     b.cursors = b.cursors.set(cursor, c);
     return b;
 }
@@ -452,14 +487,21 @@ buffer start_of_buffer(buffer b, std::size_t cursor) {
 buffer end_of_buffer(buffer b, std::size_t cursor) {
     auto c = b.cursors[cursor];
     c.point = b.contents.size();
+    if (c.view.has_value()) { // narrowed view
+        c.point = c.view->upper;
+    }
     b.cursors = b.cursors.set(cursor, c);
     return b;
 }
 
 buffer start_of_line(buffer b, std::size_t cursor) {
     auto c = b.cursors[cursor];
+    auto begin = b.contents.begin();
+    if (c.view.has_value()) {
+        begin = begin + c.view->lower;
+    }
     auto it = b.contents.begin() + c.point;
-    while (it != b.contents.begin() && *(it - 1) != U'\n') {
+    while (it != begin && *(it - 1) != U'\n') {
         --it;
     }
     c.point = it - b.contents.begin();
@@ -469,11 +511,40 @@ buffer start_of_line(buffer b, std::size_t cursor) {
 
 buffer end_of_line(buffer b, std::size_t cursor) {
     auto c = b.cursors[cursor];
+    auto end = b.contents.end();
+    if (c.view.has_value()) {
+        end = b.contents.begin() + c.view->upper;
+    }
     auto it = b.contents.begin() + c.point;
-    while (it != b.contents.end() && *it != U'\n') {
+    while (it != end && *it != U'\n') {
         ++it;
     }
     c.point = it - b.contents.begin();
+    b.cursors = b.cursors.set(cursor, c);
+    return b;
+}
+
+buffer_bool narrow_to_region(buffer b, std::size_t cursor) {
+    if (!b.cursors[cursor].mark.has_value()) {
+        // no mark => no region.
+        return buffer_bool{b, false};
+    }
+    auto c = b.cursors[cursor];
+    auto mark = *c.mark;
+    auto point = c.point;
+    if (mark > point) {
+        std::swap(mark, point);
+    }
+    c.view = bounds{mark, point};
+    c.mark.reset();
+    c.point = mark; // reset point to beginning of region.
+    b.cursors = b.cursors.set(cursor, c);
+    return buffer_bool{b, true};
+}
+
+buffer widen(buffer b, std::size_t cursor) {
+    auto c = b.cursors[cursor];
+    c.view.reset();
     b.cursors = b.cursors.set(cursor, c);
     return b;
 }
