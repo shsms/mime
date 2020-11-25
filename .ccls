@@ -4,3 +4,4 @@ clang
 -Ivendor/immer/
 -Ivendor/googletest/googletest/include
 -Ivendor/spdlog/include
+-Iinclude

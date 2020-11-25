@@ -1,4 +1,4 @@
-var b = open("main.go");
+var b = buffer("main.go");
 var doc_c = b.new_cursor();
 var nav_c = b.new_cursor();
 

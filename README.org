@@ -12,7 +12,7 @@ like Emacs Keyboard Macros,  but hard to do in code.
 Here's an example mime script ([[examples/gofunc.mime][examples/gofunc.mime]]):
 
 #+begin_src
-var b = open("main.go");
+var b = buffer("main.go");
 var doc_c = b.new_cursor();
 var nav_c = b.new_cursor();
 
@@ -159,8 +159,8 @@ function,  but the project is still very new,  and I'm in the process
 of adding additional features and documentation for all features.
 
 Until then, to get the list of functions that you can call in your
-scripts, checkout the [[https://github.com/shsms/mime/blob/main/src/chai.cc#L119][chai_init]] function.  All the functions there are
+scripts, checkout the [[https://github.com/shsms/mime/blob/main/include/mime/mime.hh#L25][mime.hh]] file.  All the functions there are
 working and have tests.
 
-For details on other features provided by the scripting language,
-checkout chaiscript docs [[https://codedocs.xyz/ChaiScript/ChaiScript/LangGettingStarted.html][here]].
+For details on features provided by the scripting language, checkout
+chaiscript docs [[https://codedocs.xyz/ChaiScript/ChaiScript/LangGettingStarted.html][here]].

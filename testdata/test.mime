@@ -9,8 +9,7 @@ def assert(x, msg)
   }
 }
 
-var b = open();
-assert(b.is_new() == true, "is_new");
+var b = buffer();
 b.paste("hello this is some text");
 b.set_mark();
 b.rfind("some");

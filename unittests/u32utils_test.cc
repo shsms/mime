@@ -1,5 +1,5 @@
-#include "../src/buffer.hh"
-#include "../src/u32utils.hh"
+#include <mime/mime.hh>
+#include <mime/u32utils.hh>
 #include <gtest/gtest.h>
 #include <string>
 

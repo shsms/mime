@@ -1,4 +1,4 @@
-#include "../src/chai.hh"
+#include <mime/chai.hh>
 #include <gtest/gtest.h>
 #include <string>
 
