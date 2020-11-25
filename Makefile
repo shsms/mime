@@ -23,7 +23,7 @@ DEP = $(OBJS:%.o=%.d)
 -include $(DEP)
 
 ALL_SRCS=$(shell find src unittests -type f -name '*.cc')
-ALL_HEADERS=$(shell find src unittests -type f -name '*.hh')
+ALL_HEADERS=$(shell find src include unittests -type f -name '*.hh')
 
 build: bin lib
 

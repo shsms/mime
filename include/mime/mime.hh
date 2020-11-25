@@ -28,7 +28,6 @@ class buffer {
     buffer(const std::string &fname);
     void save();
     void save_as(const std::string &fname);
-    void update_all_cursors(std::size_t mark, std::size_t point, std::size_t forward);
     void set_mark();
 
     template <typename T> bool find(T t);
@@ -36,11 +35,11 @@ class buffer {
     template <typename T> bool find_fuzzy(T t);
 
     int replace(std::string from, std::string to, std::size_t n);
-    
+
     inline int replace(std::string from, std::string to) {
-	return replace(from,to,0); // replace all
+        return replace(from, to, 0); // replace all
     }
-    
+
     text copy();
     text cut();
     void paste(text t);
@@ -68,6 +67,10 @@ class buffer {
     void start_of_line();
     void end_of_line();
 
+    bool start_of_block();
+    bool end_of_block();
+
+    bool narrow_to_block();
     bool narrow_to_region();
     void widen();
 
@@ -75,14 +78,13 @@ class buffer {
     // buffer backward_word(buffer b, std::size_t cursor, std::size_t n);
     // buffer_bool find_beg(buffer b, std::size_t cursor, std::string t, std::size_t lim);
     // buffer_bool rfind_end(buffer b, std::size_t cursor, std::string t, std::size_t lim);
-    // buffer_bool start_of_block(buffer b, std::size_t cursor);
-    // buffer_bool end_of_block(buffer b, std::size_t cursor);
-    // buffer_bool narrow_to_block(buffer b, std::size_t cursor);
   private:
     text contents;
     immer::box<std::string> filename;
     immer::vector<cursor_t> cursors;
     std::size_t cursor{};
+
+    void update_all_cursors(std::size_t mark, std::size_t point, std::size_t forward);
 };
 } // namespace mime
 

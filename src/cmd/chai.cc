@@ -53,7 +53,7 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(&buffer::use_cursor), "use_cursor");
     chai.add(chaiscript::fun(&buffer::get_pos), "get_pos");
     chai.add(chaiscript::fun(&buffer::goto_pos), "goto_pos");
-    
+
     chai.add(chaiscript::fun(static_cast<void (buffer::*)(std::size_t)>(&buffer::forward)),
              "forward");
     chai.add(chaiscript::fun(static_cast<void (buffer::*)()>(&buffer::forward)), "forward");
@@ -66,11 +66,14 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(static_cast<int (buffer::*)(std::size_t)>(&buffer::prev_line)),
              "prev_line");
     chai.add(chaiscript::fun(static_cast<int (buffer::*)()>(&buffer::prev_line)), "prev_line");
-    
+
     chai.add(chaiscript::fun(&buffer::start_of_buffer), "start_of_buffer");
     chai.add(chaiscript::fun(&buffer::end_of_buffer), "end_of_buffer");
     chai.add(chaiscript::fun(&buffer::start_of_line), "start_of_line");
     chai.add(chaiscript::fun(&buffer::end_of_line), "end_of_line");
+    chai.add(chaiscript::fun(&buffer::start_of_block), "start_of_block");
+    chai.add(chaiscript::fun(&buffer::end_of_block), "end_of_block");
+    chai.add(chaiscript::fun(&buffer::narrow_to_block), "narrow_to_block");
     chai.add(chaiscript::fun(&buffer::narrow_to_region), "narrow_to_region");
     chai.add(chaiscript::fun(&buffer::widen), "widen");
 

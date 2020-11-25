@@ -357,7 +357,7 @@ std::size_t buffer::new_cursor() {
 void buffer::use_cursor(std::size_t c) {
     if (c > cursors.size()) {
         SPDLOG_ERROR("attempt to move cursor to outside file_range");
-	throw std::runtime_error("attempt to move cursor to outside file_range");
+        throw std::runtime_error("attempt to move cursor to outside file_range");
     }
     cursor = c;
 }
@@ -503,6 +503,77 @@ void buffer::end_of_line() {
     }
     c.point = it - contents.begin();
     cursors = cursors.set(cursor, c);
+}
+
+bool buffer::start_of_block() {
+    auto c = cursors[cursor];
+    auto begin = contents.begin();
+    if (c.view.has_value()) {
+        begin = begin + c.view->lower;
+    }
+    int depth{};
+    auto it = contents.begin() + c.point;
+    while (it != begin) {
+        --it;
+        switch (*it) {
+        case U'}':
+            ++depth;
+        case U'{':
+            if (depth > 0) {
+                --depth;
+            } else {
+                break;
+            }
+        }
+    }
+    if (*it != U'{') {
+        return false;
+    }
+    c.point = it - contents.begin();
+    cursors = cursors.set(cursor, c);
+    return true;
+}
+
+bool buffer::end_of_block() {
+    auto c = cursors[cursor];
+    auto end = contents.end();
+    if (c.view.has_value()) {
+        end = contents.begin() + c.view->upper;
+    }
+    int depth{};
+    auto it = contents.begin() + c.point;
+    while (it != end) {
+        switch (*it) {
+        case U'{':
+            ++depth;
+        case U'}':
+            if (depth > 0) {
+                --depth;
+            } else {
+                break;
+            }
+        }
+        ++it;
+    }
+    if (*(it - 1) != U'}') {
+        return false;
+    }
+    c.point = it - contents.begin();
+    cursors = cursors.set(cursor, c);
+    return true;
+}
+
+bool buffer::narrow_to_block() {
+    auto from = get_pos();
+    if (!start_of_block()) {
+        return false;
+    }
+    set_mark();
+    goto_pos(from);
+    if (!end_of_block()) {
+        return false;
+    }
+    return narrow_to_region();
 }
 
 bool buffer::narrow_to_region() {
