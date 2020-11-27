@@ -26,6 +26,10 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::user_type<buffer>(), "buffer");
     chai.add(chaiscript::constructor<buffer()>(), "buffer");
     chai.add(chaiscript::constructor<buffer(const std::string &)>(), "buffer");
+    chai.add(chaiscript::constructor<buffer(const std::string &, buffer::open_spec)>(), "buffer");
+
+    chai.add(chaiscript::fun(&buffer::empty), "empty");
+    chai.add(chaiscript::fun(&buffer::size), "size");
 
     chai.add(chaiscript::fun(&buffer::save), "save");
     chai.add(chaiscript::fun(&buffer::save_as), "save_as");
@@ -116,6 +120,14 @@ void add_bindings(chaiscript::ChaiScript &chai) {
                  return text{rhs.begin(), rhs.end()} == lhs;
              }),
              "==");
+
+    // add enums
+    chaiscript::ModulePtr m = chaiscript::ModulePtr(new chaiscript::Module());
+
+    chaiscript::utility::add_class<buffer::open_spec>(
+        *m, "open_spec", {{buffer::try_open, "try_open"}, {buffer::must_open, "must_open"}});
+
+    chai.add(m);
 }
 
 void run(const std::string &filename) {

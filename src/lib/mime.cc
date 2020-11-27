@@ -27,16 +27,22 @@ std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
 
 buffer::buffer() { cursors = cursors.push_back(cursor_t{}); }
 
-buffer::buffer(const std::string &fname) {
+buffer::buffer(const std::string &fname, open_spec spec) {
+    filename = fname;
+    cursors = cursors.push_back(cursor_t{});
+
     if (fname.empty()) {
         SPDLOG_ERROR("Received empty filename. Nothing to open.");
         throw std::runtime_error("filename required");
     }
     std::ifstream fs(fname, std::ios::in | std::ios::binary);
 
-    if (!fs.is_open()) {
+    if (!fs.is_open() && spec == must_open) {
         SPDLOG_ERROR("Unable to open file '{0}'", fname);
         throw std::runtime_error("unable to open file");
+    } else if (!fs.is_open()) {
+        SPDLOG_INFO("Unable to open file '{0}'.  Creating an empty buffer instead.", fname);
+        return;
     }
     auto vv = text{};
 
@@ -47,9 +53,9 @@ buffer::buffer(const std::string &fname) {
     }
 
     contents = vv;
-    filename = fname;
-    cursors = cursors.push_back(cursor_t{});
 }
+
+buffer::buffer(const std::string &fname) : buffer(fname, try_open) {}
 
 void buffer::save() { save_as(filename); }
 
@@ -109,6 +115,12 @@ void buffer::set_mark() {
     cursors = cursors.set(cursor, c);
 }
 
+long buffer::get_mark() {
+    if (cursors[cursor].mark.has_value()) {
+        return *cursors[cursor].mark;
+    }
+    return -1;
+}
 template <typename T> bool buffer::find(T t) {
     if (t.empty()) {
         return false;
@@ -278,6 +290,10 @@ int buffer::replace(std::string from, std::string to, std::size_t n) {
         update_all_cursors(mark, point, wto.size());
     }
     return ii;
+}
+
+int buffer::replace(std::string from, std::string to) {
+    return replace(from, to, 0); // replace all
 }
 
 text buffer::copy() {
@@ -458,6 +474,11 @@ int buffer::prev_line(std::size_t n) {
     cursors = cursors.set(cursor, c);
     return ii;
 }
+
+void buffer::forward() { forward(1); } // forward one char32_t.
+void buffer::backward() { backward(1); }
+int buffer::next_line() { return next_line(1); }
+int buffer::prev_line() { return prev_line(1); }
 
 void buffer::start_of_buffer() {
     auto c = cursors[cursor];

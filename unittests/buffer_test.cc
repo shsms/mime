@@ -16,73 +16,82 @@ class BufferTest : public ::testing::Test {
     mime::buffer unicode;
 };
 
-// TEST_F(BufferTest, ReplaceNotFound) {
-//     auto r = mime::replace(ascii, 0, "", "c,b", 0);
-//     EXPECT_EQ(r.n, 0);
+TEST_F(BufferTest, ReplaceNotFound) {
+    auto n = ascii.replace("", "c,b", 0);
+    EXPECT_EQ(n, 0);
 
-//     r = mime::replace(ascii, 0, "zzwwd", "c,b", 0);
-//     EXPECT_EQ(r.n, 0);
-// }
+    n = ascii.replace("zzwwd", "c,b", 0);
+    EXPECT_EQ(n, 0);
+}
 
-// TEST_F(BufferTest, ReplaceFound) {
-//     auto r = mime::replace(ascii, 0, "b,c", "c,b", 0);
-//     EXPECT_EQ(r.n, 1);
-//     EXPECT_STREQ(mime::to_string(r.b.contents).c_str(), "a,c,b\n1,2,3\n4,5,6\n");
-//     EXPECT_EQ(r.b.cursors[0].point, 5);
+TEST_F(BufferTest, ReplaceFound) {
+    auto r = ascii;
+    auto n = r.replace("b,c", "c,b", 0);
+    EXPECT_EQ(n, 1);
+    EXPECT_STREQ(mime::to_string(r.get_contents()).c_str(), "a,c,b\n1,2,3\n4,5,6\n");
+    EXPECT_EQ(r.get_pos(), 5);
 
-//     r = mime::replace(ascii, 0, "b,c", "c,b", 2);
-//     EXPECT_EQ(r.n, 1);
-//     r = mime::replace(r.b, 0, ",", "#", 2);
-//     EXPECT_EQ(r.n, 2);
-//     EXPECT_STREQ(mime::to_string(r.b.contents).c_str(), "a,c,b\n1#2#3\n4,5,6\n");
-// }
+    n = ascii.replace("b,c", "c,b", 2);
+    EXPECT_EQ(n, 1);
+    n = ascii.replace(",", "#", 2);
+    EXPECT_EQ(n, 2);
+    EXPECT_STREQ(mime::to_string(ascii.get_contents()).c_str(), "a,c,b\n1#2#3\n4,5,6\n");
+}
 
-// TEST_F(BufferTest, ReplaceMultiCursor) {
-//     auto r = mime::new_cursor(ascii);
-//     EXPECT_EQ(r.n, 1);
+TEST_F(BufferTest, ReplaceMultiCursor) {
+    auto n = ascii.new_cursor();
+    EXPECT_EQ(n, 1);
 
-//     r = mime::replace(r.b, 0, "b,c", "B,c", 0);
-//     r = mime::replace(r.b, 1, ",B", ",longfield", 0);
-//     EXPECT_EQ(r.n, 1);
-//     EXPECT_STREQ(mime::to_string(r.b.contents).c_str(), "a,longfield,c\n1,2,3\n4,5,6\n");
-//     EXPECT_EQ(r.b.cursors[0].point, 13);
-//     EXPECT_EQ(r.b.cursors[1].point, 11);
+    auto r = ascii;
+    r.replace("b,c", "B,c", 0);
+    r.use_cursor(1);
+    n = r.replace(",B", ",longfield", 0);
+    EXPECT_EQ(n, 1);
+    EXPECT_STREQ(mime::to_string(r.get_contents()).c_str(), "a,longfield,c\n1,2,3\n4,5,6\n");
+    r.use_cursor(0);
+    EXPECT_EQ(r.get_pos(), 13);
+    r.use_cursor(1);
+    EXPECT_EQ(r.get_pos(), 11);
 
-//     r = mime::new_cursor(r.b);
-//     EXPECT_EQ(r.n, 2);
-//     r = mime::new_cursor(r.b);
-//     EXPECT_EQ(r.n, 3);
-//     r = mime::new_cursor(r.b);
-//     EXPECT_EQ(r.n, 4);
+    r.new_cursor();
+    r.new_cursor();
+    r.new_cursor();
 
-//     // move cursor between word "longfield" that is going away.
-//     // in this case, cursor 3 should go back to pos 1 where
-//     // from field starts.
-//     r.b.cursors = r.b.cursors.set(3, mime::cursor{.point = 5});
+    // move cursor between word "longfield" that is going away.
+    // in this case, cursor 3 should go back to pos 1 where
+    // from field starts.
+    r.use_cursor(3);
+    r.goto_pos(5);
 
-//     r = mime::replace(r.b, 2, ",longfield", ",www", 0);
-//     EXPECT_EQ(r.n, 1);
-//     EXPECT_STREQ(mime::to_string(r.b.contents).c_str(), "a,www,c\n1,2,3\n4,5,6\n");
-//     EXPECT_EQ(r.b.cursors[0].point, 7);
-//     EXPECT_EQ(r.b.cursors[1].point, 5);
-//     EXPECT_EQ(r.b.cursors[2].point, 5);
-//     EXPECT_EQ(r.b.cursors[3].point, 1);
-//     EXPECT_EQ(r.b.cursors[4].point, 0);
-// }
+    r.use_cursor(2);
+    n = r.replace(",longfield", ",www", 0);
+    EXPECT_EQ(n, 1);
+    EXPECT_STREQ(mime::to_string(r.get_contents()).c_str(), "a,www,c\n1,2,3\n4,5,6\n");
 
-// TEST_F(BufferTest, SetMark) {
-//     EXPECT_EQ(ascii.cursors[0].mark.has_value(), false);
-//     ascii = mime::set_mark(ascii, 0);
-//     EXPECT_EQ(ascii.cursors[0].mark.has_value(), true);
-//     EXPECT_EQ(ascii.cursors[0].mark.value(), 0);
+    r.use_cursor(0);
+    EXPECT_EQ(r.get_pos(), 7);
+    r.use_cursor(1);
+    EXPECT_EQ(r.get_pos(), 5);
+    r.use_cursor(2);
+    EXPECT_EQ(r.get_pos(), 5);
+    r.use_cursor(3);
+    EXPECT_EQ(r.get_pos(), 1);
+    r.use_cursor(4);
+    EXPECT_EQ(r.get_pos(), 0);
+}
 
-//     ascii.cursors = ascii.cursors.set(0, mime::cursor{.point = 3});
+// TODO: below test still need to be converted to new api.
 
-//     EXPECT_EQ(ascii.cursors[0].mark.has_value(), false);
-//     ascii = mime::set_mark(ascii, 0);
-//     EXPECT_EQ(ascii.cursors[0].mark.has_value(), true);
-//     EXPECT_EQ(ascii.cursors[0].mark.value(), 3);
-// }
+TEST_F(BufferTest, SetMark) {
+    EXPECT_EQ(ascii.get_mark(), -1);
+    ascii.set_mark();
+    EXPECT_EQ(ascii.get_mark(), 0);
+
+    ascii.goto_pos(3);
+
+    ascii.set_mark();
+    EXPECT_EQ(ascii.get_mark(), 3);
+}
 
 // TEST_F(BufferTest, CopyEmpty) {
 //     EXPECT_EQ(ascii.cursors[0].mark.has_value(), false);

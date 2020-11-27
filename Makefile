@@ -19,7 +19,7 @@ LIB_OBJS = $(addprefix build/.objs/,$(subst .cc,.o,$(LIB_SRCS)))
 BIN_SRCS = $(shell ls src/cmd/*.cc)
 BIN_OBJS = $(addprefix build/.objs/,$(subst .cc,.o,$(BIN_SRCS)))
 
-DEP = $(OBJS:%.o=%.d)
+DEP = $(LIB_OBJS:%.o=%.d) $(BIN_OBJS:%.o=%.d)
 -include $(DEP)
 
 ALL_SRCS=$(shell find src unittests -type f -name '*.cc')
@@ -83,6 +83,7 @@ test: bin $(TEST_BIN)
 	$(TEST_BIN)
 
 $(TEST_BIN):  $(TEST_OBJS) $(LIBS) $(GTEST_LIB)
+	mkdir -p build/bin
 	$(CXX) $(TEST_LDFLAGS) -o $@ $^
 
 build/test/.objs/%.o: %.cc

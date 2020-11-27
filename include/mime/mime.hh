@@ -24,21 +24,31 @@ std::string to_string(text t);
 
 class buffer {
   public:
+    enum open_spec {
+        try_open = 0,
+        must_open = 1,
+    };
+
     buffer();
+    buffer(const std::string &fname, open_spec spec);
     buffer(const std::string &fname);
+
+    inline bool empty() { return contents.empty(); }
+    inline std::size_t size() { return contents.size(); }
+
     void save();
     void save_as(const std::string &fname);
     void set_mark();
+    long get_mark();
+
+    inline text get_contents() { return contents; }
 
     template <typename T> bool find(T t);
     template <typename T> bool rfind(T t);
     template <typename T> bool find_fuzzy(T t);
 
     int replace(std::string from, std::string to, std::size_t n);
-
-    inline int replace(std::string from, std::string to) {
-        return replace(from, to, 0); // replace all
-    }
+    int replace(std::string from, std::string to);
 
     text copy();
     text cut();
@@ -57,10 +67,10 @@ class buffer {
     int next_line(std::size_t n);
     int prev_line(std::size_t n);
 
-    inline void forward() { forward(1); } // forward one char32_t.
-    inline void backward() { backward(1); }
-    inline int next_line() { return next_line(1); }
-    inline int prev_line() { return prev_line(1); }
+    void forward();
+    void backward();
+    int next_line();
+    int prev_line();
 
     void start_of_buffer();
     void end_of_buffer();
