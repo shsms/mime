@@ -93,416 +93,399 @@ TEST_F(BufferTest, SetMark) {
     EXPECT_EQ(ascii.get_mark(), 3);
 }
 
-// TEST_F(BufferTest, CopyEmpty) {
-//     EXPECT_EQ(ascii.cursors[0].mark.has_value(), false);
-//     auto r = mime::find(ascii, 0, "c"s);
-//     auto t = mime::copy(r.b, 0);
-//     EXPECT_EQ(t.size(), 0);
-//     EXPECT_STREQ(mime::to_string(t).c_str(), "");
+TEST_F(BufferTest, CopyEmpty) {
+    EXPECT_EQ(ascii.get_mark(), -1);
+    auto r = ascii.find("c"s);
+    auto t = ascii.copy();
+    EXPECT_EQ(t.size(), 0);
+    EXPECT_STREQ(mime::to_string(t).c_str(), "");
 
-//     auto b = mime::set_mark(ascii, 0);
-//     t = mime::copy(b, 0);
-//     EXPECT_EQ(t.size(), 0);
-//     EXPECT_STREQ(mime::to_string(t).c_str(), "");
-// }
+    ascii.set_mark();
+    t = ascii.copy();
+    EXPECT_EQ(t.size(), 0);
+    EXPECT_STREQ(mime::to_string(t).c_str(), "");
+}
 
-// TEST_F(BufferTest, CopyForward) {
-//     auto b = mime::set_mark(ascii, 0);
-//     auto r = mime::find(b, 0, "c"s);
-//     auto t = mime::copy(r.b, 0);
-//     EXPECT_EQ(t.size(), 5);
-//     EXPECT_STREQ(mime::to_string(t).c_str(), "a,b,c");
+TEST_F(BufferTest, CopyForward) {
+    ascii.set_mark();
+    auto r = ascii.find("c"s);
+    auto t = ascii.copy();
+    EXPECT_EQ(t.size(), 5);
+    EXPECT_STREQ(mime::to_string(t).c_str(), "a,b,c");
 
-//     b = mime::forward(r.b, 0, 1);
-//     b = mime::set_mark(b, 0);
-//     b = mime::end_of_line(b, 0);
-//     t = mime::copy(b, 0);
-//     EXPECT_EQ(t.size(), 5);
-//     EXPECT_STREQ(mime::to_string(t).c_str(), "1,2,3");
-// }
+    ascii.forward();
+    ascii.set_mark();
+    ascii.end_of_line();
+    t = ascii.copy();
+    EXPECT_EQ(t.size(), 5);
+    EXPECT_STREQ(mime::to_string(t).c_str(), "1,2,3");
+}
 
-// TEST_F(BufferTest, CopyReverse) {
-//     auto r = mime::find(ascii, 0, "3"s);
-//     auto b = mime::set_mark(r.b, 0);
-//     r = mime::rfind(b, 0, "2"s);
-//     auto t = mime::copy(r.b, 0);
-//     EXPECT_EQ(t.size(), 3);
-//     EXPECT_STREQ(mime::to_string(t).c_str(), "2,3");
-// }
+TEST_F(BufferTest, CopyReverse) {
+    ascii.find("3"s);
+    ascii.set_mark();
+    ascii.rfind("2"s);
+    auto t = ascii.copy();
+    EXPECT_EQ(t.size(), 3);
+    EXPECT_STREQ(mime::to_string(t).c_str(), "2,3");
+}
 
-// TEST_F(BufferTest, EraseRegionEmpty) {
-//     auto b = mime::erase_region(ascii, 0);
-//     EXPECT_EQ(ascii.contents, b.contents);
+TEST_F(BufferTest, EraseRegionEmpty) {
+    auto r = ascii;
+    ascii.erase_region();
+    EXPECT_EQ(ascii.get_contents(), r.get_contents());
 
-//     b = mime::set_mark(b, 0);
-//     EXPECT_EQ(ascii.contents, b.contents);
-// }
+    ascii.set_mark();
+    ascii.erase_region();
+    EXPECT_EQ(ascii.get_contents(), r.get_contents());
+}
 
-// TEST_F(BufferTest, EraseRegionForward) {
-//     auto b = mime::set_mark(ascii, 0);
-//     auto i = mime::next_line(b, 0, 1);
-//     b = mime::erase_region(i.b, 0);
-//     EXPECT_STREQ(mime::to_string(b.contents).c_str(), "1,2,3\n4,5,6\n");
+TEST_F(BufferTest, EraseRegionForward) {
+    ascii.set_mark();
+    ascii.next_line();
+    ascii.erase_region();
+    EXPECT_STREQ(mime::to_string(ascii.get_contents()).c_str(), "1,2,3\n4,5,6\n");
 
-//     auto r = mime::find(b, 0, "3"s);
-//     b = mime::set_mark(r.b, 0);
-//     i = mime::next_line(b, 0, 2);
-//     b = mime::erase_region(i.b, 0);
-//     EXPECT_STREQ(mime::to_string(b.contents).c_str(), "1,2,3");
-// }
+    ascii.find("3"s);
+    ascii.set_mark();
+    ascii.next_line(2);
+    ascii.erase_region();
+    EXPECT_STREQ(mime::to_string(ascii.get_contents()).c_str(), "1,2,3");
+}
 
-// TEST_F(BufferTest, EraseRegionReverse) {
-//     auto r = mime::next_line(ascii, 0, 1);
-//     auto b = mime::set_mark(r.b, 0);
-//     b = mime::backward(b, 0, 3);
-//     b = mime::erase_region(b, 0);
-//     EXPECT_STREQ(mime::to_string(b.contents).c_str(), "a,b1,2,3\n4,5,6\n");
-// }
+TEST_F(BufferTest, EraseRegionReverse) {
+    ascii.next_line();
+    ascii.set_mark();
+    ascii.backward(3);
+    ascii.erase_region();
+    EXPECT_STREQ(mime::to_string(ascii.get_contents()).c_str(), "a,b1,2,3\n4,5,6\n");
+}
 
-// TEST_F(BufferTest, EraseRegionMultiCursor) {
-//     // create 4 new cursors
-//     auto i = mime::new_cursor(ascii); // go inbetween
-//     i = mime::new_cursor(i.b);        // go after
-//     i = mime::new_cursor(i.b);        // eraseregion here.
+TEST_F(BufferTest, EraseRegionMultiCursor) {
+    // create 4 new cursors
+    ascii.new_cursor();
+    ascii.new_cursor();
+    ascii.new_cursor();
 
-//     auto b = mime::forward(i.b, 1, 3);
-//     i = mime::next_line(b, 2, 1);
+    ascii.use_cursor(1);
+    ascii.forward(3);
+    ascii.use_cursor(2);
+    ascii.next_line();
 
-//     EXPECT_EQ(i.b.cursors[0].point, 0);
-//     EXPECT_EQ(i.b.cursors[1].point, 3);
-//     EXPECT_EQ(i.b.cursors[2].point, 6);
-//     EXPECT_EQ(i.b.cursors[3].point, 0);
+    ascii.use_cursor(0);
+    EXPECT_EQ(ascii.get_pos(), 0);
+    ascii.use_cursor(1);
+    EXPECT_EQ(ascii.get_pos(), 3);
+    ascii.use_cursor(2);
+    EXPECT_EQ(ascii.get_pos(), 6);
+    ascii.use_cursor(3);
+    EXPECT_EQ(ascii.get_pos(), 0);
 
-//     auto r = mime::find(i.b, 3, ","s);
-//     EXPECT_EQ(r.b.cursors[3].point, 2);
-//     b = mime::set_mark(r.b, 3);
-//     b = mime::end_of_line(b, 3);
-//     EXPECT_EQ(b.cursors[3].point, 5);
-//     b = mime::erase_region(b, 3);
+    ascii.find(","s);
+    EXPECT_EQ(ascii.get_pos(), 2);
+    ascii.set_mark();
+    ascii.end_of_line();
+    EXPECT_EQ(ascii.get_pos(), 5);
+    ascii.erase_region();
 
-//     EXPECT_EQ(b.cursors[0].point, 0);
-//     EXPECT_EQ(b.cursors[1].point, 2);
-//     EXPECT_EQ(b.cursors[2].point, 3);
-//     EXPECT_EQ(b.cursors[3].point, 2);
-// }
+    ascii.use_cursor(0);
+    EXPECT_EQ(ascii.get_pos(), 0);
+    ascii.use_cursor(1);
+    EXPECT_EQ(ascii.get_pos(), 2);
+    ascii.use_cursor(2);
+    EXPECT_EQ(ascii.get_pos(), 3);
+    ascii.use_cursor(3);
+    EXPECT_EQ(ascii.get_pos(), 2);
+}
 
-// TEST_F(BufferTest, Cut) {
-//     auto b = mime::set_mark(ascii, 0);
-//     auto t = mime::cut(b, 0);
-//     EXPECT_EQ(t.t.size(), 0);
-//     EXPECT_EQ(t.b.contents.size(), 18);
+TEST_F(BufferTest, Cut) {
+    ascii.set_mark();
+    auto t = ascii.cut();
+    EXPECT_EQ(t.size(), 0);
+    EXPECT_EQ(ascii.size(), 18);
 
-//     auto r = mime::find(b, 0, "c"s);
-//     t = mime::cut(r.b, 0);
-//     EXPECT_EQ(t.t.size(), 5);
-//     EXPECT_STREQ(mime::to_string(t.t).c_str(), "a,b,c");
+    ascii.find("c"s);
+    t = ascii.cut();
+    EXPECT_EQ(t.size(), 5);
+    EXPECT_STREQ(mime::to_string(t).c_str(), "a,b,c");
 
-//     EXPECT_EQ(t.b.contents.size(), 13);
-//     EXPECT_STREQ(mime::to_string(t.b.contents).c_str(), "\n1,2,3\n4,5,6\n");
-// }
+    EXPECT_EQ(ascii.size(), 13);
+    EXPECT_STREQ(mime::to_string(ascii.get_contents()).c_str(), "\n1,2,3\n4,5,6\n");
+}
 
 // // TODO: add a MultiCursor test for Paste
-// TEST_F(BufferTest, Paste) {
-//     auto b = mime::set_mark(ascii, 0);
-//     auto r = mime::find(b, 0, "c"s);
-//     auto t = mime::copy(r.b, 0);
-
-//     b = mime::paste(r.b, 0, "\n");
-//     b = mime::paste(b, 0, t);
-//     EXPECT_STREQ(mime::to_string(b.contents).c_str(), "a,b,c\na,b,c\n1,2,3\n4,5,6\n");
-// }
-
-// TEST_F(BufferTest, Clear) {
-//     auto r = mime::find(ascii, 0, ","s);
-//     EXPECT_EQ(r.b.cursors[0].point, 2);
-
-//     auto b = mime::clear(r.b);
-//     EXPECT_EQ(b.contents.size(), 0);
-//     EXPECT_EQ(b.cursors[0].point, 0);
-// }
-
-// TEST_F(BufferTest, GetPos) {
-//     EXPECT_EQ(ascii.cursors[0].point, 0);
-//     EXPECT_EQ(mime::get_pos(ascii, 0), 0);
-//     auto r = mime::find(ascii, 0, ","s);
-//     EXPECT_EQ(r.b.cursors[0].point, 2);
-//     EXPECT_EQ(mime::get_pos(r.b, 0), 2);
-// }
-
-// TEST_F(BufferTest, GotoPos) {
-//     auto r = mime::goto_pos(ascii, 0, -1);
-//     EXPECT_EQ(r.success, false);
-
-//     r = mime::goto_pos(r.b, 0, 20);
-//     EXPECT_EQ(r.success, false);
-
-//     r = mime::goto_pos(r.b, 0, 10);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 10);
-
-//     r = mime::goto_pos(r.b, 0, 5);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 5);
-
-//     r = mime::goto_pos(r.b, 0, 18);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-
-//     auto b = mime::paste(r.b, 0, "hello");
-//     b = mime::start_of_buffer(b, 0);
-//     r = mime::find(b, 0, "hel"s);
-//     EXPECT_EQ(r.b.cursors[0].point, 21);
-//     EXPECT_EQ(r.success, true);
-// }
-
-// TEST_F(BufferTest, Forward) {
-//     auto b = mime::forward(ascii, 0, 1);
-//     EXPECT_EQ(b.cursors[0].point, 1);
-
-//     b = mime::forward(b, 0, 1);
-//     EXPECT_EQ(b.cursors[0].point, 2);
-
-//     b = mime::forward(b, 0, 16);
-//     EXPECT_EQ(b.cursors[0].point, 18);
-
-//     b = mime::forward(ascii, 0, 20);
-//     EXPECT_EQ(b.cursors[0].point, 18);
-// }
-
-// TEST_F(BufferTest, Backward) {
-//     auto b = mime::forward(ascii, 0, 18);
-//     EXPECT_EQ(b.cursors[0].point, 18);
-
-//     b = mime::backward(b, 0, 1);
-//     EXPECT_EQ(b.cursors[0].point, 17);
-//     b = mime::backward(b, 0, 5);
-//     EXPECT_EQ(b.cursors[0].point, 12);
-
-//     b = mime::backward(b, 0, 12);
-//     EXPECT_EQ(b.cursors[0].point, 0);
-
-//     b = mime::backward(b, 0, 20);
-//     EXPECT_EQ(b.cursors[0].point, 0);
-// }
-
-// TEST_F(BufferTest, NextLine) {
-//     auto i = mime::next_line(ascii, 0, 1);
-//     EXPECT_EQ(i.b.cursors[0].point, 6);
-//     EXPECT_EQ(i.n, 1);
-
-//     i = mime::next_line(i.b, 0, 1);
-//     EXPECT_EQ(i.b.cursors[0].point, 12);
-//     EXPECT_EQ(i.n, 1);
-
-//     i = mime::next_line(i.b, 0, 2);
-//     EXPECT_EQ(i.b.cursors[0].point, 18);
-//     EXPECT_EQ(i.n, 1);
-// }
-
-// TEST_F(BufferTest, PrevLine) {
-//     auto r = mime::goto_pos(ascii, 0, 18);
-//     auto i = mime::prev_line(r.b, 0, 1);
-//     EXPECT_EQ(i.b.cursors[0].point, 12);
-//     EXPECT_EQ(i.n, 1);
-
-//     i = mime::prev_line(i.b, 0, 1);
-//     EXPECT_EQ(i.b.cursors[0].point, 6);
-//     EXPECT_EQ(i.n, 1);
-
-//     i = mime::prev_line(i.b, 0, 2);
-//     EXPECT_EQ(i.b.cursors[0].point, 0);
-//     EXPECT_EQ(i.n, 1);
-// }
-
-// TEST_F(BufferTest, StartOfBuffer) {
-//     auto r = mime::goto_pos(ascii, 0, 12);
-//     EXPECT_EQ(r.b.cursors[0].point, 12);
-
-//     auto b = mime::start_of_buffer(r.b, 0);
-//     EXPECT_EQ(b.cursors[0].point, 0);
-// }
-
-// TEST_F(BufferTest, EndOfBuffer) {
-//     auto r = mime::goto_pos(ascii, 0, 12);
-//     EXPECT_EQ(r.b.cursors[0].point, 12);
-
-//     auto b = mime::end_of_buffer(r.b, 0);
-//     EXPECT_EQ(b.cursors[0].point, 18);
-// }
-
-// TEST_F(BufferTest, StartOfLine) {
-//     auto r = mime::goto_pos(ascii, 0, 15);
-//     EXPECT_EQ(r.b.cursors[0].point, 15);
-
-//     auto b = mime::start_of_line(r.b, 0);
-//     EXPECT_EQ(b.cursors[0].point, 12);
-// }
-
-// TEST_F(BufferTest, EndOfLine) {
-//     auto r = mime::goto_pos(ascii, 0, 12);
-//     EXPECT_EQ(r.b.cursors[0].point, 12);
-
-//     auto b = mime::end_of_line(r.b, 0);
-//     EXPECT_EQ(b.cursors[0].point, 17);
-// }
-
-// // TODO:  convert below tests to fixture based ones.
-// TEST(BufferOpen, UnnamedFile) {
-//     auto r = mime::open("");
-//     EXPECT_EQ(r.get_bool(), true); // signifying a new file.
-//     EXPECT_EQ(r.get_buffer().contents.size(), 0);
-// }
-
-// TEST(BufferOpen, ExistingFile) {
-//     auto r = mime::open("testdata/open.csv");
-//     EXPECT_EQ(r.get_bool(), false);
-//     EXPECT_EQ(r.get_buffer().contents.size(), 18);
-// }
-
-// TEST(BufferOpen, NewFile) {
-//     auto r = mime::open("testdata/newfile");
-//     EXPECT_EQ(r.get_bool(), true);
-//     EXPECT_EQ(r.get_buffer().contents.size(), 0);
-// }
-
-// TEST(BufferSave, NewFile) {
-//     auto r = mime::open("testdata/newfile");
-//     EXPECT_EQ(r.get_bool(), true);
-//     r.b = mime::paste(r.b, 0, "hello");
-//     save(r.b);
-//     r = mime::open("testdata/newfile");
-//     EXPECT_EQ(r.get_bool(), false);
-//     EXPECT_EQ(r.get_buffer().contents.size(), 5);
-//     std::filesystem::remove("testdata/newfile");
-// }
-
-// TEST(BufferFind, Present) {
-//     auto r = mime::open("testdata/open.csv");
-
-//     r = mime::find(r.b, 0, "a"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 1);
-
-//     r = mime::find(r.b, 0, "b"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 3);
-
-//     r = mime::find(r.b, 0, "c\n1"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 7);
-
-//     r = mime::find(r.b, 0, "6\n"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-// }
-
-// TEST(BufferFind, Missing) {
-//     auto r = mime::open("testdata/open.csv");
-
-//     r = mime::find(r.b, 0, "zz"s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 0);
-
-//     r = mime::find(r.b, 0, "b"s);
-//     EXPECT_EQ(r.b.cursors[0].point, 3);
-
-//     r = mime::find(r.b, 0, "zzz"s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 3);
-
-//     r = mime::find(r.b, 0, ""s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 3);
-
-//     r = mime::find(r.b, 0, "6\n"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-
-//     r = mime::find(r.b, 0, "6\n"s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-// }
-
-// TEST(BufferFind, EmptyFile) {
-//     auto r = mime::open("");
-//     EXPECT_EQ(r.b.cursors[0].point, 0);
-//     r = mime::find(r.b, 0, "zz"s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 0);
-// }
-
-// TEST(BufferRfind, Present) {
-//     auto r = mime::open("testdata/open.csv");
-
-//     r = mime::find(r.b, 0, "6\n"s);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-
-//     r = mime::rfind(r.b, 0, "3"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 10);
-
-//     r = mime::rfind(r.b, 0, "a,b"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 0);
-// }
-
-// TEST(BufferRfind, Missing) {
-//     auto r = mime::open("testdata/open.csv");
-
-//     // TODO: make this work
-//     // r = mime::rfind(r.b, 0, "a,b"s, 0);
-//     // EXPECT_EQ(r.success, false);
-//     // EXPECT_EQ(r.b.cursors[0].point, 18);
-
-//     r = mime::find(r.b, 0, "6\n"s);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-
-//     r = mime::rfind(r.b, 0, ""s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-
-//     r = mime::rfind(r.b, 0, "d"s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-
-//     r = mime::rfind(r.b, 0, "a,b,d"s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 18);
-// }
-
-// TEST(BufferFindFuzzy, Present) {
-//     auto r = mime::open("testdata/open.csv");
-
-//     r = mime::find_fuzzy(r.b, 0, "a,B,C 1,2"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 9);
-
-//     r = mime::find_fuzzy(r.b, 0, "3\n\n\t4"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 13);
-
-//     // TODO: make this work
-//     // r = mime::find_fuzzy(r.b, 0, "5, 6"s, 0);
-//     // EXPECT_EQ(r.success, true);
-//     // EXPECT_EQ(r.b.cursors[0].point, 13);
-// }
-
-// TEST(BufferFindFuzzy, Missing) {
-//     auto r = mime::open("testdata/open.csv");
-
-//     r = mime::find_fuzzy(r.b, 0, "a,B,d 1,2"s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 0);
-
-//     r = mime::find_fuzzy(r.b, 0, ""s);
-//     EXPECT_EQ(r.success, false);
-//     EXPECT_EQ(r.b.cursors[0].point, 0);
-// }
-
-// TEST(BufferFindFuzzy, Unicode) {
-//     auto r = mime::open("testdata/unicode.csv");
-
-//     r = mime::find_fuzzy(r.b, 0, "நாமன் உன்"s);
-//     EXPECT_EQ(r.success, true);
-//     EXPECT_EQ(r.b.cursors[0].point, 38);
-// }
+TEST_F(BufferTest, Paste) {
+    ascii.set_mark();
+    ascii.find("c"s);
+    auto t = ascii.copy();
+
+    ascii.paste("\n");
+    ascii.paste(t);
+    EXPECT_STREQ(mime::to_string(ascii.get_contents()).c_str(), "a,b,c\na,b,c\n1,2,3\n4,5,6\n");
+}
+
+TEST_F(BufferTest, Clear) {
+    ascii.find(","s);
+    EXPECT_EQ(ascii.get_pos(), 2);
+
+    ascii.clear();
+    EXPECT_EQ(ascii.size(), 0);
+    EXPECT_EQ(ascii.get_pos(), 0);
+}
+
+TEST_F(BufferTest, GetPos) {
+    EXPECT_EQ(ascii.get_pos(), 0);
+    ascii.find(","s);
+    EXPECT_EQ(ascii.get_pos(), 2);
+}
+
+TEST_F(BufferTest, GotoPos) {
+    auto r = ascii.goto_pos(-1);
+    EXPECT_EQ(r, false);
+
+    r = ascii.goto_pos(20);
+    EXPECT_EQ(r, false);
+
+    r = ascii.goto_pos(10);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 10);
+
+    r = ascii.goto_pos(5);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 5);
+    
+    r = ascii.goto_pos(18);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    ascii.paste("hello");
+    ascii.start_of_buffer();
+    r = ascii.find("hel"s);
+    EXPECT_EQ(ascii.get_pos(), 21);
+    EXPECT_EQ(r, true);
+}
+
+TEST_F(BufferTest, Forward) {
+    ascii.forward();
+    EXPECT_EQ(ascii.get_pos(), 1);
+
+    ascii.forward();
+    EXPECT_EQ(ascii.get_pos(), 2);
+
+    ascii.forward(16);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    ascii.forward(20);
+    EXPECT_EQ(ascii.get_pos(), 18);
+}
+
+TEST_F(BufferTest, Backward) {
+    ascii.forward(18);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    ascii.backward(1);
+    EXPECT_EQ(ascii.get_pos(), 17);
+    ascii.backward(5);
+    EXPECT_EQ(ascii.get_pos(), 12);
+    ascii.backward(12);
+    EXPECT_EQ(ascii.get_pos(), 0);
+
+    ascii.backward(20);
+    EXPECT_EQ(ascii.get_pos(), 0);
+}
+
+TEST_F(BufferTest, NextLine) {
+    auto n = ascii.next_line();
+    EXPECT_EQ(ascii.get_pos(), 6);
+    EXPECT_EQ(n, 1);
+
+    n = ascii.next_line();
+    EXPECT_EQ(ascii.get_pos(), 12);
+    EXPECT_EQ(n, 1);
+
+    n = ascii.next_line(4);
+    EXPECT_EQ(ascii.get_pos(), 18);
+    EXPECT_EQ(n, 1);
+}
+
+TEST_F(BufferTest, PrevLine) {
+    ascii.goto_pos(18);
+    auto n = ascii.prev_line();
+    EXPECT_EQ(ascii.get_pos(), 12);
+    EXPECT_EQ(n, 1);
+
+    n = ascii.prev_line();
+    EXPECT_EQ(ascii.get_pos(), 6);
+    EXPECT_EQ(n, 1);
+
+    n = ascii.prev_line(2);
+    EXPECT_EQ(ascii.get_pos(), 0);
+    EXPECT_EQ(n, 1);
+}
+
+TEST_F(BufferTest, StartOfBuffer) {
+    ascii.goto_pos(12);
+    EXPECT_EQ(ascii.get_pos(), 12);
+    ascii.start_of_buffer();
+    EXPECT_EQ(ascii.get_pos(), 0);
+
+}
+
+TEST_F(BufferTest, EndOfBuffer) {
+    ascii.goto_pos(12);
+    EXPECT_EQ(ascii.get_pos(), 12);
+    ascii.end_of_buffer();
+    EXPECT_EQ(ascii.get_pos(), 18);
+}
+
+TEST_F(BufferTest, StartOfLine) {
+    ascii.goto_pos(15);
+    EXPECT_EQ(ascii.get_pos(), 15);
+
+    ascii.start_of_line();
+    EXPECT_EQ(ascii.get_pos(), 12);
+}
+
+TEST_F(BufferTest, EndOfLine) {
+    ascii.goto_pos(12);
+    EXPECT_EQ(ascii.get_pos(), 12);
+
+    ascii.end_of_line();
+    EXPECT_EQ(ascii.get_pos(), 17);
+}
+
+TEST_F(BufferTest, Open) {
+    auto b = mime::buffer();
+    EXPECT_EQ(b.size(), 0);
+    b = mime::buffer("/non/existant");
+    EXPECT_EQ(b.size(), 0);
+    EXPECT_EQ(ascii.size(), 18);
+}
+
+TEST_F(BufferTest, Save) {
+    auto b = mime::buffer("testdata/newfile");
+    b.paste("hello");
+    b.save();
+    auto r = mime::buffer("testdata/newfile");
+    EXPECT_EQ(r.size(), 5);
+    std::filesystem::remove("testdata/newfile");
+}
+
+TEST_F(BufferTest, FindPresent) {
+    auto r = ascii.find("a"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 1);
+
+    r = ascii.find("b"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 3);
+
+    r = ascii.find("c\n1"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 7);
+
+    r = ascii.find("6\n"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 18);
+}
+
+TEST_F(BufferTest, FindMissing) {
+    auto r = ascii.find("zz"s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 0);
+
+    r = ascii.find("b"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 3);
+
+    r = ascii.find("zzz"s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 3);
+
+    r = ascii.find(""s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 3);
+    
+    r = ascii.find("6\n"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 18);
+    
+    r = ascii.find("6\n"s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 18);
+}
+
+TEST_F(BufferTest, FindEmptyFile) {
+    auto b = mime::buffer();
+    EXPECT_EQ(b.get_pos(), 0);
+    auto r = b.find("zz"s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(b.get_pos(), 0);
+}
+
+TEST_F(BufferTest, RFindPresent) {
+    ascii.find("6\n"s);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    auto r = ascii.rfind("3"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 10);
+
+    r = ascii.rfind("a,b"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 0);
+}
+
+TEST_F(BufferTest, RFindMissing) {
+
+    // TODO: make this work
+    // r = mime::rfind(r.b, 0, "a,b"s, 0);
+    // EXPECT_EQ(r.success, false);
+    // EXPECT_EQ(r.b.cursors[0].point, 18);
+
+    ascii.find("6\n"s);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    auto r = ascii.rfind(""s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    r = ascii.rfind("d"s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    r = ascii.rfind("a,b,d"s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 18);
+}
+
+TEST_F(BufferTest, FindFuzzyPresent) {
+    auto r = ascii.find_fuzzy("a,B,C 1,2"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 9);
+
+    r = ascii.find_fuzzy("3\n\n\t4"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(ascii.get_pos(), 13);
+
+    // TODO: make this work
+    // r = mime::find_fuzzy(r.b, 0, "5, 6"s, 0);
+    // EXPECT_EQ(r.success, true);
+    // EXPECT_EQ(r.b.cursors[0].point, 13);
+}
+
+TEST_F(BufferTest, FindFuzzyMissing) {
+    auto r = ascii.find_fuzzy("a,B,d 1,2"s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 0);
+
+    r = ascii.find_fuzzy(""s);
+    EXPECT_EQ(r, false);
+    EXPECT_EQ(ascii.get_pos(), 0);
+}
+
+TEST_F(BufferTest, FindFuzzyUnicode) {
+    auto r = unicode.find_fuzzy("நாமன் உன்"s);
+    EXPECT_EQ(r, true);
+    EXPECT_EQ(unicode.get_pos(), 38);
+}

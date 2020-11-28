@@ -441,10 +441,10 @@ int buffer::next_line(std::size_t n) {
         if (*it != U'\n') {
             break;
         }
-        // go 1 char past the new line.
-        if (it != end) {
-            ++it;
-        }
+        if (it == end) {
+	    break;
+	}
+	++it;
     }
     c.point = it - contents.begin();
     cursors = cursors.set(cursor, c);
