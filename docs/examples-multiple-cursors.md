@@ -1,4 +1,9 @@
-# Example
+---
+title: Multiple cursors
+parent: Examples
+---
+
+# Multiple cursors
 
 Here's an example mime script ([examples/gofunc.mime](github.com/shsms/mime/examples/gofunc.mime)):
 
@@ -78,7 +83,7 @@ func hello() string {
 }
 ```
 
-If it is not already obvious, here's what the script does:
+Here's an explanation of the script:
 
    1. open file "main.go"
    2. create two cursors - one for adding documentation at the top,

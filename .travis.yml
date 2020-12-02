@@ -24,4 +24,4 @@ script:
   - make && make test
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -x gcov-10 -g './build/test/.objs/unittests/*'
+  - bash <(curl -s https://codecov.io/bash) -x gcov-10 -g './build/CMakeFiles/unittests.dir/*'
