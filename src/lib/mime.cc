@@ -218,8 +218,9 @@ template <typename T> bool buffer::find_fuzzy(T t) {
     auto match_iter = t.begin();
     auto c = cursors[cursor];
     auto offset = c.point;
-
     auto lim = contents.size();
+    std::size_t match_length{};
+
     if (c.view.has_value()) { // narrowed view
         lim = c.view->upper;
     }
@@ -237,10 +238,17 @@ template <typename T> bool buffer::find_fuzzy(T t) {
         }
         if (u32::tolower(*match_iter) != u32::tolower(*it)) {
             match_iter = t.begin();
-            ++offset;
-            ++it;
+            if (match_length == 0) {
+                ++offset;
+                ++it;
+            } else {
+                offset -= (match_length - 1);
+                it -= (match_length - 1);
+                match_length = 0;
+            }
             continue;
         }
+        ++match_length;
         ++offset;
         ++it;
         ++match_iter;
@@ -442,9 +450,9 @@ int buffer::next_line(std::size_t n) {
             break;
         }
         if (it == end) {
-	    break;
-	}
-	++it;
+            break;
+        }
+        ++it;
     }
     c.point = it - contents.begin();
     cursors = cursors.set(cursor, c);

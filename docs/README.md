@@ -1,3 +1,6 @@
+---
+nav_order: 0
+---
 # Introduction
 
 Mime is a text processing tool inspired by Emacs, written in C++.

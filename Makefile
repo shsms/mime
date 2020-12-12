@@ -1,5 +1,7 @@
 install_path = $(shell systemd-path user-binaries)
-target_bin = build/mime
+target_bin = build/release/mime
+
+.PHONY: default init clean build debug test testCover install
 
 default: build
 
@@ -10,10 +12,13 @@ clean:
 	rm -rf build
 
 build: CMakeLists.txt
-	mkdir -p build && cd build && cmake .. && make -j
+	mkdir -p build/release && cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../.. && make -j
+
+debug: CMakeLists.txt
+	mkdir -p build/debug && cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../.. && make -j
 
 test: build
-	build/unittests
+	build/release/unittests
 
 testCover: test
 	gcovr -r . -f src --html --html-details -o build/coverage.html
