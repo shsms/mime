@@ -12,10 +12,10 @@ clean:
 	rm -rf build
 
 build: CMakeLists.txt
-	mkdir -p build/release && cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../.. && make -j
+	mkdir -p build/release && cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../.. && $(MAKE) -j -s
 
 debug: CMakeLists.txt
-	mkdir -p build/debug && cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../.. && make -j
+	mkdir -p build/debug && cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../.. && $(MAKE) -j -s
 
 test: build
 	build/release/unittests

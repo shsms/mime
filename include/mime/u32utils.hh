@@ -8,15 +8,15 @@
 #include <string>
 
 namespace mime::u32 {
-bool isspace(char32_t c);
+bool isspace(wchar_t c);
 
-void ltrim(std::u32string &s);
-void ltrim(immer::flex_vector<char32_t> &s);
-void rtrim(std::u32string &s);
-void rtrim(immer::flex_vector<char32_t> &s);
-void trim(std::u32string &s);
-void trim(immer::flex_vector<char32_t> &s);
-char32_t tolower(char32_t a);
-char32_t toupper(char32_t a);
+void ltrim(std::wstring &s);
+void ltrim(immer::flex_vector<wchar_t> &s);
+void rtrim(std::wstring &s);
+void rtrim(immer::flex_vector<wchar_t> &s);
+void trim(std::wstring &s);
+void trim(immer::flex_vector<wchar_t> &s);
+wchar_t tolower(wchar_t a);
+wchar_t toupper(wchar_t a);
 } // namespace mime::u32
 #endif /* MIME_U32UTILS_HH */

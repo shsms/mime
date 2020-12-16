@@ -1,16 +1,19 @@
+// -*- js -*-
+
 var b = buffer("main.go");
 var doc_c = b.new_cursor();
 var nav_c = b.new_cursor();
 
 b.use_cursor(nav_c);
 
-while(b.find("func ")) {
+while(b.find(regex("[a-z]+\\(\\)"))) {
+    b.start_of_line();
     b.set_mark();
     b.find("(");
     b.backward();
 
     var fname = b.copy();
-    
+    b.next_line();
     b.use_cursor(doc_c);
     b.paste("// FuncAlert: " + fname + "\n");
 

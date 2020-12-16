@@ -13,7 +13,7 @@ namespace mime {
 
 const static int chunk_size = 1e6;
 
-std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
+std::wstring read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     std::string chunk;
     chunk.resize(max_chunk_size);
 
@@ -21,7 +21,7 @@ std::u32string read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     if (file.gcount() < max_chunk_size) {
         chunk.resize(file.gcount());
     }
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     return cvt.from_bytes(chunk);
 }
 
@@ -151,13 +151,37 @@ template <typename T> bool buffer::find(T t) {
     }
     return false;
 }
+
 // we only need these two instanciations and one specialization below.
 template bool buffer::find(text t);
-template bool buffer::find(std::u32string t);
+template bool buffer::find(std::wstring t);
 template <> bool buffer::find(std::string t) {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-    std::u32string ustr = cvt.from_bytes(t);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+    std::wstring ustr = cvt.from_bytes(t);
     return find(ustr);
+}
+
+template <> bool buffer::find(regex_t t) {
+    std::match_results<text::iterator> m;
+
+    auto c = cursors[cursor];
+    auto offset = c.point;
+    auto begin = contents.begin() + offset;
+    auto end = contents.end();
+    if (c.view.has_value()) { // narrowed view
+        end = contents.begin() + c.view->upper;
+    }
+
+    bool found = std::regex_search(begin, end, m, t.get());
+    assert(m.ready());
+    if (!found || m.empty()) {
+        return false;
+    }
+
+    c.point = m[0].second - contents.begin();
+    cursors = cursors.set(cursor, c);
+
+    return true;
 }
 
 template <typename T> bool buffer::rfind(T t) {
@@ -202,10 +226,10 @@ template <typename T> bool buffer::rfind(T t) {
 }
 
 template bool buffer::rfind(text t);
-template bool buffer::rfind(std::u32string t);
+template bool buffer::rfind(std::wstring t);
 template <> bool buffer::rfind(std::string t) {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-    std::u32string ustr = cvt.from_bytes(t);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+    std::wstring ustr = cvt.from_bytes(t);
     return rfind(ustr);
 }
 
@@ -262,21 +286,21 @@ template <typename T> bool buffer::find_fuzzy(T t) {
     return false;
 }
 template bool buffer::find_fuzzy(text t);
-template bool buffer::find_fuzzy(std::u32string t);
+template bool buffer::find_fuzzy(std::wstring t);
 template <> bool buffer::find_fuzzy(std::string t) {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-    std::u32string ustr = cvt.from_bytes(t);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+    std::wstring ustr = cvt.from_bytes(t);
     return find_fuzzy(ustr);
 }
 
 int buffer::replace(std::string from, std::string to, std::size_t n) {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-    std::u32string wfrom = cvt.from_bytes(from);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+    std::wstring wfrom = cvt.from_bytes(from);
     if (wfrom.empty()) {
         return 0;
     }
 
-    std::u32string wto = cvt.from_bytes(to);
+    std::wstring wto = cvt.from_bytes(to);
     text text_to{wto.begin(), wto.end()};
 
     if (n <= 0) {
@@ -339,8 +363,8 @@ void buffer::paste(text t) {
 }
 
 void buffer::paste(std::string t) {
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-    std::u32string wt = cvt.from_bytes(t);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+    std::wstring wt = cvt.from_bytes(t);
 
     return paste(text{wt.begin(), wt.end()});
 }
@@ -443,10 +467,10 @@ int buffer::next_line(std::size_t n) {
 
     int ii;
     for (ii = 0; ii < n; ii++) {
-        while (it != end && *it != U'\n') {
+        while (it != end && *it != L'\n') {
             ++it;
         }
-        if (*it != U'\n') {
+        if (*it != L'\n') {
             break;
         }
         if (it == end) {
@@ -468,13 +492,13 @@ int buffer::prev_line(std::size_t n) {
     }
     int ii;
     for (ii = 0; ii < n; ii++) {
-        while (it != begin && *it != U'\n') {
+        while (it != begin && *it != L'\n') {
             --it;
         }
-        if (*it != U'\n') {
+        if (*it != L'\n') {
             break;
         }
-        while (it != begin && *(it - 1) != U'\n') {
+        while (it != begin && *(it - 1) != L'\n') {
             --it;
         }
     }
@@ -483,7 +507,7 @@ int buffer::prev_line(std::size_t n) {
     return ii;
 }
 
-void buffer::forward() { forward(1); } // forward one char32_t.
+void buffer::forward() { forward(1); } // forward one wchar_t.
 void buffer::backward() { backward(1); }
 int buffer::next_line() { return next_line(1); }
 int buffer::prev_line() { return prev_line(1); }
@@ -513,7 +537,7 @@ void buffer::start_of_line() {
         begin = begin + c.view->lower;
     }
     auto it = contents.begin() + c.point;
-    while (it != begin && *(it - 1) != U'\n') {
+    while (it != begin && *(it - 1) != L'\n') {
         --it;
     }
     c.point = it - contents.begin();
@@ -527,7 +551,7 @@ void buffer::end_of_line() {
         end = contents.begin() + c.view->upper;
     }
     auto it = contents.begin() + c.point;
-    while (it != end && *it != U'\n') {
+    while (it != end && *it != L'\n') {
         ++it;
     }
     c.point = it - contents.begin();
@@ -545,9 +569,9 @@ bool buffer::start_of_block() {
     while (it != begin) {
         --it;
         switch (*it) {
-        case U'}':
+        case L'}':
             ++depth;
-        case U'{':
+        case L'{':
             if (depth > 0) {
                 --depth;
             } else {
@@ -555,7 +579,7 @@ bool buffer::start_of_block() {
             }
         }
     }
-    if (*it != U'{') {
+    if (*it != L'{') {
         return false;
     }
     c.point = it - contents.begin();
@@ -573,9 +597,9 @@ bool buffer::end_of_block() {
     auto it = contents.begin() + c.point;
     while (it != end) {
         switch (*it) {
-        case U'{':
+        case L'{':
             ++depth;
-        case U'}':
+        case L'}':
             if (depth > 0) {
                 --depth;
             } else {
@@ -584,7 +608,7 @@ bool buffer::end_of_block() {
         }
         ++it;
     }
-    if (*(it - 1) != U'}') {
+    if (*(it - 1) != L'}') {
         return false;
     }
     c.point = it - contents.begin();
@@ -630,9 +654,13 @@ void buffer::widen() {
 }
 
 std::string to_string(text t) {
-    std::u32string wret{t.begin(), t.end()};
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+    std::wstring wret{t.begin(), t.end()};
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     return cvt.to_bytes(wret);
 }
 
+regex_t regex(std::string r) {
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+    return std::wregex(cvt.from_bytes(r));
+}
 } // namespace mime

@@ -4,6 +4,7 @@
 #include <immer/box.hpp>
 #include <immer/flex_vector.hpp>
 #include <immer/vector.hpp>
+#include <regex>
 
 namespace mime {
 
@@ -18,9 +19,11 @@ struct cursor_t {
     std::optional<bounds> view{};
 };
 
-using text = immer::flex_vector<char32_t>;
+using regex_t = immer::box<std::wregex>;
+using text = immer::flex_vector<wchar_t>;
 
 std::string to_string(text t);
+regex_t regex(std::string r);
 
 class buffer {
   public:

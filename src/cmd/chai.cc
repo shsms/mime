@@ -7,6 +7,7 @@ namespace mime {
 void add_bindings(chaiscript::ChaiScript &chai) {
     using bool_str_t = bool (buffer::*)(std::string);
     using bool_txt_t = bool (buffer::*)(text);
+    using bool_rex_t = bool (buffer::*)(regex_t);
     using void_str_t = void (buffer::*)(std::string);
     using void_txt_t = void (buffer::*)(text);
 
@@ -14,13 +15,15 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     using replace_all_t = int (buffer::*)(std::string, std::string);
 
     chai.add(chaiscript::user_type<text>(), "text");
+    chai.add(chaiscript::user_type<regex_t>(), "regex_t");
     chai.add(chaiscript::fun(&to_string), "to_string");
+    chai.add(chaiscript::fun(&regex), "regex");
 
-    chai.add(chaiscript::fun(static_cast<void (*)(std::u32string &)>(&u32::ltrim)), "ltrim");
+    chai.add(chaiscript::fun(static_cast<void (*)(std::wstring &)>(&u32::ltrim)), "ltrim");
     chai.add(chaiscript::fun(static_cast<void (*)(text &)>(&u32::ltrim)), "ltrim");
-    chai.add(chaiscript::fun(static_cast<void (*)(std::u32string &)>(&u32::rtrim)), "rtrim");
+    chai.add(chaiscript::fun(static_cast<void (*)(std::wstring &)>(&u32::rtrim)), "rtrim");
     chai.add(chaiscript::fun(static_cast<void (*)(text &)>(&u32::rtrim)), "rtrim");
-    chai.add(chaiscript::fun(static_cast<void (*)(std::u32string &)>(&u32::trim)), "trim");
+    chai.add(chaiscript::fun(static_cast<void (*)(std::wstring &)>(&u32::trim)), "trim");
     chai.add(chaiscript::fun(static_cast<void (*)(text &)>(&u32::trim)), "trim");
 
     chai.add(chaiscript::user_type<buffer>(), "buffer");
@@ -37,8 +40,11 @@ void add_bindings(chaiscript::ChaiScript &chai) {
 
     chai.add(chaiscript::fun(static_cast<bool_str_t>(&buffer::find)), "find");
     chai.add(chaiscript::fun(static_cast<bool_txt_t>(&buffer::find)), "find");
+    chai.add(chaiscript::fun(static_cast<bool_rex_t>(&buffer::find)), "find");
+
     chai.add(chaiscript::fun(static_cast<bool_str_t>(&buffer::rfind)), "rfind");
     chai.add(chaiscript::fun(static_cast<bool_txt_t>(&buffer::rfind)), "rfind");
+
     chai.add(chaiscript::fun(static_cast<bool_str_t>(&buffer::find_fuzzy)), "find_fuzzy");
     chai.add(chaiscript::fun(static_cast<bool_txt_t>(&buffer::find_fuzzy)), "find_fuzzy");
 
@@ -86,14 +92,14 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun([](text &lhs, const text &rhs) -> text & { return lhs = rhs; }), "=");
 
     chai.add(chaiscript::fun([](const std::string &lhs, const text &rhs) -> text {
-                 std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-                 std::u32string u32lhs = cvt.from_bytes(lhs);
+                 std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+                 std::wstring u32lhs = cvt.from_bytes(lhs);
                  return text{u32lhs.begin(), u32lhs.end()} + rhs;
              }),
              "+");
     chai.add(chaiscript::fun([](const text &lhs, const std::string &rhs) -> text {
-                 std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-                 std::u32string u32rhs = cvt.from_bytes(rhs);
+                 std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+                 std::wstring u32rhs = cvt.from_bytes(rhs);
                  return lhs + text{u32rhs.begin(), u32rhs.end()};
              }),
              "+");
@@ -103,8 +109,8 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun([](const text &lhs, const text &rhs) -> bool { return lhs == rhs; }),
              "==");
     chai.add(chaiscript::fun([](const std::string &lhs, const text &rhs) -> bool {
-                 std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-                 std::u32string u32lhs = cvt.from_bytes(lhs);
+                 std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+                 std::wstring u32lhs = cvt.from_bytes(lhs);
                  if (u32lhs.size() != rhs.size()) {
                      return false;
                  }
@@ -112,8 +118,8 @@ void add_bindings(chaiscript::ChaiScript &chai) {
              }),
              "==");
     chai.add(chaiscript::fun([](const text &lhs, const std::string &rhs) -> bool {
-                 std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-                 std::u32string u32rhs = cvt.from_bytes(rhs);
+                 std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
+                 std::wstring u32rhs = cvt.from_bytes(rhs);
                  if (u32rhs.size() != lhs.size()) {
                      return false;
                  }
