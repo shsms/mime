@@ -32,6 +32,7 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::constructor<buffer(const std::string &, buffer::open_spec)>(), "buffer");
 
     chai.add(chaiscript::fun(&buffer::empty), "empty");
+    chai.add(chaiscript::fun(&buffer::get_contents), "get_contents");
     chai.add(chaiscript::fun(&buffer::size), "size");
 
     chai.add(chaiscript::fun(&buffer::save), "save");

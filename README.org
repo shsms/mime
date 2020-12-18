@@ -93,9 +93,9 @@ If it is not already obvious, here's what the script does:
    2. create two cursors - one for adding documentation at the top,
       and one for navigating the file.
    3. switch to the navigation cursor.
-   4. find and goto next occurance of the string "func ".  If found:
+   4. find and goto next occurence of the string "func ".  If found:
       1. set mark (emacs parlance for "start selecting")
-      2. find next occurance of "(" (assuming we are operating on a
+      2. find next occurence of "(" (assuming we are operating on a
          valid go program,  we don't check if "(" was found, we assume
          it is there.)
       3. go back one character,  we don't want to copy the "("

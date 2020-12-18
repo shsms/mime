@@ -5,6 +5,7 @@
 #include <immer/flex_vector.hpp>
 #include <immer/vector.hpp>
 #include <regex>
+#include <optional>
 
 namespace mime {
 

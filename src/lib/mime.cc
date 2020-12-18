@@ -173,7 +173,6 @@ template <> bool buffer::find(regex_t t) {
     }
 
     bool found = std::regex_search(begin, end, m, t.get());
-    assert(m.ready());
     if (!found || m.empty()) {
         return false;
     }

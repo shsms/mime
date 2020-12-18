@@ -6,11 +6,11 @@ var nav_c = b.new_cursor();
 
 b.use_cursor(nav_c);
 
-while(b.find(regex("[a-z]+\\(\\)"))) {
-    b.start_of_line();
-    b.set_mark();
-    b.find("(");
+while(b.find(regex("(^|\n)[^\\s].*[a-z]+\\("))) {
     b.backward();
+    b.set_mark();
+    b.rfind(" ");
+    b.forward();
 
     var fname = b.copy();
     b.next_line();
