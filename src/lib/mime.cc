@@ -12,6 +12,7 @@
 namespace mime {
 
 const static int chunk_size = 1e6;
+const long not_found = -1;
 
 std::wstring read_file_chunk(std::ifstream &file, uint64_t max_chunk_size) {
     std::string chunk;
@@ -119,11 +120,12 @@ long buffer::get_mark() {
     if (cursors[cursor].mark.has_value()) {
         return *cursors[cursor].mark;
     }
-    return -1;
+    return not_found;
 }
-template <typename T> bool buffer::find(T t) {
+
+template <typename T> long buffer::find(T t) {
     if (t.empty()) {
-        return false;
+        return not_found;
     }
 
     auto match_iter = t.begin();
@@ -135,10 +137,12 @@ template <typename T> bool buffer::find(T t) {
         lim = c.view->upper;
     }
 
+    long match_start = offset;
     for (auto it = contents.begin() + offset; it != contents.end() && offset < lim; ++it) {
         ++offset;
         if (*match_iter != *it) {
             match_iter = t.begin();
+	    match_start = offset;
             continue;
         }
         ++match_iter;
@@ -146,22 +150,22 @@ template <typename T> bool buffer::find(T t) {
             auto c = cursors[cursor];
             c.point = offset;
             cursors = cursors.set(cursor, c);
-            return true;
+            return match_start;
         }
     }
-    return false;
+    return not_found;
 }
 
 // we only need these two instanciations and one specialization below.
-template bool buffer::find(text t);
-template bool buffer::find(std::wstring t);
-template <> bool buffer::find(std::string t) {
+template long buffer::find(text t);
+template long buffer::find(std::wstring t);
+template <> long buffer::find(std::string t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return find(ustr);
 }
 
-template <> bool buffer::find(regex_t t) {
+template <> long buffer::find(regex_t t) {
     std::match_results<text::iterator> m;
 
     auto c = cursors[cursor];
@@ -174,24 +178,24 @@ template <> bool buffer::find(regex_t t) {
 
     bool found = std::regex_search(begin, end, m, t.get());
     if (!found || m.empty()) {
-        return false;
+        return not_found;
     }
 
     c.point = m[0].second - contents.begin();
     cursors = cursors.set(cursor, c);
 
-    return true;
+    return m[0].first - contents.begin();
 }
 
-template <typename T> bool buffer::rfind(T t) {
+template <typename T> long buffer::rfind(T t) {
     if (t.empty()) {
-        return false;
+        return not_found;
     }
 
     auto c = cursors[cursor];
     std::size_t offset = c.point - t.size();
     if (offset < 0) {
-        return false;
+        return not_found;
     }
 
     std::size_t lim{};
@@ -201,6 +205,7 @@ template <typename T> bool buffer::rfind(T t) {
 
     auto match_iter = t.begin();
     auto iter = contents.begin() + offset;
+
     while (offset >= lim) {
         if (*match_iter != *iter) {
             if (offset == lim) {
@@ -218,24 +223,24 @@ template <typename T> bool buffer::rfind(T t) {
             auto c = cursors[cursor];
             c.point = offset;
             cursors = cursors.set(cursor, c);
-            return true;
+            return iter - contents.begin();
         }
     }
-    return false;
+    return not_found;
 }
 
-template bool buffer::rfind(text t);
-template bool buffer::rfind(std::wstring t);
-template <> bool buffer::rfind(std::string t) {
+template long buffer::rfind(text t);
+template long buffer::rfind(std::wstring t);
+template <> long buffer::rfind(std::string t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return rfind(ustr);
 }
 
-template <typename T> bool buffer::find_fuzzy(T t) {
+template <typename T> long buffer::find_fuzzy(T t) {
     u32::trim(t);
     if (t.empty()) {
-        return false;
+        return not_found;
     }
 
     auto match_iter = t.begin();
@@ -243,6 +248,7 @@ template <typename T> bool buffer::find_fuzzy(T t) {
     auto offset = c.point;
     auto lim = contents.size();
     std::size_t match_length{};
+    long match_start = offset;
 
     if (c.view.has_value()) { // narrowed view
         lim = c.view->upper;
@@ -269,6 +275,7 @@ template <typename T> bool buffer::find_fuzzy(T t) {
                 it -= (match_length - 1);
                 match_length = 0;
             }
+	    match_start = offset;
             continue;
         }
         ++match_length;
@@ -279,14 +286,14 @@ template <typename T> bool buffer::find_fuzzy(T t) {
             auto c = cursors[cursor];
             c.point = offset;
             cursors = cursors.set(cursor, c);
-            return true;
+            return match_start;
         }
     }
-    return false;
+    return not_found;
 }
-template bool buffer::find_fuzzy(text t);
-template bool buffer::find_fuzzy(std::wstring t);
-template <> bool buffer::find_fuzzy(std::string t) {
+template long buffer::find_fuzzy(text t);
+template long buffer::find_fuzzy(std::wstring t);
+template <> long buffer::find_fuzzy(std::string t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return find_fuzzy(ustr);
@@ -310,7 +317,7 @@ int buffer::replace(std::string from, std::string to, std::size_t n) {
     int ii;
     for (ii = 0; ii < n; ++ii) {
         auto found = find(wfrom);
-        if (!found) {
+        if (found < 0) {
             return ii;
         }
         auto c = cursors[cursor];

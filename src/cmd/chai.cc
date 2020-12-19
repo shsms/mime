@@ -5,9 +5,9 @@
 namespace mime {
 
 void add_bindings(chaiscript::ChaiScript &chai) {
-    using bool_str_t = bool (buffer::*)(std::string);
-    using bool_txt_t = bool (buffer::*)(text);
-    using bool_rex_t = bool (buffer::*)(regex_t);
+    using long_str_t = long (buffer::*)(std::string);
+    using long_txt_t = long (buffer::*)(text);
+    using long_rex_t = long (buffer::*)(regex_t);
     using void_str_t = void (buffer::*)(std::string);
     using void_txt_t = void (buffer::*)(text);
 
@@ -39,15 +39,15 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(&buffer::save_as), "save_as");
     chai.add(chaiscript::fun(&buffer::set_mark), "set_mark");
 
-    chai.add(chaiscript::fun(static_cast<bool_str_t>(&buffer::find)), "find");
-    chai.add(chaiscript::fun(static_cast<bool_txt_t>(&buffer::find)), "find");
-    chai.add(chaiscript::fun(static_cast<bool_rex_t>(&buffer::find)), "find");
+    chai.add(chaiscript::fun(static_cast<long_str_t>(&buffer::find)), "find");
+    chai.add(chaiscript::fun(static_cast<long_txt_t>(&buffer::find)), "find");
+    chai.add(chaiscript::fun(static_cast<long_rex_t>(&buffer::find)), "find");
 
-    chai.add(chaiscript::fun(static_cast<bool_str_t>(&buffer::rfind)), "rfind");
-    chai.add(chaiscript::fun(static_cast<bool_txt_t>(&buffer::rfind)), "rfind");
+    chai.add(chaiscript::fun(static_cast<long_str_t>(&buffer::rfind)), "rfind");
+    chai.add(chaiscript::fun(static_cast<long_txt_t>(&buffer::rfind)), "rfind");
 
-    chai.add(chaiscript::fun(static_cast<bool_str_t>(&buffer::find_fuzzy)), "find_fuzzy");
-    chai.add(chaiscript::fun(static_cast<bool_txt_t>(&buffer::find_fuzzy)), "find_fuzzy");
+    chai.add(chaiscript::fun(static_cast<long_str_t>(&buffer::find_fuzzy)), "find_fuzzy");
+    chai.add(chaiscript::fun(static_cast<long_txt_t>(&buffer::find_fuzzy)), "find_fuzzy");
 
     chai.add(chaiscript::fun(static_cast<replace_t>(&buffer::replace)), "replace");
     chai.add(chaiscript::fun(static_cast<replace_all_t>(&buffer::replace)), "replace");

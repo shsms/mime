@@ -11,14 +11,14 @@ like Emacs Keyboard Macros,  but hard to do in code.
 
 Here's an example mime script ([[examples/gofunc.mime][examples/gofunc.mime]]):
 
-#+begin_src
+#+begin_src js
 var b = buffer("main.go");
 var doc_c = b.new_cursor();
 var nav_c = b.new_cursor();
 
 b.use_cursor(nav_c);
 
-while(b.find("func ")) {
+while(b.find("func ") >= 0) {
     b.set_mark();
     b.find("(");
     b.backward();

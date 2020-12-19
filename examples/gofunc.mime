@@ -6,7 +6,7 @@ var nav_c = b.new_cursor();
 
 b.use_cursor(nav_c);
 
-while(b.find(regex("(^|\n)[^\\s].*[a-z]+\\("))) {
+while(b.find(regex("(^|\n)[^\\s].*[a-z]+\\(")) >= 0) {
     b.backward();
     b.set_mark();
     b.rfind(" ");

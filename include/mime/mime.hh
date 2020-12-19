@@ -47,9 +47,9 @@ class buffer {
 
     inline text get_contents() { return contents; }
 
-    template <typename T> bool find(T t);
-    template <typename T> bool rfind(T t);
-    template <typename T> bool find_fuzzy(T t);
+    template <typename T> long find(T t);
+    template <typename T> long rfind(T t);
+    template <typename T> long find_fuzzy(T t);
 
     int replace(std::string from, std::string to, std::size_t n);
     int replace(std::string from, std::string to);
