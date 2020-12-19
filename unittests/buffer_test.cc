@@ -95,7 +95,7 @@ TEST_F(BufferTest, SetMark) {
 
 TEST_F(BufferTest, CopyEmpty) {
     EXPECT_EQ(ascii.get_mark(), -1);
-    auto r = ascii.find("c"s);
+    ascii.find("c"s);
     auto t = ascii.copy();
     EXPECT_EQ(t.size(), 0);
     EXPECT_STREQ(mime::to_string(t).c_str(), "");
@@ -108,7 +108,7 @@ TEST_F(BufferTest, CopyEmpty) {
 
 TEST_F(BufferTest, CopyForward) {
     ascii.set_mark();
-    auto r = ascii.find("c"s);
+    ascii.find("c"s);
     auto t = ascii.copy();
     EXPECT_EQ(t.size(), 5);
     EXPECT_STREQ(mime::to_string(t).c_str(), "a,b,c");
@@ -240,29 +240,29 @@ TEST_F(BufferTest, GetPos) {
 }
 
 TEST_F(BufferTest, GotoPos) {
-    auto r = ascii.goto_pos(-1);
-    EXPECT_EQ(r, false);
+    auto b = ascii.goto_pos(-1);
+    EXPECT_EQ(b, false);
 
-    r = ascii.goto_pos(20);
-    EXPECT_EQ(r, false);
+    b = ascii.goto_pos(20);
+    EXPECT_EQ(b, false);
 
-    r = ascii.goto_pos(10);
-    EXPECT_EQ(r, true);
+    b = ascii.goto_pos(10);
+    EXPECT_EQ(b, true);
     EXPECT_EQ(ascii.get_pos(), 10);
 
-    r = ascii.goto_pos(5);
-    EXPECT_EQ(r, true);
+    b = ascii.goto_pos(5);
+    EXPECT_EQ(b, true);
     EXPECT_EQ(ascii.get_pos(), 5);
     
-    r = ascii.goto_pos(18);
-    EXPECT_EQ(r, true);
+    b = ascii.goto_pos(18);
+    EXPECT_EQ(b, true);
     EXPECT_EQ(ascii.get_pos(), 18);
 
     ascii.paste("hello");
     ascii.start_of_buffer();
-    r = ascii.find("hel"s);
+    auto r = ascii.find("hel"s);
     EXPECT_EQ(ascii.get_pos(), 21);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 18);
 }
 
 TEST_F(BufferTest, Forward) {
@@ -373,45 +373,45 @@ TEST_F(BufferTest, Save) {
 
 TEST_F(BufferTest, FindPresent) {
     auto r = ascii.find("a"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 0);
     EXPECT_EQ(ascii.get_pos(), 1);
 
     r = ascii.find("b"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 2);
     EXPECT_EQ(ascii.get_pos(), 3);
 
     r = ascii.find("c\n1"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 4);
     EXPECT_EQ(ascii.get_pos(), 7);
 
     r = ascii.find("6\n"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 16);
     EXPECT_EQ(ascii.get_pos(), 18);
 }
 
 TEST_F(BufferTest, FindMissing) {
     auto r = ascii.find("zz"s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 0);
 
     r = ascii.find("b"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 2);
     EXPECT_EQ(ascii.get_pos(), 3);
 
     r = ascii.find("zzz"s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 3);
 
     r = ascii.find(""s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 3);
     
     r = ascii.find("6\n"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 16);
     EXPECT_EQ(ascii.get_pos(), 18);
     
     r = ascii.find("6\n"s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 18);
 }
 
@@ -419,7 +419,7 @@ TEST_F(BufferTest, FindEmptyFile) {
     auto b = mime::buffer();
     EXPECT_EQ(b.get_pos(), 0);
     auto r = b.find("zz"s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(b.get_pos(), 0);
 }
 
@@ -428,11 +428,11 @@ TEST_F(BufferTest, RFindPresent) {
     EXPECT_EQ(ascii.get_pos(), 18);
 
     auto r = ascii.rfind("3"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 11);
     EXPECT_EQ(ascii.get_pos(), 10);
 
     r = ascii.rfind("a,b"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 3);
     EXPECT_EQ(ascii.get_pos(), 0);
 }
 
@@ -447,25 +447,25 @@ TEST_F(BufferTest, RFindMissing) {
     EXPECT_EQ(ascii.get_pos(), 18);
 
     auto r = ascii.rfind(""s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 18);
 
     r = ascii.rfind("d"s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 18);
 
     r = ascii.rfind("a,b,d"s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 18);
 }
 
 TEST_F(BufferTest, FindFuzzyPresent) {
     auto r = ascii.find_fuzzy("a,B,C 1,2"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 0);
     EXPECT_EQ(ascii.get_pos(), 9);
 
     r = ascii.find_fuzzy("3\n\n\t4"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 10);
     EXPECT_EQ(ascii.get_pos(), 13);
 
     // TODO: make this work
@@ -476,16 +476,16 @@ TEST_F(BufferTest, FindFuzzyPresent) {
 
 TEST_F(BufferTest, FindFuzzyMissing) {
     auto r = ascii.find_fuzzy("a,B,d 1,2"s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 0);
 
     r = ascii.find_fuzzy(""s);
-    EXPECT_EQ(r, false);
+    EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 0);
 }
 
 TEST_F(BufferTest, FindFuzzyUnicode) {
     auto r = unicode.find_fuzzy("நாமன் உன்"s);
-    EXPECT_EQ(r, true);
+    EXPECT_EQ(r, 29);
     EXPECT_EQ(unicode.get_pos(), 38);
 }

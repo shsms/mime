@@ -14,7 +14,7 @@ var nav_c = b.new_cursor();
 
 b.use_cursor(nav_c);
 
-while(b.find("func ")) {
+while(b.find("func ") >= 0) {
     b.set_mark();
     b.find("(");
     b.backward();
