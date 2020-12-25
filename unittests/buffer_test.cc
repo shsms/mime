@@ -253,7 +253,7 @@ TEST_F(BufferTest, GotoPos) {
     b = ascii.goto_pos(5);
     EXPECT_EQ(b, true);
     EXPECT_EQ(ascii.get_pos(), 5);
-    
+
     b = ascii.goto_pos(18);
     EXPECT_EQ(b, true);
     EXPECT_EQ(ascii.get_pos(), 18);
@@ -328,7 +328,6 @@ TEST_F(BufferTest, StartOfBuffer) {
     EXPECT_EQ(ascii.get_pos(), 12);
     ascii.start_of_buffer();
     EXPECT_EQ(ascii.get_pos(), 0);
-
 }
 
 TEST_F(BufferTest, EndOfBuffer) {
@@ -405,11 +404,11 @@ TEST_F(BufferTest, FindMissing) {
     r = ascii.find(""s);
     EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 3);
-    
+
     r = ascii.find("6\n"s);
     EXPECT_EQ(r, 16);
     EXPECT_EQ(ascii.get_pos(), 18);
-    
+
     r = ascii.find("6\n"s);
     EXPECT_LT(r, 0);
     EXPECT_EQ(ascii.get_pos(), 18);
@@ -421,6 +420,16 @@ TEST_F(BufferTest, FindEmptyFile) {
     auto r = b.find("zz"s);
     EXPECT_LT(r, 0);
     EXPECT_EQ(b.get_pos(), 0);
+}
+
+TEST_F(BufferTest, FindRegex) {
+    auto r = ascii.find(mime::regex("[0-9]"));
+    EXPECT_EQ(r, 6);
+    EXPECT_EQ(ascii.get_pos(), 7);
+
+    r = ascii.find(mime::regex(""));
+    EXPECT_LT(r, 0);
+    EXPECT_EQ(ascii.get_pos(), 7);
 }
 
 TEST_F(BufferTest, RFindPresent) {

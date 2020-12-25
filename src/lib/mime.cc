@@ -8,6 +8,7 @@
 #include <mime/u32utils.hh>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <stdexcept>
 
 namespace mime {
 
@@ -58,6 +59,8 @@ buffer::buffer(const std::string &fname, open_spec spec) {
 
 buffer::buffer(const std::string &fname) : buffer(fname, try_open) {}
 
+buffer::buffer(const text &fname) : buffer(to_string(fname), try_open) {}
+
 void buffer::save() { save_as(filename); }
 
 void buffer::save_as(const std::string &fname) {
@@ -90,7 +93,7 @@ void buffer::update_all_cursors(std::size_t mark, std::size_t point, std::size_t
         }
 
         if (csr.view.has_value()) {
-            if (csr.view->lower >= point) {
+            if (csr.view->lower >= point && mark < point) {
                 csr.view->lower = csr.view->lower - back + forward;
                 csr.view->upper = csr.view->upper - back + forward;
             } else if (csr.view->lower >= mark && csr.view->upper >= point) {
@@ -142,7 +145,7 @@ template <typename T> long buffer::find(T t) {
         ++offset;
         if (*match_iter != *it) {
             match_iter = t.begin();
-	    match_start = offset;
+            match_start = offset;
             continue;
         }
         ++match_iter;
@@ -167,7 +170,9 @@ template <> long buffer::find(std::string t) {
 
 template <> long buffer::find(regex_t t) {
     std::match_results<text::iterator> m;
-
+    if (t.empty) {
+        return not_found;
+    }
     auto c = cursors[cursor];
     auto offset = c.point;
     auto begin = contents.begin() + offset;
@@ -176,7 +181,7 @@ template <> long buffer::find(regex_t t) {
         end = contents.begin() + c.view->upper;
     }
 
-    bool found = std::regex_search(begin, end, m, t.get());
+    bool found = std::regex_search(begin, end, m, t.rex.get());
     if (!found || m.empty()) {
         return not_found;
     }
@@ -275,7 +280,7 @@ template <typename T> long buffer::find_fuzzy(T t) {
                 it -= (match_length - 1);
                 match_length = 0;
             }
-	    match_start = offset;
+            match_start = offset;
             continue;
         }
         ++match_length;
@@ -411,7 +416,7 @@ std::size_t buffer::new_cursor() {
 void buffer::use_cursor(std::size_t c) {
     if (c > cursors.size()) {
         SPDLOG_ERROR("attempt to move cursor to outside file_range");
-        throw std::runtime_error("attempt to move cursor to outside file_range");
+        throw std::out_of_range("attempt to move cursor to outside file_range");
     }
     cursor = c;
 }
@@ -490,6 +495,7 @@ int buffer::next_line(std::size_t n) {
 }
 
 int buffer::prev_line(std::size_t n) {
+    backward(); // if at end of line,  that \n shouldn't be counted.
     auto c = cursors[cursor];
     auto it = contents.begin() + c.point;
     auto begin = contents.begin();
@@ -573,16 +579,22 @@ bool buffer::start_of_block() {
     int depth{};
     auto it = contents.begin() + c.point;
     while (it != begin) {
+        bool found_start{false};
         --it;
         switch (*it) {
         case L'}':
             ++depth;
+            break;
         case L'{':
             if (depth > 0) {
                 --depth;
             } else {
-                break;
+                found_start = true;
             }
+            break;
+        }
+        if (found_start) {
+            break;
         }
     }
     if (*it != L'{') {
@@ -594,6 +606,11 @@ bool buffer::start_of_block() {
 }
 
 bool buffer::end_of_block() {
+    auto curr_pos = get_pos();
+    if (!start_of_block()) {
+        return false;
+    }
+    goto_pos(curr_pos);
     auto c = cursors[cursor];
     auto end = contents.end();
     if (c.view.has_value()) {
@@ -602,17 +619,23 @@ bool buffer::end_of_block() {
     int depth{};
     auto it = contents.begin() + c.point;
     while (it != end) {
+        bool found_end{false};
         switch (*it) {
         case L'{':
             ++depth;
+            break;
         case L'}':
             if (depth > 0) {
                 --depth;
             } else {
-                break;
+                found_end = true;
             }
+            break;
         }
         ++it;
+        if (found_end) {
+            break;
+        }
     }
     if (*(it - 1) != L'}') {
         return false;
@@ -623,12 +646,12 @@ bool buffer::end_of_block() {
 }
 
 bool buffer::narrow_to_block() {
-    auto from = get_pos();
+    auto curr_pos = get_pos();
     if (!start_of_block()) {
         return false;
     }
     set_mark();
-    goto_pos(from);
+    goto_pos(curr_pos);
     if (!end_of_block()) {
         return false;
     }
@@ -659,14 +682,17 @@ void buffer::widen() {
     cursors = cursors.set(cursor, c);
 }
 
-std::string to_string(text t) {
+std::string to_string(const text &t) {
     std::wstring wret{t.begin(), t.end()};
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     return cvt.to_bytes(wret);
 }
 
-regex_t regex(std::string r) {
+regex_t regex(const std::string &r) {
+    if (r.empty()) {
+        return {.empty = true};
+    }
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
-    return std::wregex(cvt.from_bytes(r));
+    return {std::wregex(cvt.from_bytes(r)), false};
 }
 } // namespace mime

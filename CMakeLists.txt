@@ -37,6 +37,7 @@ add_executable(unittests
   src/lib/u32utils.cc
   src/cmd/chai.cc
   unittests/buffer_test.cc    
+  unittests/narrow_test.cc
   unittests/chai_test.cc    
   unittests/main_test.cc    
   unittests/u32utils_test.cc)

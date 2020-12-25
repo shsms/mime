@@ -28,10 +28,12 @@ void add_bindings(chaiscript::ChaiScript &chai) {
 
     chai.add(chaiscript::user_type<buffer>(), "buffer");
     chai.add(chaiscript::constructor<buffer()>(), "buffer");
-    chai.add(chaiscript::constructor<buffer(const std::string &)>(), "buffer");
     chai.add(chaiscript::constructor<buffer(const std::string &, buffer::open_spec)>(), "buffer");
+    chai.add(chaiscript::constructor<buffer(const std::string &)>(), "buffer");
+    chai.add(chaiscript::constructor<buffer(const mime::text &)>(), "buffer");
 
     chai.add(chaiscript::fun(&buffer::empty), "empty");
+    chai.add(chaiscript::fun(&buffer::narrowed_view), "narrowed_view");
     chai.add(chaiscript::fun(&buffer::get_contents), "get_contents");
     chai.add(chaiscript::fun(&buffer::size), "size");
 

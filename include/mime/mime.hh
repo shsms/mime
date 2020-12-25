@@ -4,8 +4,8 @@
 #include <immer/box.hpp>
 #include <immer/flex_vector.hpp>
 #include <immer/vector.hpp>
-#include <regex>
 #include <optional>
+#include <regex>
 
 namespace mime {
 
@@ -20,11 +20,15 @@ struct cursor_t {
     std::optional<bounds> view{};
 };
 
-using regex_t = immer::box<std::wregex>;
+struct regex_t {
+    immer::box<std::wregex> rex;
+    bool empty{};
+};
+
 using text = immer::flex_vector<wchar_t>;
 
-std::string to_string(text t);
-regex_t regex(std::string r);
+std::string to_string(const text &t);
+regex_t regex(const std::string &r);
 
 class buffer {
   public:
@@ -36,16 +40,24 @@ class buffer {
     buffer();
     buffer(const std::string &fname, open_spec spec);
     buffer(const std::string &fname);
+    buffer(const text &fname);
 
     inline bool empty() { return contents.empty(); }
     inline std::size_t size() { return contents.size(); }
+    inline bool narrowed_view() { return cursors[cursor].view.has_value(); }
 
     void save();
     void save_as(const std::string &fname);
     void set_mark();
     long get_mark();
 
-    inline text get_contents() { return contents; }
+    inline text get_contents() {
+	const auto &v = cursors[cursor].view;
+        if (v.has_value()) {
+	    return contents.drop(v->lower).take(v->upper-v->lower);
+        }
+        return contents;
+    }
 
     template <typename T> long find(T t);
     template <typename T> long rfind(T t);
