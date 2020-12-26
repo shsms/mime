@@ -2,14 +2,31 @@
 
 [[https://travis-ci.com/shsms/mime][https://travis-ci.com/shsms/mime.svg?branch=main]] [[https://codecov.io/gh/shsms/mime][https://codecov.io/gh/shsms/mime/branch/main/graph/badge.svg?token=ASAIA6P309]]
 
-Mime is a text processing tool inspired by Emacs,  written in C++.
+Mime is a scripting language framework for text processing, inspired
+by Emacs.
 
 Mime provides an editor-like abstraction for manipulating text files,
 but in a scripting environment,  without an editor.  This enables very
 sophisticated transformations that are easy to do through tools
 like Emacs Keyboard Macros,  but hard to do in code.
 
-Here's an example mime script ([[examples/gofunc.mime][examples/gofunc.mime]]):
+- *Documentation*: https://mime.dev
+
+** Dependencies
+For providing its functionalities, Mime depends on these amazing
+ libraries:
+
+- [[https://github.com/ChaiScript/ChaiScript][ChaiScript]] for the scripting language.
+- [[https://github.com/arximboldi/immer][Immer]] for data representation.
+- [[https://github.com/gabime/spdlog][spdlog]] for logs.
+- [[https://github.com/jarro2783/cxxopts][cxxopts]] for parsing of cli arguments.
+- [[https://github.com/google/googletest][googletest]] for unit tests.
+
+(You don't have to install them separately, they are added as
+submodules to this repository, so just following the build steps in
+the [[https://mime.dev/getting-started.html][Getting started]] page is enough.)
+
+** An example mime script
 
 #+begin_src js
 var b = buffer("main.go");
@@ -87,7 +104,7 @@ func hello() string {
 }
 #+end_src
 
-If it is not already obvious, here's what the script does:
+Here's what the script does:
 
    1. open file "main.go"
    2. create two cursors - one for adding documentation at the top,
@@ -110,57 +127,3 @@ If it is not already obvious, here's what the script does:
    5. switch to doc cursor to insert a final newline to introduce a
       gap between inserted text and original program.
    6. save file under a new name.
-
-** Dependencies
-For providing its functionalities, Mime depends on these amazing
- libraries:
-
-1. [[https://github.com/ChaiScript/ChaiScript][ChaiScript]] for the scripting language.
-2. [[https://github.com/arximboldi/immer][Immer]] for data representation. Immer is particularly unique in the
-   kind of abstractions it offers over traditional datastructures,
-   there's nothing else like it in C++ as far as I know.
-3. [[https://github.com/gabime/spdlog][spdlog]] for logs.
-4. [[https://github.com/google/googletest][googletest]] for unit tests.
-
-(You don't have to install them separately, they are added as
-submodules to this repository,  so just following the build steps
-below is enough.)
-
-** Build instructions
-(Only Linux at the moment, I've tested on Manjaro)
-
-- Initialize submodules with:
-
-#+begin_src shell
-make init
-#+end_src
-
-- Build using:
-
-#+begin_src shell
-make build
-#+end_src
-
-- Run unit tests with:
-
-#+begin_src shell
-make test
-#+end_src
-
-- Install to [[https://www.freedesktop.org/software/systemd/man/file-hierarchy.html#~/.local/bin/][local bin]] directory. (depends on systemd to get
-  installation path)
-#+begin_src bash
-make install
-#+end_src
-
-** Project status
-Mime is already usable,  there are unit tests for all core
-function,  but the project is still very new,  and I'm in the process
-of adding additional features and documentation for all features.
-
-Until then, to get the list of functions that you can call in your
-scripts, checkout the [[https://github.com/shsms/mime/blob/main/include/mime/mime.hh#L25][mime.hh]] file.  All the functions there are
-working and have tests.
-
-For details on features provided by the scripting language, checkout
-chaiscript docs [[https://codedocs.xyz/ChaiScript/ChaiScript/LangGettingStarted.html][here]].

@@ -1,5 +1,6 @@
-#include <mime/args.hh>
 #include <chaiscript/chaiscript.hpp>
+#include <mime/args.hh>
+#include <mime/except.hh>
 #include <mime/mime.hh>
 #include <mime/u32utils.hh>
 
@@ -38,7 +39,7 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::constructor<buffer(const mime::text &)>(), "buffer");
 
     chai.add(chaiscript::fun(&buffer::empty), "empty");
-    chai.add(chaiscript::fun(&buffer::narrowed_view), "narrowed_view");
+    chai.add(chaiscript::fun(&buffer::narrowed), "narrowed");
     chai.add(chaiscript::fun(&buffer::get_contents), "get_contents");
     chai.add(chaiscript::fun(&buffer::size), "size");
 
@@ -135,8 +136,6 @@ void add_bindings(chaiscript::ChaiScript &chai) {
              }),
              "==");
 
-    // add args_parser
-
     // add enums
     chaiscript::ModulePtr m = chaiscript::ModulePtr(new chaiscript::Module());
 
@@ -144,6 +143,9 @@ void add_bindings(chaiscript::ChaiScript &chai) {
         *m, "open_spec", {{buffer::try_open, "try_open"}, {buffer::must_open, "must_open"}});
 
     chai.add(m);
+
+    // exit
+    chai.add(chaiscript::fun([](int code) { throw exit_exception(code); }), "exit");
 }
 
 void add_args_bindings(chaiscript::ChaiScript &chai, args_parser &args) {
@@ -197,7 +199,13 @@ int run(int argc, char **argv) {
     chaiscript::ChaiScript chai;
     add_bindings(chai);
     add_args_bindings(chai, args);
-    chai.eval_file(argv[1]);
+
+    try {
+        chai.eval_file(argv[1]);
+    } catch (const exit_exception &e) {
+        return e.get_code();
+    }
+
     return 0;
 }
 } // namespace mime

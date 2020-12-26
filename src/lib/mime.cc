@@ -423,7 +423,10 @@ void buffer::use_cursor(std::size_t c) {
 
 std::size_t buffer::get_pos() { return cursors[cursor].point; }
 
-bool buffer::goto_pos(std::size_t pos) {
+bool buffer::goto_pos(long pos) {
+    if (pos == -1) {
+	return false;
+    }
     auto c = cursors[cursor];
     std::size_t start = 0, end = contents.size();
     if (c.view.has_value()) { // narrowed view
