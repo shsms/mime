@@ -1,3 +1,4 @@
+#include <mime/args.hh>
 #include <chaiscript/chaiscript.hpp>
 #include <mime/mime.hh>
 #include <mime/u32utils.hh>
@@ -15,6 +16,10 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     using replace_all_t = int (buffer::*)(std::string, std::string);
 
     chai.add(chaiscript::user_type<text>(), "text");
+    chai.add(chaiscript::fun(&text::empty), "empty");
+    chai.add(chaiscript::fun(&text::size), "size");
+    chai.add(chaiscript::constructor<text(const text &)>(), "text");
+
     chai.add(chaiscript::user_type<regex_t>(), "regex_t");
     chai.add(chaiscript::fun(&to_string), "to_string");
     chai.add(chaiscript::fun(&regex), "regex");
@@ -130,6 +135,8 @@ void add_bindings(chaiscript::ChaiScript &chai) {
              }),
              "==");
 
+    // add args_parser
+
     // add enums
     chaiscript::ModulePtr m = chaiscript::ModulePtr(new chaiscript::Module());
 
@@ -139,9 +146,58 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(m);
 }
 
-void run(const std::string &filename) {
+void add_args_bindings(chaiscript::ChaiScript &chai, args_parser &args) {
+    chai.add(chaiscript::user_type<args_parser>(), "args_parser_t");
+    chai.add(chaiscript::fun([&]() { return args; }), "args_parser");
+    chai.add(chaiscript::fun(&args_parser::help), "help");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &,
+                                                   const std::string &)>(&args_parser::bool_opt)),
+             "bool_opt");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &)>(
+                     &args_parser::bool_opt)),
+             "bool_opt");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &,
+                                                   const std::string &)>(&args_parser::int_opt)),
+             "int_opt");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &)>(
+                     &args_parser::int_opt)),
+             "int_opt");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &,
+                                                   const std::string &)>(&args_parser::float_opt)),
+             "float_opt");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &)>(
+                     &args_parser::float_opt)),
+             "float_opt");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &,
+                                                   const std::string &)>(&args_parser::string_opt)),
+             "string_opt");
+    chai.add(chaiscript::fun(
+                 static_cast<void (args_parser::*)(const std::string &, const std::string &)>(
+                     &args_parser::string_opt)),
+             "string_opt");
+    chai.add(chaiscript::fun(&args_parser::parse), "parse");
+}
+
+int run(int argc, char **argv) {
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <filename>\n"
+                  << "\twhere <filename> is the name of the file containing the mime script to "
+                     "execute.\n\n";
+        return 1;
+    }
+
+    args_parser args(argc, argv);
     chaiscript::ChaiScript chai;
     add_bindings(chai);
-    chai.eval_file(filename);
+    add_args_bindings(chai, args);
+    chai.eval_file(argv[1]);
+    return 0;
 }
 } // namespace mime
