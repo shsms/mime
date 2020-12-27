@@ -13,6 +13,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 include_directories(
   include
   vendor/immer
+  vendor/cxxopts/include
   vendor/ChaiScript/include
   vendor/spdlog/include)
 
@@ -21,6 +22,7 @@ add_library(mime STATIC
   src/lib/u32utils.cc)
 
 add_executable(mime-bin
+  src/cmd/args.cc
   src/cmd/chai.cc
   src/cmd/main.cc)
 
@@ -33,13 +35,15 @@ set_target_properties(mime-bin
 
 add_subdirectory(vendor/googletest)
 add_executable(unittests
+  src/cmd/args.cc
   src/lib/mime.cc
   src/lib/u32utils.cc
   src/cmd/chai.cc
-  unittests/buffer_test.cc    
+  unittests/args_test.cc
+  unittests/buffer_test.cc
   unittests/narrow_test.cc
-  unittests/chai_test.cc    
-  unittests/main_test.cc    
+  unittests/chai_test.cc
+  unittests/main_test.cc
   unittests/u32utils_test.cc)
 target_compile_options(unittests PUBLIC -coverage)
 target_link_libraries(unittests gtest dl)

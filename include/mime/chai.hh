@@ -4,6 +4,6 @@
 #include <string>
 
 namespace mime {
-void run(const std::string &filename);
+int run(int argc, char **argv);
 } // namespace mime
 #endif /* MIME_CHAI_INIT_HH */
