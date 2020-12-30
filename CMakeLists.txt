@@ -41,6 +41,7 @@ add_executable(unittests
   src/cmd/chai.cc
   unittests/args_test.cc
   unittests/buffer_test.cc
+  unittests/except_test.cc
   unittests/narrow_test.cc
   unittests/chai_test.cc
   unittests/main_test.cc

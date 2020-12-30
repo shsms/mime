@@ -42,9 +42,21 @@ class buffer {
     buffer(const std::string &fname);
     buffer(const text &fname);
 
-    inline bool empty() { return contents.empty(); }
-    inline std::size_t size() { return contents.size(); }
-    inline bool narrowed_view() { return cursors[cursor].view.has_value(); }
+    inline bool empty() {
+        const auto &v = cursors[cursor].view;
+        if (v.has_value()) {
+            return v->upper == v->lower;
+        }
+	return contents.empty();
+    }
+    inline std::size_t size() {
+        const auto &v = cursors[cursor].view;
+        if (v.has_value()) {
+            return v->upper - v->lower;
+        }
+        return contents.size();
+    }
+    inline bool narrowed() { return cursors[cursor].view.has_value(); }
 
     void save();
     void save_as(const std::string &fname);
@@ -52,9 +64,9 @@ class buffer {
     long get_mark();
 
     inline text get_contents() {
-	const auto &v = cursors[cursor].view;
+        const auto &v = cursors[cursor].view;
         if (v.has_value()) {
-	    return contents.drop(v->lower).take(v->upper-v->lower);
+            return contents.drop(v->lower).take(v->upper - v->lower);
         }
         return contents;
     }
@@ -76,7 +88,7 @@ class buffer {
     std::size_t new_cursor();
     void use_cursor(std::size_t c);
     std::size_t get_pos();
-    bool goto_pos(std::size_t pos);
+    bool goto_pos(long pos);
 
     void forward(std::size_t n);
     void backward(std::size_t n);

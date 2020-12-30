@@ -8,7 +8,8 @@ using namespace std::literals;
 class BufferTest : public ::testing::Test {
   protected:
     void SetUp() override {
-        ascii = mime::buffer("testdata/open.csv");
+	std::string aname{"testdata/open.csv"};
+        ascii = mime::buffer(mime::text{aname.begin(), aname.end()});
         unicode = mime::buffer("testdata/unicode.csv");
     }
 
@@ -256,6 +257,10 @@ TEST_F(BufferTest, GotoPos) {
 
     b = ascii.goto_pos(18);
     EXPECT_EQ(b, true);
+    EXPECT_EQ(ascii.get_pos(), 18);
+
+    b = ascii.goto_pos(-1);
+    EXPECT_EQ(b, false);
     EXPECT_EQ(ascii.get_pos(), 18);
 
     ascii.paste("hello");

@@ -9,6 +9,13 @@ def assert(x, msg)
   }
 }
 
+var args = args_parser();
+args.bool_opt("fail", "fail the program immediately", "false");
+
+if(args.parse().fail) {
+    exit(-42);
+}
+
 var b = buffer();
 b.paste("hello this is some text");
 b.set_mark();

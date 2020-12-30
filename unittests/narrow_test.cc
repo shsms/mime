@@ -51,14 +51,35 @@ class NarrowTest : public ::testing::Test {
     mime::buffer narrowed;
 };
 
+TEST_F(NarrowTest, EmptySize) {
+    EXPECT_EQ(gosrc.size(), 244);
+    EXPECT_EQ(narrowed.size(), 119);
+
+    EXPECT_EQ(gosrc.empty(), false);
+    EXPECT_EQ(narrowed.empty(), false);
+
+    narrowed.start_of_buffer();
+    narrowed.set_mark();
+    narrowed.end_of_buffer();
+    narrowed.erase_region();
+
+    EXPECT_EQ(narrowed.empty(), true);
+    EXPECT_EQ(narrowed.size(), 0);
+
+    narrowed.widen();
+
+    EXPECT_EQ(narrowed.empty(), false);
+    EXPECT_EQ(narrowed.size(), 125);
+}
+
 TEST_F(NarrowTest, NarrowToBlock) {
     EXPECT_EQ(gosrc.narrow_to_block(), false);
     EXPECT_EQ(gosrc.get_pos(), 0);
-    EXPECT_EQ(gosrc.narrowed_view(), false);
+    EXPECT_EQ(gosrc.narrowed(), false);
 
     EXPECT_EQ(gosrc.find("world"s), 91);
     EXPECT_EQ(gosrc.narrow_to_block(), true);
-    EXPECT_EQ(gosrc.narrowed_view(), true);
+    EXPECT_EQ(gosrc.narrowed(), true);
     EXPECT_EQ(gosrc.get_pos(), 40);
     EXPECT_EQ(gosrc.find("world"s), 91);
     gosrc.start_of_buffer();
@@ -79,14 +100,14 @@ TEST_F(NarrowTest, Widen) {
     EXPECT_EQ(narrowed.get_pos(), 40);
     narrowed.end_of_buffer();
     EXPECT_EQ(narrowed.get_pos(), 159);
-    EXPECT_EQ(narrowed.narrowed_view(), true);
+    EXPECT_EQ(narrowed.narrowed(), true);
 
     narrowed.widen();
     narrowed.start_of_buffer();
     EXPECT_EQ(narrowed.get_pos(), 0);
     narrowed.end_of_buffer();
     EXPECT_EQ(narrowed.get_pos(), 244);
-    EXPECT_EQ(narrowed.narrowed_view(), false);
+    EXPECT_EQ(narrowed.narrowed(), false);
 }
 
 TEST_F(NarrowTest, Find) {

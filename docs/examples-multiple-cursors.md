@@ -1,12 +1,14 @@
 ---
 title: Multiple cursors
 parent: Examples
+nav_order: 1
 ---
 
 # Multiple cursors
 
-Here's an example mime script ([examples/gofunc.mime](github.com/shsms/mime/examples/gofunc.mime)):
+There are many situations where having multiple cursors in the same file can be useful.  In the below script,  we use two cursors. One to navigate the file and find function names,  and another that stays near the start of the file,  to insert a comment line for each function the other cursor finds.
 
+### gofunc.mime
 ``` js
 var b = buffer("main.go");
 var doc_c = b.new_cursor();
@@ -31,6 +33,8 @@ b.paste("\n");
 
 b.save_as("mimeout.go");
 ```
+
+### main.go
 
 If there is a file "main.go" in the same directory with the below
 contents,
