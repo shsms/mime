@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: apt install make cmake g++ git
+      - run: |
+         sudo apt update
+         sudo apt install make cmake g++ git
       - uses: actions/checkout@v2
       - name: make
         run: make
