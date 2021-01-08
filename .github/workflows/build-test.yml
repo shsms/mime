@@ -1,0 +1,21 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: make
+      run: make
+    - name: make test
+      run: make test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
