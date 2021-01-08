@@ -12,10 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: make
-      run: make
-    - name: make test
-      run: make test
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
+      - run: apt install make cmake g++ git
+      - uses: actions/checkout@v2
+      - name: make
+        run: make
+      - name: make test
+        run: make test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
