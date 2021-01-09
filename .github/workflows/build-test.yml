@@ -30,3 +30,4 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           gcov_executable	: gcov-10
+          gcov_path_exclude	: ./build/CMakeFiles/unittests.dir/*
