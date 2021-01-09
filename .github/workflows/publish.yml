@@ -1,0 +1,22 @@
+on:
+  release:
+    types: [created]
+name: Publish binary
+jobs:
+  generate:
+    name: Create release-artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@master
+      - name: make
+        run: make init build package
+        env:
+          CC:   gcc-10
+          CXX:  g++-10
+      - name: Upload the artifacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: 'mime-linux-amd64.tar.*'
