@@ -1,0 +1,30 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: make
+        run: make init build
+        env:
+          CC:   gcc-10
+          CXX:  g++-10
+      - name: make test
+        run: make test
+        env:
+          CC:   gcc-10
+          CXX:  g++-10
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          gcov_executable	: gcov-10
+          gcov_path_exclude	: ./build/CMakeFiles/unittests.dir/*

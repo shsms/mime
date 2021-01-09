@@ -5,7 +5,15 @@ nav_order: 1
 
 # Getting started
 
-Currently, there are no prebuilt binaries,  and the build process works only on Linux.
+Currently, mime is available only for Linux.
+
+## Download the prebuilt binary
+
+An archive containing a prebuilt linux-amd64 binary can be downloaded from [here](https://github.com/shsms/mime/releases/latest).
+
+Extract the file into `/usr/bin/` to make it available to all users,  or to `~/.local/bin/` for just the current user.
+
+Checkout the [What next](#what-next) section.
 
 ## Build from source
 

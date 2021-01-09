@@ -1,7 +1,7 @@
 install_path = $(shell systemd-path user-binaries)
 target_bin = build/release/mime
 
-.PHONY: default init clean build debug test testCover install
+.PHONY: default init clean build debug test testCover package install
 
 default: build
 
@@ -27,3 +27,7 @@ install: build
 	test "$(install_path)" == "" \
 		&& echo -e "\nunable to get 'user-binaries' path from 'systemd-path' command\n" \
 		|| install $(target_bin) $(install_path)/
+
+package:
+	tar -czf mime-linux-amd64.tar.gz --directory=build/release mime
+	tar -cJf mime-linux-amd64.tar.xz --directory=build/release mime
