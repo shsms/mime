@@ -29,5 +29,5 @@ install: build
 		|| install $(target_bin) $(install_path)/
 
 package:
-	tar -czf mime-linux-amd64.tar.gz build/release/mime
-	tar -cJf mime-linux-amd64.tar.xz build/release/mime
+	tar -czf mime-linux-amd64.tar.gz --directory=build/release mime
+	tar -cJf mime-linux-amd64.tar.xz --directory=build/release mime
