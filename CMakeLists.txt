@@ -22,7 +22,6 @@ add_library(mime STATIC
   src/lib/u32utils.cc)
 
 add_executable(mime-bin
-  src/cmd/args.cc
   src/cmd/chai.cc
   src/cmd/main.cc)
 
@@ -35,7 +34,6 @@ set_target_properties(mime-bin
 
 add_subdirectory(vendor/googletest)
 add_executable(unittests
-  src/cmd/args.cc
   src/lib/mime.cc
   src/lib/u32utils.cc
   src/cmd/chai.cc

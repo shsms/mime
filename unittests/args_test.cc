@@ -50,7 +50,7 @@ class ArgsTest : public ::testing::Test {
 };
 
 TEST_F(ArgsTest, AllTypes) {
-    args_parser parser(args.argc(), args.argv());
+    mime::args_parser parser(args.argc(), args.argv());
     parser.bool_opt("bool_v", "bool value");
     parser.int_opt("i,int_v", "int value");
     parser.float_opt("float_v", "float value");

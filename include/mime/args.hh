@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace mime {
+
 class args_parser {
   public:
     args_parser(int argc, char **argv);
@@ -34,4 +36,5 @@ class args_parser {
     char **argv;
 };
 
+} // namespace mime
 #endif /* MIME_ARGS_HH */
