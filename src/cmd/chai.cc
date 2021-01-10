@@ -40,6 +40,7 @@ void add_bindings(chaiscript::ChaiScript &chai) {
 
     chai.add(chaiscript::fun(&buffer::empty), "empty");
     chai.add(chaiscript::fun(&buffer::narrowed), "narrowed");
+    chai.add(chaiscript::fun(&buffer::get_name), "get_name");
     chai.add(chaiscript::fun(&buffer::get_contents), "get_contents");
     chai.add(chaiscript::fun(&buffer::size), "size");
 
