@@ -283,6 +283,15 @@ if (buf.empty()) {
 }
 ```
 
+### get_name
+
+Returns the filename used to open/create the buffer.
+
+```js
+var n = buf.get_name();
+print(n);
+```
+
 ### get_contents
 
 Returns the contents of the buffer.  If narrowed, just the contents of the narrowed view.

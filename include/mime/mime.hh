@@ -47,7 +47,7 @@ class buffer {
         if (v.has_value()) {
             return v->upper == v->lower;
         }
-	return contents.empty();
+        return contents.empty();
     }
     inline std::size_t size() {
         const auto &v = cursors[cursor].view;
@@ -70,6 +70,8 @@ class buffer {
         }
         return contents;
     }
+
+    inline std::string get_name() { return filename; }
 
     template <typename T> long find(T t);
     template <typename T> long rfind(T t);

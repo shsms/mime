@@ -362,6 +362,7 @@ TEST_F(BufferTest, Open) {
     auto b = mime::buffer();
     EXPECT_EQ(b.size(), 0);
     b = mime::buffer("/non/existant");
+    EXPECT_EQ(b.get_name(), "/non/existant");
     EXPECT_EQ(b.size(), 0);
     EXPECT_EQ(ascii.size(), 18);
 }
