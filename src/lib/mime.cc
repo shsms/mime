@@ -7,8 +7,8 @@
 #include <mime/mime.hh>
 #include <mime/u32utils.hh>
 #include <spdlog/spdlog.h>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 namespace mime {
 
@@ -425,7 +425,7 @@ std::size_t buffer::get_pos() { return cursors[cursor].point; }
 
 bool buffer::goto_pos(long pos) {
     if (pos == -1) {
-	return false;
+        return false;
     }
     auto c = cursors[cursor];
     std::size_t start = 0, end = contents.size();

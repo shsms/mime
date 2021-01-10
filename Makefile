@@ -1,7 +1,7 @@
 install_path = $(shell systemd-path user-binaries)
 target_bin = build/release/mime
 
-.PHONY: default init clean build debug test testCover package install
+.PHONY: default init clean build debug test testCover package install format
 
 default: build
 
@@ -31,3 +31,9 @@ install: build
 package:
 	tar -czf mime-linux-amd64.tar.gz --directory=build/release mime
 	tar -cJf mime-linux-amd64.tar.xz --directory=build/release mime
+
+##
+
+src = $(shell find src include unittests -type f -name '*.cc' -o -name '*.hh')
+format:
+	clang-format -i $(src)

@@ -8,7 +8,7 @@ using namespace std::literals;
 class BufferTest : public ::testing::Test {
   protected:
     void SetUp() override {
-	std::string aname{"testdata/open.csv"};
+        std::string aname{"testdata/open.csv"};
         ascii = mime::buffer(mime::text{aname.begin(), aname.end()});
         unicode = mime::buffer("testdata/unicode.csv");
     }
