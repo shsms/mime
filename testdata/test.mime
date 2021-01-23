@@ -27,3 +27,4 @@ assert(".some text" == "." + t, "concat string+text");
 assert(t + ".some text" == t + "." + t, "concat text+text");
 assert((t == ".") == false, "eq compare should fail");
 assert(("." == t) == false, "eq compare should fail");
+assert(t.at(0) == "s", "at on text");

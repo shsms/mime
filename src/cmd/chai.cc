@@ -97,6 +97,9 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(&buffer::narrow_to_region), "narrow_to_region");
     chai.add(chaiscript::fun(&buffer::widen), "widen");
 
+    chai.add(chaiscript::fun([](const text& t, std::size_t idx) -> std::string {
+	return mime::to_string(text{t[idx]});
+    }), "at");
     chai.add(chaiscript::fun([](buffer &lhs, const buffer &rhs) -> buffer & { return lhs = rhs; }),
              "=");
     chai.add(chaiscript::fun([](text &lhs, const text &rhs) -> text & { return lhs = rhs; }), "=");

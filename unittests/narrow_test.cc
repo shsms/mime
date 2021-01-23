@@ -432,7 +432,7 @@ TEST_F(MultiCursorNarrowTest, Paste) {
     EXPECT_EQ(gosrc.get_pos(), 100);
 
     gosrc.use_cursor(wor_c);
-    EXPECT_EQ(gosrc.get_pos(), 95);
+    EXPECT_EQ(gosrc.get_pos(), 91);
     gosrc.start_of_buffer();
     EXPECT_EQ(gosrc.get_pos(), 91);
     gosrc.end_of_buffer();
