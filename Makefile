@@ -23,7 +23,7 @@ test: build
 testCover: test
 	gcovr -r . -f src --html --html-details -o build/coverage.html
 
-install: build
+install: test
 	test "$(install_path)" == "" \
 		&& echo -e "\nunable to get 'user-binaries' path from 'systemd-path' command\n" \
 		|| install $(target_bin) $(install_path)/

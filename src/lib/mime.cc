@@ -86,12 +86,19 @@ void buffer::update_all_cursors(std::size_t mark, std::size_t point, std::size_t
     for (std::size_t cid = 0; cid < cursors.size(); ++cid) {
         auto csr = cursors[cid];
         csr.mark.reset();
-        if (csr.point >= point) {
+
+	// move the cursors as necessary.
+	if (csr.point == point && cursor != cid && back == 0) {
+	    // a different cursor located at the same position
+	    // as the current cursor is pasting stuff.  don't move
+	    // the current cursor.
+	} else if (csr.point >= point) {
             csr.point = csr.point - back + forward;
         } else if (csr.point > mark && back > 0) {
             csr.point = mark;
         }
 
+	// move the narrowed regions as necessary.
         if (csr.view.has_value()) {
             if (csr.view->lower >= point && mark < point) {
                 csr.view->lower = csr.view->lower - back + forward;
