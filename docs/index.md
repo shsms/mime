@@ -12,8 +12,10 @@ but in a scripting environment, without an editor.  This enables very
 sophisticated transformations that are easy to do through tools like
 Emacs Keyboard Macros, but hard to do in code.
 
-Visit the [Getting started](getting-started.md) page for instructions,
-or checkout the code from [github](https://github.com/shsms/mime).
+* Visit the [Getting started](getting-started.md) page for instructions
+* Checkout some [examples](examples.md)
+* Checkout the [Concepts](concepts.md) and [Reference](reference.md) pages
+* Or the code from [github](https://github.com/shsms/mime).
 
 ## Design
 
