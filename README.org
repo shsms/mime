@@ -1,3 +1,4 @@
+#+startup: indent
 * mime
 
 [[https://github.com/shsms/mime/actions][https://github.com/shsms/mime/workflows/build/badge.svg]] [[https://codecov.io/gh/shsms/mime][https://codecov.io/gh/shsms/mime/branch/main/graph/badge.svg?token=ASAIA6P309]]
@@ -127,7 +128,11 @@ Here's what the script does:
    5. switch to doc cursor to insert a final newline to introduce a
       gap between inserted text and original program.
    6. save file under a new name.
-   
+
+** Projects using mime
+
+- *ulysses-annotated*: a project to automatically generate an annotated ebook version of [[https://en.wikipedia.org/wiki/Ulysses_(novel)][Ulysses]]. Read more in its [[https://github.com/shsms/ulysses-annotated][github page]] or on [[http://www.joyceproject.com/pages/ebook.htm][joyceproject.com]]
+
 ** Contributing
 
 If you'd like to contribute a feature or a bug fix,  feel free to send a pull request!
