@@ -87,20 +87,25 @@ class buffer {
     void erase_region();
     void clear();
 
+    std::size_t del_backward(std::size_t n);
+    std::size_t del_backward();
+    std::size_t del_forward(std::size_t n);
+    std::size_t del_forward();
+
     std::size_t new_cursor();
     void use_cursor(std::size_t c);
     std::size_t get_pos();
     bool goto_pos(long pos);
 
-    void forward(std::size_t n);
-    void backward(std::size_t n);
-    int next_line(std::size_t n);
-    int prev_line(std::size_t n);
+    std::size_t forward(std::size_t n);
+    std::size_t backward(std::size_t n);
+    std::size_t next_line(std::size_t n);
+    std::size_t prev_line(std::size_t n);
 
-    void forward();
-    void backward();
-    int next_line();
-    int prev_line();
+    std::size_t forward();
+    std::size_t backward();
+    std::size_t next_line();
+    std::size_t prev_line();
 
     void start_of_buffer();
     void end_of_buffer();
@@ -118,6 +123,10 @@ class buffer {
     // buffer backward_word(buffer b, std::size_t cursor, std::size_t n);
     // buffer_bool find_beg(buffer b, std::size_t cursor, std::string t, std::size_t lim);
     // buffer_bool rfind_end(buffer b, std::size_t cursor, std::string t, std::size_t lim);
+
+    // {{noexport
+    int get_cursor_count() { return cursors.size(); }
+    // noexport}}
   private:
     text contents;
     immer::box<std::string> filename;

@@ -16,6 +16,9 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     using replace_t = int (buffer::*)(std::string, std::string, std::size_t);
     using replace_all_t = int (buffer::*)(std::string, std::string);
 
+    using size_oper_n_t = std::size_t (buffer::*)(std::size_t);
+    using size_oper_t = std::size_t (buffer::*)();
+
     chai.add(chaiscript::user_type<text>(), "text");
     chai.add(chaiscript::fun(&text::empty), "empty");
     chai.add(chaiscript::fun(&text::size), "size");
@@ -74,18 +77,19 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(&buffer::get_pos), "get_pos");
     chai.add(chaiscript::fun(&buffer::goto_pos), "goto_pos");
 
-    chai.add(chaiscript::fun(static_cast<void (buffer::*)(std::size_t)>(&buffer::forward)),
-             "forward");
-    chai.add(chaiscript::fun(static_cast<void (buffer::*)()>(&buffer::forward)), "forward");
-    chai.add(chaiscript::fun(static_cast<void (buffer::*)(std::size_t)>(&buffer::backward)),
-             "backward");
-    chai.add(chaiscript::fun(static_cast<void (buffer::*)()>(&buffer::backward)), "backward");
-    chai.add(chaiscript::fun(static_cast<int (buffer::*)(std::size_t)>(&buffer::next_line)),
-             "next_line");
-    chai.add(chaiscript::fun(static_cast<int (buffer::*)()>(&buffer::next_line)), "next_line");
-    chai.add(chaiscript::fun(static_cast<int (buffer::*)(std::size_t)>(&buffer::prev_line)),
-             "prev_line");
-    chai.add(chaiscript::fun(static_cast<int (buffer::*)()>(&buffer::prev_line)), "prev_line");
+    chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::forward)), "forward");
+    chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::backward)), "backward");
+    chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::next_line)), "next_line");
+    chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::prev_line)), "prev_line");
+    chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::del_backward)), "del_backward");
+    chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::del_forward)), "del_forward");
+    
+    chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::forward)), "forward");
+    chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::backward)), "backward");
+    chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::next_line)), "next_line");
+    chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::prev_line)), "prev_line");
+    chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::del_backward)), "del_backward");
+    chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::del_forward)), "del_forward");
 
     chai.add(chaiscript::fun(&buffer::start_of_buffer), "start_of_buffer");
     chai.add(chaiscript::fun(&buffer::end_of_buffer), "end_of_buffer");
@@ -97,9 +101,10 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(&buffer::narrow_to_region), "narrow_to_region");
     chai.add(chaiscript::fun(&buffer::widen), "widen");
 
-    chai.add(chaiscript::fun([](const text& t, std::size_t idx) -> std::string {
-	return mime::to_string(text{t[idx]});
-    }), "at");
+    chai.add(chaiscript::fun([](const text &t, std::size_t idx) -> std::string {
+                 return mime::to_string(text{t[idx]});
+             }),
+             "at");
     chai.add(chaiscript::fun([](buffer &lhs, const buffer &rhs) -> buffer & { return lhs = rhs; }),
              "=");
     chai.add(chaiscript::fun([](text &lhs, const text &rhs) -> text & { return lhs = rhs; }), "=");
@@ -212,7 +217,6 @@ int run(int argc, char **argv) {
 
     return 0;
 }
-
 
 args_parser::args_parser(int argc, char **argv) : options(argv[1]), argc(argc - 1), argv(++argv) {}
 
