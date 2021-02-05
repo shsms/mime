@@ -190,9 +190,35 @@ should print:
 ----some text++++
 ```
 
+### del_{backward,forward}
+
+`del_backward` and `del_forward` are for deleting backward and forward from the current position of the cursor,  similar to the `backspace` and `delete` keys on a keyboard.  They both delete one character by default,  and take an optional parameter `n` specify the number of characters to delete.  They both delete `n` characters if possible,  or as many as they can delete within the bounds of the buffer or the narrowed region, if one is active.  They both return the number of characters deleted.
+
+```js
+// delete backward 1 character (backspace)
+buf.del_backward();
+
+// delete backward 10 characters
+buf.del_backward(10);
+
+// delete forward 1 character (backspace)
+buf.del_forward();
+
+// delete forward 10 characters
+buf.del_forward(10);
+```
+
+The below example inserts 5 chars into a buffer, then tried to delete 10 characters.  The output would be `5`.
+```js
+var buf = buffer();
+buf.paste("12345");
+var count = buf.del_backward(10);
+print(count);
+```
+
 ### erase_region
 
-erase_region is similar to cut,  except it doesn't return anything.
+`erase_region` is similar to cut,  except it doesn't return anything.
 
 ## Cursors
 Read about how multiple cursors work in mime, in the [concepts](concepts.md#multiple-cursors) page.

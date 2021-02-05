@@ -539,3 +539,143 @@ TEST_F(MultiCursorNarrowTest, Replace) {
     gosrc.end_of_buffer();
     EXPECT_EQ(gosrc.get_pos(), 77);
 }
+
+TEST_F(MultiCursorNarrowTest, DelBackward) {
+    gosrc.use_cursor(world_c);
+    gosrc.find("wor"s);
+    auto csz = gosrc.get_cursor_count();
+    EXPECT_EQ(gosrc.del_backward(), 1);
+    EXPECT_EQ(mime::to_string(gosrc.get_contents()), "wold");
+    EXPECT_EQ(gosrc.del_backward(10), 2);
+    EXPECT_EQ(csz, gosrc.get_cursor_count());
+    EXPECT_EQ(mime::to_string(gosrc.get_contents()), "ld");
+
+    gosrc.use_cursor(full_c);
+    EXPECT_EQ(gosrc.get_pos(), 0);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 241);
+
+    gosrc.use_cursor(main_c);
+    EXPECT_EQ(gosrc.get_pos(), 40);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 156);
+
+    gosrc.use_cursor(world_c);
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.start_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 93);
+
+    gosrc.use_cursor(wor_c);
+    gosrc.start_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+
+    gosrc.use_cursor(orl_c);
+    gosrc.start_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 92);
+
+    gosrc.use_cursor(rld_c);
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 93);
+
+    gosrc.use_cursor(rld_eol_c);
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 96);
+
+    gosrc.use_cursor(print_c);
+    EXPECT_EQ(gosrc.get_pos(), 85);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+
+    gosrc.use_cursor(print_wor_c);
+    EXPECT_EQ(gosrc.get_pos(), 85);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+
+    gosrc.use_cursor(func_world_c);
+    EXPECT_EQ(gosrc.get_pos(), 158);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 168);
+
+    gosrc.use_cursor(if_c);
+    EXPECT_EQ(gosrc.get_pos(), 52);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 77);
+}
+
+TEST_F(MultiCursorNarrowTest, DelForward) {
+    gosrc.use_cursor(world_c);
+    gosrc.find("wo"s);
+    auto csz = gosrc.get_cursor_count();
+    EXPECT_EQ(gosrc.del_forward(), 1);
+    EXPECT_EQ(mime::to_string(gosrc.get_contents()), "wold");
+    EXPECT_EQ(gosrc.del_forward(10), 2);
+    EXPECT_EQ(csz, gosrc.get_cursor_count());
+    EXPECT_EQ(mime::to_string(gosrc.get_contents()), "wo");
+
+    gosrc.use_cursor(full_c);
+    EXPECT_EQ(gosrc.get_pos(), 0);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 241);
+
+    gosrc.use_cursor(main_c);
+    EXPECT_EQ(gosrc.get_pos(), 40);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 156);
+
+    gosrc.use_cursor(world_c);
+    EXPECT_EQ(gosrc.get_pos(), 93);
+    gosrc.start_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 93);
+
+    gosrc.use_cursor(wor_c);
+    gosrc.start_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 93);
+
+    gosrc.use_cursor(orl_c);
+    gosrc.start_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 92);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 93);
+
+    gosrc.use_cursor(rld_c);
+    EXPECT_EQ(gosrc.get_pos(), 93);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 93);
+
+    gosrc.use_cursor(rld_eol_c);
+    EXPECT_EQ(gosrc.get_pos(), 93);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 96);
+
+    gosrc.use_cursor(print_c);
+    EXPECT_EQ(gosrc.get_pos(), 85);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 91);
+
+    gosrc.use_cursor(print_wor_c);
+    EXPECT_EQ(gosrc.get_pos(), 85);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 93);
+
+    gosrc.use_cursor(func_world_c);
+    EXPECT_EQ(gosrc.get_pos(), 158);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 168);
+
+    gosrc.use_cursor(if_c);
+    EXPECT_EQ(gosrc.get_pos(), 52);
+    gosrc.end_of_buffer();
+    EXPECT_EQ(gosrc.get_pos(), 77);
+}

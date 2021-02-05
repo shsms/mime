@@ -451,34 +451,40 @@ bool buffer::goto_pos(long pos) {
     return true;
 }
 
-void buffer::forward(std::size_t n) {
+std::size_t buffer::forward(std::size_t n) {
     auto c = cursors[cursor];
     auto lim = contents.size();
     if (c.view.has_value()) { // narrowed view
         lim = c.view->upper;
     }
+    std::size_t orig = c.point;
     c.point += n;
     if (c.point > lim) {
         c.point = lim;
     }
     cursors = cursors.set(cursor, c);
+
+    return c.point - orig;
 }
 
-void buffer::backward(std::size_t n) {
+std::size_t buffer::backward(std::size_t n) {
     auto c = cursors[cursor];
     std::size_t lim{};
     if (c.view.has_value()) { // narrowed view
         lim = c.view->lower;
     }
+    std::size_t orig = c.point;
     if (c.point > n + lim) {
         c.point -= n;
     } else {
         c.point = lim;
     }
     cursors = cursors.set(cursor, c);
+
+    return orig - c.point;
 }
 
-int buffer::next_line(std::size_t n) {
+std::size_t buffer::next_line(std::size_t n) {
     auto c = cursors[cursor];
     auto it = contents.begin() + c.point;
     auto end = contents.end();
@@ -486,7 +492,7 @@ int buffer::next_line(std::size_t n) {
         end = contents.begin() + c.view->upper;
     }
 
-    int ii;
+    std::size_t ii;
     for (ii = 0; ii < n; ii++) {
         while (it != end && *it != L'\n') {
             ++it;
@@ -504,7 +510,7 @@ int buffer::next_line(std::size_t n) {
     return ii;
 }
 
-int buffer::prev_line(std::size_t n) {
+std::size_t buffer::prev_line(std::size_t n) {
     backward(); // if at end of line,  that \n shouldn't be counted.
     auto c = cursors[cursor];
     auto it = contents.begin() + c.point;
@@ -512,7 +518,7 @@ int buffer::prev_line(std::size_t n) {
     if (c.view.has_value()) {
         begin = begin + c.view->lower;
     }
-    int ii;
+    std::size_t ii;
     for (ii = 0; ii < n; ii++) {
         while (it != begin && *it != L'\n') {
             --it;
@@ -529,10 +535,45 @@ int buffer::prev_line(std::size_t n) {
     return ii;
 }
 
-void buffer::forward() { forward(1); } // forward one wchar_t.
-void buffer::backward() { backward(1); }
-int buffer::next_line() { return next_line(1); }
-int buffer::prev_line() { return prev_line(1); }
+// TODO: make efficient implementation for del_backward and del_forward
+std::size_t buffer::del_backward(std::size_t n) {
+    auto orig_c = cursor;
+    auto orig_pos = get_pos();
+    cursor = new_cursor();
+    cursors = cursors.set(cursor, cursors[orig_c]);
+    goto_pos(orig_pos);
+    set_mark();
+    std::size_t dist;
+    if(dist = backward(n); dist > 0) {
+	erase_region();
+    }
+    cursors = cursors.take(cursor);
+    cursor = orig_c;
+    return dist;
+}
+
+std::size_t buffer::del_forward(std::size_t n) {
+    auto orig_c = cursor;
+    auto orig_pos = get_pos();
+    cursor = new_cursor();
+    cursors = cursors.set(cursor, cursors[orig_c]);
+    goto_pos(orig_pos);
+    set_mark();
+    std::size_t dist;
+    if(dist = forward(n); dist > 0) {
+	erase_region();
+    }
+    cursors = cursors.take(cursor);
+    cursor = orig_c;
+    return dist;
+}
+
+std::size_t buffer::forward() { return forward(1); } // forward one wchar_t.
+std::size_t buffer::backward() { return backward(1); }
+std::size_t buffer::next_line() { return next_line(1); }
+std::size_t buffer::prev_line() { return prev_line(1); }
+std::size_t buffer::del_backward() { return del_backward(1); }
+std::size_t buffer::del_forward() { return del_forward(1); }
 
 void buffer::start_of_buffer() {
     auto c = cursors[cursor];
