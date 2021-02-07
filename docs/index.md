@@ -4,8 +4,7 @@ nav_order: 0
 ---
 # Mime
 
-Mime is a scripting language framework for text processing, inspired
-by Emacs.
+Mime is a scripting tool for text processing, inspired by Emacs.
 
 Mime provides an editor-like abstraction for manipulating text files,
 but in a scripting environment, without an editor.  This enables very

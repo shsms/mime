@@ -3,7 +3,7 @@ nav_order: 3
 ---
 # Concepts
 
-Mime is a scripting language, that provides a way to reimagine text processing tasks as operations a text editor.  Here are some concepts you should know to be able to use mime effectively.  These are written to be helpful to someone who is not familiar with Emacs.  If you are familiar with Emacs,  it is still useful to read the [multiple cursors](#multiple-cursors) section at least.
+Mime is a scripting tool, that provides a way to reimagine text processing tasks as operations a text editor.  Here are some concepts you should know to be able to use mime effectively.  These are written to be helpful to someone who is not familiar with Emacs.  If you are familiar with Emacs,  it is still useful to read the [multiple cursors](#multiple-cursors) section at least.
 
 ## Buffer
 

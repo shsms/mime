@@ -3,8 +3,7 @@
 
 [[https://github.com/shsms/mime/actions][https://github.com/shsms/mime/workflows/build/badge.svg]] [[https://codecov.io/gh/shsms/mime][https://codecov.io/gh/shsms/mime/branch/main/graph/badge.svg?token=ASAIA6P309]]
 
-Mime is a scripting language framework for text processing, inspired
-by Emacs.
+Mime is a scripting tool for text processing, inspired by Emacs.
 
 Mime provides an editor-like abstraction for manipulating text files,
 but in a scripting environment,  without an editor.  This enables very
