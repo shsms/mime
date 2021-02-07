@@ -201,7 +201,7 @@ buf.del_backward();
 // delete backward 10 characters
 buf.del_backward(10);
 
-// delete forward 1 character (backspace)
+// delete forward 1 character
 buf.del_forward();
 
 // delete forward 10 characters
