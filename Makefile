@@ -39,7 +39,7 @@ format:
 	clang-format -i $(src)
 
 wasm:
-	/home/sahas/Software/emsdk/upstream/emscripten/em++ \
+	em++ \
 		-O3 \
 		--std=c++17 \
 		-I vendor/ChaiScript/include \
