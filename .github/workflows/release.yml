@@ -39,8 +39,10 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@master
+      - name: install emscripten
+        uses: lovasoa/setup-emscripten@master
       - name: make
-        run: make init build package
+        run: make init wasm build package
         env:
           CC:   gcc-10
           CXX:  g++-10
@@ -50,3 +52,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: 'mime-linux-amd64.tar.*'
+      - name: Deploy docs and playground
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: docs
+          CLEAN: true

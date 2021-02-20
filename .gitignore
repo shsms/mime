@@ -1,3 +1,4 @@
 examples/mimeout*
 build
 .ccls-cache
+docs/playground/mime.*

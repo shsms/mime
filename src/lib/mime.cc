@@ -206,7 +206,7 @@ template <typename T> long buffer::rfind(T t) {
 
     auto c = cursors[cursor];
     std::size_t offset = c.point - t.size();
-    if (offset < 0) {
+    if (t.size() > c.point) {
         return not_found;
     }
 

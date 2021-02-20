@@ -37,3 +37,23 @@ package:
 src = $(shell find src include unittests -type f -name '*.cc' -o -name '*.hh')
 format:
 	clang-format -i $(src)
+
+wasm:
+	/home/sahas/Software/emsdk/upstream/emscripten/em++ \
+		-O3 \
+		--std=c++17 \
+		-I vendor/ChaiScript/include \
+		-I include \
+		-I vendor/cxxopts/include \
+		-I vendor/immer/ \
+		-I vendor/spdlog/include \
+		-s DEMANGLE_SUPPORT=1 \
+		-s MAIN_MODULE=1 \
+		-s "EXPORTED_FUNCTIONS=['_run_script']" \
+		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']" \
+		--pre-js emscripten-pre.js \
+		-o docs/playground/mime.js \
+		src/cmd/chai.cc src/lib/*.cc
+
+playground-css:
+	cd docs/playground && npx tailwindcss build -o tailwind.css

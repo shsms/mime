@@ -83,7 +83,7 @@ void add_bindings(chaiscript::ChaiScript &chai) {
     chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::prev_line)), "prev_line");
     chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::del_backward)), "del_backward");
     chai.add(chaiscript::fun(static_cast<size_oper_n_t>(&buffer::del_forward)), "del_forward");
-    
+
     chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::forward)), "forward");
     chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::backward)), "backward");
     chai.add(chaiscript::fun(static_cast<size_oper_t>(&buffer::next_line)), "next_line");
@@ -302,3 +302,17 @@ chaiscript::dispatch::Dynamic_Object args_parser::parse() {
 }
 
 } // namespace mime
+
+extern "C" {
+
+// run with:
+// Module.ccall("run_script", 'number', ['string'], ['print("hello")'])
+int run_script(char *script) {
+    chaiscript::ChaiScript chai;
+    mime::add_bindings(chai);
+
+    chai.eval(script);
+
+    return 0;
+}
+}
