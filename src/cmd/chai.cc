@@ -1,8 +1,8 @@
 #include <chaiscript/chaiscript.hpp>
-#include <mime/args.hh>
-#include <mime/except.hh>
+#include <internal/args.hh>
+#include <internal/except.hh>
+#include <internal/u32utils.hh>
 #include <mime/mime.hh>
-#include <mime/u32utils.hh>
 
 namespace mime {
 

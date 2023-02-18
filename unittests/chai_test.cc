@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <mime/chai.hh>
+#include <internal/chai.hh>
 #include <string>
 
 using namespace std::string_literals;

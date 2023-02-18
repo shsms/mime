@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <immer/box.hpp>
-#include <mime/args.hh>
+#include <internal/args.hh>
 #include <string>
 
 using namespace std::string_literals;

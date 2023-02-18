@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <mime/except.hh>
+#include <internal/except.hh>
 
 TEST(Except, Exit) {
     int code = 0;
