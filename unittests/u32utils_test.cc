@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
+#include <internal/u32utils.hh>
 #include <mime/mime.hh>
-#include <mime/u32utils.hh>
 #include <string>
 
 using namespace std::literals;

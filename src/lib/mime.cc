@@ -1,11 +1,11 @@
 #include <codecvt>
 #include <fstream>
 #include <immer/box.hpp>
+#include <internal/u32utils.hh>
 #include <iostream>
 #include <iterator>
 #include <locale>
 #include <mime/mime.hh>
-#include <mime/u32utils.hh>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
@@ -61,9 +61,9 @@ buffer::buffer(const std::string &fname) : buffer(fname, try_open) {}
 
 buffer::buffer(const text &fname) : buffer(to_string(fname), try_open) {}
 
-void buffer::save() { save_as(filename); }
+void buffer::save() const { save_as(filename); }
 
-void buffer::save_as(const std::string &fname) {
+void buffer::save_as(const std::string &fname) const {
     std::ofstream fs(fname, std::ios::trunc | std::ios::out | std::ios::binary);
     auto data = contents;
     auto max_size = chunk_size / 4;
@@ -87,18 +87,18 @@ void buffer::update_all_cursors(std::size_t mark, std::size_t point, std::size_t
         auto csr = cursors[cid];
         csr.mark.reset();
 
-	// move the cursors as necessary.
-	if (csr.point == point && cursor != cid && back == 0) {
-	    // a different cursor located at the same position
-	    // as the current cursor is pasting stuff.  don't move
-	    // the current cursor.
-	} else if (csr.point >= point) {
+        // move the cursors as necessary.
+        if (csr.point == point && cursor != cid && back == 0) {
+            // a different cursor located at the same position
+            // as the current cursor is pasting stuff.  don't move
+            // the current cursor.
+        } else if (csr.point >= point) {
             csr.point = csr.point - back + forward;
         } else if (csr.point > mark && back > 0) {
             csr.point = mark;
         }
 
-	// move the narrowed regions as necessary.
+        // move the narrowed regions as necessary.
         if (csr.view.has_value()) {
             if (csr.view->lower >= point && mark < point) {
                 csr.view->lower = csr.view->lower - back + forward;
@@ -133,7 +133,7 @@ long buffer::get_mark() {
     return not_found;
 }
 
-template <typename T> long buffer::find(T t) {
+template <typename T> long buffer::find(const T &t) {
     if (t.empty()) {
         return not_found;
     }
@@ -167,15 +167,15 @@ template <typename T> long buffer::find(T t) {
 }
 
 // we only need these two instanciations and one specialization below.
-template long buffer::find(text t);
-template long buffer::find(std::wstring t);
-template <> long buffer::find(std::string t) {
+template long buffer::find(const text &t);
+template long buffer::find(const std::wstring &t);
+template <> long buffer::find(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return find(ustr);
 }
 
-template <> long buffer::find(regex_t t) {
+template <> long buffer::find(const regex_t &t) {
     std::match_results<text::iterator> m;
     if (t.empty) {
         return not_found;
@@ -199,7 +199,7 @@ template <> long buffer::find(regex_t t) {
     return m[0].first - contents.begin();
 }
 
-template <typename T> long buffer::rfind(T t) {
+template <typename T> long buffer::rfind(const T &t) {
     if (t.empty()) {
         return not_found;
     }
@@ -241,15 +241,16 @@ template <typename T> long buffer::rfind(T t) {
     return not_found;
 }
 
-template long buffer::rfind(text t);
-template long buffer::rfind(std::wstring t);
-template <> long buffer::rfind(std::string t) {
+template long buffer::rfind(const text &t);
+template long buffer::rfind(const std::wstring &t);
+template <> long buffer::rfind(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return rfind(ustr);
 }
 
-template <typename T> long buffer::find_fuzzy(T t) {
+template <typename T> long buffer::find_fuzzy(const T &text) {
+    auto t = text;
     u32::trim(t);
     if (t.empty()) {
         return not_found;
@@ -303,15 +304,15 @@ template <typename T> long buffer::find_fuzzy(T t) {
     }
     return not_found;
 }
-template long buffer::find_fuzzy(text t);
-template long buffer::find_fuzzy(std::wstring t);
-template <> long buffer::find_fuzzy(std::string t) {
+template long buffer::find_fuzzy(const text &t);
+template long buffer::find_fuzzy(const std::wstring &t);
+template <> long buffer::find_fuzzy(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return find_fuzzy(ustr);
 }
 
-int buffer::replace(std::string from, std::string to, std::size_t n) {
+int buffer::replace(const std::string &from, const std::string &to, std::size_t n) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring wfrom = cvt.from_bytes(from);
     if (wfrom.empty()) {
@@ -342,11 +343,11 @@ int buffer::replace(std::string from, std::string to, std::size_t n) {
     return ii;
 }
 
-int buffer::replace(std::string from, std::string to) {
+int buffer::replace(const std::string &from, const std::string &to) {
     return replace(from, to, 0); // replace all
 }
 
-text buffer::copy() {
+text buffer::copy() const {
     auto c = cursors[cursor];
     if (!c.mark.has_value()) {
         return text{};
@@ -373,14 +374,14 @@ text buffer::cut() {
     return t;
 }
 
-void buffer::paste(text t) {
+void buffer::paste(const text &t) {
     auto point = cursors[cursor].point;
 
     contents = contents.insert(point, t);
     update_all_cursors(point, point, t.size());
 }
 
-void buffer::paste(std::string t) {
+void buffer::paste(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring wt = cvt.from_bytes(t);
 
@@ -428,7 +429,7 @@ void buffer::use_cursor(std::size_t c) {
     cursor = c;
 }
 
-std::size_t buffer::get_pos() { return cursors[cursor].point; }
+std::size_t buffer::get_pos() const { return cursors[cursor].point; }
 
 bool buffer::goto_pos(long pos) {
     if (pos == -1) {
@@ -544,8 +545,8 @@ std::size_t buffer::del_backward(std::size_t n) {
     goto_pos(orig_pos);
     set_mark();
     std::size_t dist;
-    if(dist = backward(n); dist > 0) {
-	erase_region();
+    if (dist = backward(n); dist > 0) {
+        erase_region();
     }
     cursors = cursors.take(cursor);
     cursor = orig_c;
@@ -560,8 +561,8 @@ std::size_t buffer::del_forward(std::size_t n) {
     goto_pos(orig_pos);
     set_mark();
     std::size_t dist;
-    if(dist = forward(n); dist > 0) {
-	erase_region();
+    if (dist = forward(n); dist > 0) {
+        erase_region();
     }
     cursors = cursors.take(cursor);
     cursor = orig_c;

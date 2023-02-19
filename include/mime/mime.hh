@@ -42,28 +42,28 @@ class buffer {
     buffer(const std::string &fname);
     buffer(const text &fname);
 
-    inline bool empty() {
+    inline bool empty() const {
         const auto &v = cursors[cursor].view;
         if (v.has_value()) {
             return v->upper == v->lower;
         }
         return contents.empty();
     }
-    inline std::size_t size() {
+    inline std::size_t size() const {
         const auto &v = cursors[cursor].view;
         if (v.has_value()) {
             return v->upper - v->lower;
         }
         return contents.size();
     }
-    inline bool narrowed() { return cursors[cursor].view.has_value(); }
+    inline bool narrowed() const { return cursors[cursor].view.has_value(); }
 
-    void save();
-    void save_as(const std::string &fname);
+    void save() const;
+    void save_as(const std::string &fname) const;
     void set_mark();
     long get_mark();
 
-    inline text get_contents() {
+    inline text get_contents() const {
         const auto &v = cursors[cursor].view;
         if (v.has_value()) {
             return contents.drop(v->lower).take(v->upper - v->lower);
@@ -71,21 +71,27 @@ class buffer {
         return contents;
     }
 
-    inline std::string get_name() { return filename; }
+    inline std::string get_name() const { return filename; }
 
-    template <typename T> long find(T t);
-    template <typename T> long rfind(T t);
-    template <typename T> long find_fuzzy(T t);
+    template <typename T> long find(const T &t);
+    template <typename T> long rfind(const T &t);
+    template <typename T> long find_fuzzy(const T &t);
 
-    int replace(std::string from, std::string to, std::size_t n);
-    int replace(std::string from, std::string to);
+    int replace(const std::string &from, const std::string &to, std::size_t n);
+    int replace(const std::string &from, const std::string &to);
 
-    text copy();
+    text copy() const;
     text cut();
-    void paste(text t);
-    void paste(std::string t);
+    void paste(const text &t);
+    void paste(const std::string &t);
     void erase_region();
     void clear();
+
+    inline std::unique_ptr<text> get_contents_box() const {
+        return std::make_unique<text>(get_contents());
+    }
+    inline std::unique_ptr<text> copy_box() const { return std::make_unique<text>(copy()); }
+    inline std::unique_ptr<text> cut_box() { return std::make_unique<text>(cut()); }
 
     std::size_t del_backward(std::size_t n);
     std::size_t del_backward();
@@ -94,7 +100,7 @@ class buffer {
 
     std::size_t new_cursor();
     void use_cursor(std::size_t c);
-    std::size_t get_pos();
+    std::size_t get_pos() const;
     bool goto_pos(long pos);
 
     std::size_t forward(std::size_t n);
@@ -125,7 +131,7 @@ class buffer {
     // buffer_bool rfind_end(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
     // {{noexport
-    int get_cursor_count() { return cursors.size(); }
+    int get_cursor_count() const { return cursors.size(); }
     // noexport}}
   private:
     text contents;
@@ -134,6 +140,12 @@ class buffer {
     std::size_t cursor{};
 
     void update_all_cursors(std::size_t mark, std::size_t point, std::size_t forward);
+};
+
+inline std::unique_ptr<buffer> new_buffer() { return std::make_unique<buffer>(); };
+
+inline std::unique_ptr<buffer> open_buffer(const std::string &name) {
+    return std::make_unique<buffer>(name);
 };
 } // namespace mime
 

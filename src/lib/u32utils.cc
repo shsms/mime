@@ -1,4 +1,4 @@
-#include <mime/u32utils.hh>
+#include <internal/u32utils.hh>
 
 namespace mime::u32 {
 
