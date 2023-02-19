@@ -135,6 +135,12 @@ class buffer {
 
     void update_all_cursors(std::size_t mark, std::size_t point, std::size_t forward);
 };
+
+inline std::unique_ptr<buffer> new_buffer() { return std::make_unique<buffer>(); };
+
+inline std::unique_ptr<buffer> open_buffer(const std::string &name) {
+    return std::make_unique<buffer>(name);
+};
 } // namespace mime
 
 #endif /* MIME_HH */
