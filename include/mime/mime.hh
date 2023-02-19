@@ -87,6 +87,12 @@ class buffer {
     void erase_region();
     void clear();
 
+    inline std::unique_ptr<text> get_contents_box() {
+        return std::make_unique<text>(get_contents());
+    }
+    inline std::unique_ptr<text> copy_box() { return std::make_unique<text>(copy()); }
+    inline std::unique_ptr<text> cut_box() { return std::make_unique<text>(cut()); }
+
     std::size_t del_backward(std::size_t n);
     std::size_t del_backward();
     std::size_t del_forward(std::size_t n);
