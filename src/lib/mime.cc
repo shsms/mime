@@ -61,9 +61,9 @@ buffer::buffer(const std::string &fname) : buffer(fname, try_open) {}
 
 buffer::buffer(const text &fname) : buffer(to_string(fname), try_open) {}
 
-void buffer::save() { save_as(filename); }
+void buffer::save() const { save_as(filename); }
 
-void buffer::save_as(const std::string &fname) {
+void buffer::save_as(const std::string &fname) const {
     std::ofstream fs(fname, std::ios::trunc | std::ios::out | std::ios::binary);
     auto data = contents;
     auto max_size = chunk_size / 4;
@@ -347,7 +347,7 @@ int buffer::replace(const std::string &from, const std::string &to) {
     return replace(from, to, 0); // replace all
 }
 
-text buffer::copy() {
+text buffer::copy() const {
     auto c = cursors[cursor];
     if (!c.mark.has_value()) {
         return text{};
@@ -429,7 +429,7 @@ void buffer::use_cursor(std::size_t c) {
     cursor = c;
 }
 
-std::size_t buffer::get_pos() { return cursors[cursor].point; }
+std::size_t buffer::get_pos() const { return cursors[cursor].point; }
 
 bool buffer::goto_pos(long pos) {
     if (pos == -1) {
