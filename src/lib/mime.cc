@@ -133,7 +133,7 @@ long buffer::get_mark() {
     return not_found;
 }
 
-template <typename T> long buffer::find(T t) {
+template <typename T> long buffer::find(const T &t) {
     if (t.empty()) {
         return not_found;
     }
@@ -167,15 +167,15 @@ template <typename T> long buffer::find(T t) {
 }
 
 // we only need these two instanciations and one specialization below.
-template long buffer::find(text t);
-template long buffer::find(std::wstring t);
-template <> long buffer::find(std::string t) {
+template long buffer::find(const text &t);
+template long buffer::find(const std::wstring &t);
+template <> long buffer::find(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return find(ustr);
 }
 
-template <> long buffer::find(regex_t t) {
+template <> long buffer::find(const regex_t &t) {
     std::match_results<text::iterator> m;
     if (t.empty) {
         return not_found;
@@ -199,7 +199,7 @@ template <> long buffer::find(regex_t t) {
     return m[0].first - contents.begin();
 }
 
-template <typename T> long buffer::rfind(T t) {
+template <typename T> long buffer::rfind(const T &t) {
     if (t.empty()) {
         return not_found;
     }
@@ -241,15 +241,16 @@ template <typename T> long buffer::rfind(T t) {
     return not_found;
 }
 
-template long buffer::rfind(text t);
-template long buffer::rfind(std::wstring t);
-template <> long buffer::rfind(std::string t) {
+template long buffer::rfind(const text &t);
+template long buffer::rfind(const std::wstring &t);
+template <> long buffer::rfind(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return rfind(ustr);
 }
 
-template <typename T> long buffer::find_fuzzy(T t) {
+template <typename T> long buffer::find_fuzzy(const T &text) {
+    auto t = text;
     u32::trim(t);
     if (t.empty()) {
         return not_found;
@@ -303,15 +304,15 @@ template <typename T> long buffer::find_fuzzy(T t) {
     }
     return not_found;
 }
-template long buffer::find_fuzzy(text t);
-template long buffer::find_fuzzy(std::wstring t);
-template <> long buffer::find_fuzzy(std::string t) {
+template long buffer::find_fuzzy(const text &t);
+template long buffer::find_fuzzy(const std::wstring &t);
+template <> long buffer::find_fuzzy(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring ustr = cvt.from_bytes(t);
     return find_fuzzy(ustr);
 }
 
-int buffer::replace(std::string from, std::string to, std::size_t n) {
+int buffer::replace(const std::string &from, const std::string &to, std::size_t n) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring wfrom = cvt.from_bytes(from);
     if (wfrom.empty()) {
@@ -342,7 +343,7 @@ int buffer::replace(std::string from, std::string to, std::size_t n) {
     return ii;
 }
 
-int buffer::replace(std::string from, std::string to) {
+int buffer::replace(const std::string &from, const std::string &to) {
     return replace(from, to, 0); // replace all
 }
 
@@ -373,14 +374,14 @@ text buffer::cut() {
     return t;
 }
 
-void buffer::paste(text t) {
+void buffer::paste(const text &t) {
     auto point = cursors[cursor].point;
 
     contents = contents.insert(point, t);
     update_all_cursors(point, point, t.size());
 }
 
-void buffer::paste(std::string t) {
+void buffer::paste(const std::string &t) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> cvt;
     std::wstring wt = cvt.from_bytes(t);
 

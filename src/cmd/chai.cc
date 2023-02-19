@@ -7,14 +7,14 @@
 namespace mime {
 
 void add_bindings(chaiscript::ChaiScript &chai) {
-    using long_str_t = long (buffer::*)(std::string);
-    using long_txt_t = long (buffer::*)(text);
-    using long_rex_t = long (buffer::*)(regex_t);
-    using void_str_t = void (buffer::*)(std::string);
-    using void_txt_t = void (buffer::*)(text);
+    using long_str_t = long (buffer::*)(const std::string &);
+    using long_txt_t = long (buffer::*)(const text &);
+    using long_rex_t = long (buffer::*)(const regex_t &);
+    using void_str_t = void (buffer::*)(const std::string &);
+    using void_txt_t = void (buffer::*)(const text &);
 
-    using replace_t = int (buffer::*)(std::string, std::string, std::size_t);
-    using replace_all_t = int (buffer::*)(std::string, std::string);
+    using replace_t = int (buffer::*)(const std::string &, const std::string &, std::size_t);
+    using replace_all_t = int (buffer::*)(const std::string &, const std::string &);
 
     using size_oper_n_t = std::size_t (buffer::*)(std::size_t);
     using size_oper_t = std::size_t (buffer::*)();

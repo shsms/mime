@@ -73,17 +73,17 @@ class buffer {
 
     inline std::string get_name() { return filename; }
 
-    template <typename T> long find(T t);
-    template <typename T> long rfind(T t);
-    template <typename T> long find_fuzzy(T t);
+    template <typename T> long find(const T &t);
+    template <typename T> long rfind(const T &t);
+    template <typename T> long find_fuzzy(const T &t);
 
-    int replace(std::string from, std::string to, std::size_t n);
-    int replace(std::string from, std::string to);
+    int replace(const std::string &from, const std::string &to, std::size_t n);
+    int replace(const std::string &from, const std::string &to);
 
     text copy();
     text cut();
-    void paste(text t);
-    void paste(std::string t);
+    void paste(const text &t);
+    void paste(const std::string &t);
     void erase_region();
     void clear();
 
