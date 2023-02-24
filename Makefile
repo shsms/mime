@@ -51,7 +51,7 @@ wasm:
 		-s MAIN_MODULE=1 \
 		-s "EXPORTED_FUNCTIONS=['_run_script']" \
 		-s "EXTRA_EXPORTED_RUNTIME_METHODS=['ccall', 'cwrap']" \
-		--pre-js emscripten-pre.js \
+		--pre-js docs/playground/emscripten-pre.js \
 		-o docs/playground/mime.js \
 		src/cmd/chai.cc src/lib/*.cc
 
