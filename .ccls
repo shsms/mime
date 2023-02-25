@@ -1,7 +1,7 @@
 clang
 %cpp -std=c++17
--Ivendor/ChaiScript/include
--Ivendor/immer/
--Ivendor/googletest/googletest/include
--Ivendor/cxxopts/include
--Iinclude
+-Ic++/vendor/ChaiScript/include
+-Ic++/vendor/immer/
+-Ic++/vendor/googletest/googletest/include
+-Ic++/vendor/cxxopts/include
+-Ic++/include

@@ -6,22 +6,22 @@ target_bin = build/release/mime
 default: build
 
 init:
-	git submodule update --init --recursive vendor/*
+	git submodule update --init --recursive c++/vendor/*
 
 clean:
 	rm -rf build
 
-build: CMakeLists.txt
-	mkdir -p build/release && cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../.. && $(MAKE) -s
+build: c++/CMakeLists.txt
+	mkdir -p build/release && cd build/release && cmake -DCMAKE_BUILD_TYPE=Release ../../c++ && $(MAKE) -s
 
-debug: CMakeLists.txt
-	mkdir -p build/debug && cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../.. && $(MAKE) -s
+debug: c++/CMakeLists.txt
+	mkdir -p build/debug && cd build/debug && cmake -DCMAKE_BUILD_TYPE=Debug ../../c++ && $(MAKE) -s
 
 test: build
 	build/release/unittests
 
 testCover: test
-	gcovr -r . -f src --html --html-details -o build/coverage.html
+	gcovr -r . -f c++/src --html --html-details -o build/coverage.html
 
 install: test
 	test "$(install_path)" == "" \
@@ -34,7 +34,7 @@ package:
 
 ##
 
-src = $(shell find src include unittests -type f -name '*.cc' -o -name '*.hh')
+src = $(shell find c++/src c++/include c++/unittests -type f -name '*.cc' -o -name '*.hh')
 format:
 	clang-format -i $(src)
 
