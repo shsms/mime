@@ -6,7 +6,6 @@
 #include <iterator>
 #include <locale>
 #include <mime/mime.hh>
-#include <spdlog/spdlog.h>
 #include <stdexcept>
 #include <string>
 
@@ -34,16 +33,17 @@ buffer::buffer(const std::string &fname, open_spec spec) {
     cursors = cursors.push_back(cursor_t{});
 
     if (fname.empty()) {
-        SPDLOG_ERROR("Received empty filename. Nothing to open.");
+        std::cerr << "ERROR: Received empty filename. Nothing to open.";
         throw std::runtime_error("filename required");
     }
     std::ifstream fs(fname, std::ios::in | std::ios::binary);
 
     if (!fs.is_open() && spec == must_open) {
-        SPDLOG_ERROR("Unable to open file '{0}'", fname);
+        std::cerr << "ERROR: Unable to open file: " << fname;
         throw std::runtime_error("unable to open file");
     } else if (!fs.is_open()) {
-        SPDLOG_INFO("Unable to open file '{0}'.  Creating an empty buffer instead.", fname);
+        std::cerr << "WARN: Unable to open file " << fname
+                  << ".  Creating an empty buffer instead.";
         return;
     }
     auto vv = text{};
@@ -423,7 +423,7 @@ std::size_t buffer::new_cursor() {
 
 void buffer::use_cursor(std::size_t c) {
     if (c > cursors.size()) {
-        SPDLOG_ERROR("attempt to move cursor to outside file_range");
+        std::cerr << "ERROR: attempt to move cursor to outside file_range";
         throw std::out_of_range("attempt to move cursor to outside file_range");
     }
     cursor = c;
@@ -443,8 +443,8 @@ bool buffer::goto_pos(long pos) {
     }
 
     if (pos < start || pos > end) {
-        SPDLOG_ERROR("Attempt to 'goto_pos({0})', which is outside the {1}: {2}", pos,
-                     c.view.has_value() ? "narrowed view" : "buffer", filename.get());
+        std::cerr << "ERROR: Attempt to 'goto_pos(" << pos << ")', which is outside the"
+                  << (c.view.has_value() ? "narrowed view" : "buffer") << ": " << filename.get();
         return false;
     }
     c.point = pos;

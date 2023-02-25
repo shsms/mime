@@ -3,6 +3,5 @@ clang
 -Ivendor/ChaiScript/include
 -Ivendor/immer/
 -Ivendor/googletest/googletest/include
--Ivendor/spdlog/include
 -Ivendor/cxxopts/include
 -Iinclude

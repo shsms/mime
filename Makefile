@@ -46,7 +46,6 @@ wasm:
 		-I include \
 		-I vendor/cxxopts/include \
 		-I vendor/immer/ \
-		-I vendor/spdlog/include \
 		-s DEMANGLE_SUPPORT=1 \
 		-s MAIN_MODULE=1 \
 		-s "EXPORTED_FUNCTIONS=['_run_script']" \

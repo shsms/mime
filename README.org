@@ -18,7 +18,6 @@ For providing its functionalities, Mime depends on these amazing
 
 - [[https://github.com/ChaiScript/ChaiScript][ChaiScript]] for the scripting language.
 - [[https://github.com/arximboldi/immer][Immer]] for data representation.
-- [[https://github.com/gabime/spdlog][spdlog]] for logs.
 - [[https://github.com/jarro2783/cxxopts][cxxopts]] for parsing of cli arguments.
 - [[https://github.com/google/googletest][googletest]] for unit tests.
 
