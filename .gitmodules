@@ -1,15 +1,12 @@
 [submodule "vendor/ChaiScript"]
-	path = vendor/ChaiScript
+	path = c++/vendor/ChaiScript
 	url = https://github.com/ChaiScript/ChaiScript.git
 [submodule "vendor/immer"]
-	path = vendor/immer
+	path = c++/vendor/immer
 	url = https://github.com/arximboldi/immer.git
 [submodule "vendor/googletest"]
-	path = vendor/googletest
+	path = c++/vendor/googletest
 	url = https://github.com/google/googletest
-[submodule "vendor/spdlog"]
-	path = vendor/spdlog
-	url = https://github.com/gabime/spdlog.git
 [submodule "vendor/cxxopts"]
-	path = vendor/cxxopts
+	path = c++/vendor/cxxopts
 	url = https://github.com/jarro2783/cxxopts

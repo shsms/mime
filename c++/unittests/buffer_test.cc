@@ -8,9 +8,9 @@ using namespace std::literals;
 class BufferTest : public ::testing::Test {
   protected:
     void SetUp() override {
-        std::string aname{"testdata/open.csv"};
+        std::string aname{"c++/testdata/open.csv"};
         ascii = mime::buffer(mime::text{aname.begin(), aname.end()});
-        unicode = mime::buffer("testdata/unicode.csv");
+        unicode = mime::buffer("c++/testdata/unicode.csv");
     }
 
     mime::buffer ascii;
@@ -368,12 +368,12 @@ TEST_F(BufferTest, Open) {
 }
 
 TEST_F(BufferTest, Save) {
-    auto b = mime::buffer("testdata/newfile");
+    auto b = mime::buffer("c++/testdata/newfile");
     b.paste("hello");
     b.save();
-    auto r = mime::buffer("testdata/newfile");
+    auto r = mime::buffer("c++/testdata/newfile");
     EXPECT_EQ(r.size(), 5);
-    std::filesystem::remove("testdata/newfile");
+    std::filesystem::remove("c++/testdata/newfile");
 }
 
 TEST_F(BufferTest, FindPresent) {

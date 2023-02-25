@@ -6,7 +6,7 @@ using namespace std::literals;
 
 class BlockTest : public ::testing::Test {
   protected:
-    void SetUp() override { gosrc = mime::buffer("testdata/narrow_test_input.go"); }
+    void SetUp() override { gosrc = mime::buffer("c++/testdata/narrow_test_input.go"); }
 
     mime::buffer gosrc;
 };
@@ -40,7 +40,7 @@ TEST_F(BlockTest, EndOfBlock) {
 class NarrowTest : public ::testing::Test {
   protected:
     void SetUp() override {
-        gosrc = mime::buffer("testdata/narrow_test_input.go");
+        gosrc = mime::buffer("c++/testdata/narrow_test_input.go");
 
         narrowed = gosrc;
         narrowed.find("{"s);
@@ -197,7 +197,7 @@ TEST_F(NarrowTest, EndOfLine) {
 class MultiCursorNarrowTest : public ::testing::Test {
   protected:
     void SetUp() override {
-        gosrc = mime::buffer("testdata/narrow_test_input.go");
+        gosrc = mime::buffer("c++/testdata/narrow_test_input.go");
         full_c = gosrc.new_cursor();
 
         main_c = gosrc.new_cursor();
