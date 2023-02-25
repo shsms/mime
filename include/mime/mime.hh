@@ -130,6 +130,11 @@ class buffer {
     // buffer_bool find_beg(buffer b, std::size_t cursor, std::string t, std::size_t lim);
     // buffer_bool rfind_end(buffer b, std::size_t cursor, std::string t, std::size_t lim);
 
+    inline long find_text(const text &t) { return find(t); }
+    inline long rfind_text(const text &t) { return rfind(t); }
+    inline long find_fuzzy_text(const text &t) { return find_fuzzy(t); }
+    inline void paste_text(const text &t) { paste(t); }
+
     // {{noexport
     int get_cursor_count() const { return cursors.size(); }
     // noexport}}
