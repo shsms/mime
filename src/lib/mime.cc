@@ -740,6 +740,10 @@ std::string to_string(const text &t) {
     return cvt.to_bytes(wret);
 }
 
+std::unique_ptr<std::string> text_to_string(const text &t) {
+    return std::make_unique<std::string>(to_string(t));
+}
+
 regex_t regex(const std::string &r) {
     if (r.empty()) {
         return {.empty = true};

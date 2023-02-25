@@ -147,6 +147,7 @@ inline std::unique_ptr<buffer> new_buffer() { return std::make_unique<buffer>();
 inline std::unique_ptr<buffer> open_buffer(const std::string &name) {
     return std::make_unique<buffer>(name);
 };
+std::unique_ptr<std::string> text_to_string(const text &t);
 } // namespace mime
 
 #endif /* MIME_HH */
