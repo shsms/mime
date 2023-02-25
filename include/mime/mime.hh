@@ -61,7 +61,7 @@ class buffer {
     void save() const;
     void save_as(const std::string &fname) const;
     void set_mark();
-    long get_mark();
+    long get_mark() const;
 
     inline text get_contents() const {
         const auto &v = cursors[cursor].view;

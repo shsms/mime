@@ -126,7 +126,7 @@ void buffer::set_mark() {
     cursors = cursors.set(cursor, c);
 }
 
-long buffer::get_mark() {
+long buffer::get_mark() const {
     if (cursors[cursor].mark.has_value()) {
         return *cursors[cursor].mark;
     }
