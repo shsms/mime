@@ -2,3 +2,5 @@ examples/mimeout*
 build
 .ccls-cache
 docs/playground/mime.*
+target
+Cargo.lock
