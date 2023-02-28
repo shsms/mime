@@ -1,0 +1,20 @@
+[package]
+name = "mime-rs"
+description = "A text processing framework, inspired by Emacs lisp and keyboard macros."
+version = "0.3.0"
+edition = "2021"
+repository = "https://github.com/shsms/mime"
+license = "GPL-3.0"
+keywords = ["scripting", "text-processing"]
+categories = ["text-processing"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "mime"
+path = "mime-rs/lib.rs"
+
+[dependencies]
+cxx = "1.0"
+
+[build-dependencies]
+cxx-build = "1.0"
