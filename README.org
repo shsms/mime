@@ -10,7 +10,7 @@ but in a scripting environment,  without an editor.  This enables very
 sophisticated transformations that are easy to do through tools
 like Emacs Keyboard Macros,  but hard to do in code.
 
-- *Documentation*: https://mime.dev
+- *Documentation*: https://shsms.github.io/mime
 
 ** Dependencies
 For providing its functionalities, Mime depends on these amazing
