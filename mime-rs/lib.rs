@@ -1,42 +1,12 @@
 mod ffi;
-
+mod text;
 use cxx::{let_cxx_string, UniquePtr};
 use ffi::cpp;
-use std::{
-    fmt::Display,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
+pub use text::Text;
+use text::_TextImpl;
 
 unsafe impl Send for cpp::buffer {}
-unsafe impl Send for cpp::text {}
-
-pub struct Text(_TextImpl);
-
-impl From<String> for Text {
-    fn from(value: String) -> Self {
-        Text(_TextImpl::Str(value))
-    }
-}
-
-impl From<&str> for Text {
-    fn from(value: &str) -> Self {
-        Text(_TextImpl::Str(value.to_string()))
-    }
-}
-
-enum _TextImpl {
-    Text(UniquePtr<cpp::text>),
-    Str(String),
-}
-
-impl Display for Text {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match &self.0 {
-            _TextImpl::Text(t) => f.write_str(&cpp::text_to_string(&t).to_string()),
-            _TextImpl::Str(t) => f.write_str(&t),
-        }
-    }
-}
 
 pub struct Window {
     buffer: Arc<Mutex<UniquePtr<cpp::buffer>>>,
@@ -98,9 +68,7 @@ impl Window {
     }
 
     pub fn get_contents(&self) -> Text {
-        Text(_TextImpl::Text(
-            self.buffer.lock().unwrap().get_contents_box(),
-        ))
+        self.buffer.lock().unwrap().get_contents_box().into()
     }
 
     pub fn find(&self, text: &str) -> Option<i64> {
@@ -131,14 +99,18 @@ impl Window {
 
     pub fn copy(&self) -> Text {
         self.update_cursor();
-        Text(_TextImpl::Text(self.buffer.lock().unwrap().copy_box()))
+        self.buffer.lock().unwrap().copy_box().into()
     }
 
     pub fn cut(&self) -> Text {
         self.update_cursor();
-        Text(_TextImpl::Text(
-            self.buffer.lock().unwrap().as_mut().unwrap().cut_box(),
-        ))
+        self.buffer
+            .lock()
+            .unwrap()
+            .as_mut()
+            .unwrap()
+            .cut_box()
+            .into()
     }
 
     pub fn paste<T: Into<Text>>(&self, text: T) {
