@@ -113,7 +113,7 @@ impl Window {
 
     pub fn paste<T: Into<Text>>(&self, text: T) {
         self.update_cursor();
-        match text.into().0 {
+        match &*text.into().0 {
             _TextImpl::Text(ref text) => self
                 .buffer
                 .lock()
