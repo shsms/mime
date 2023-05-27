@@ -1,5 +1,5 @@
 fn main() {
-    println!("cargo:rerun-if-changed=src/ffi.rs");
+    println!("cargo:rerun-if-changed=mime-rs/ffi.rs");
 
     cxx_build::bridge("mime-rs/ffi.rs")
         .includes(["c++/vendor/immer", "c++/include"])
